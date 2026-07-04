@@ -1,0 +1,84 @@
+[
+  {
+    "name": "Soléi Old Town Heritage",
+    "img": "/attached_assets/solei-old-town-heritage.png",
+    "blurb": "Traditional Siwan architecture in the heart of ancient ruins",
+    "coords": [29.203, 25.521],
+    "category": "heritage",
+    "price": "$50/night",
+    "amenities": ["Historic Location", "Cultural Tours", "Rooftop Views", "Traditional Crafts"],
+    "email": "hello@lasolei.com"
+  },
+  {
+    "name": "Soléi Royal",
+    "img": "/attached_assets/soliel-royal_1751757316304.png",
+    "blurb": "Therapeutic mineral spa resort on salt lake shores",
+    "coords": [29.208, 25.525],
+    "category": "wellness",
+    "price": "$500/night",
+    "amenities": ["Mineral Spa", "Float Therapy", "Wellness Programs", "Meditation Gardens"],
+    "email": "hello@lasolei.com"
+  },
+  {
+    "name": "Soléi Desert Retreat",
+    "img": "/attached_assets/Cover_1763399616165.png",
+    "blurb": "Where the desert meets the sky",
+    "coords": [29.200, 25.520],
+    "category": "glamping",
+    "price": "From $60/night",
+    "amenities": ["Eco-Spa", "Natural Healing", "Meditation Gardens"],
+    "location": "Cairo, Egypt",
+    "phone": "+20 120 688 7575",
+    "email": "hello@lasolei.com"
+  },
+  {
+    "name": "Soléi Salt Caves",
+    "img": "/attached_assets/37F6BA06-4DA0-4B60-8C0F-cover_1763674997927.png",
+    "blurb": "Sustainable palm grove retreat with natural pools",
+    "coords": [29.201, 25.515],
+    "category": "wellness",
+    "price": "$50/night",
+    "amenities": ["Natural Pools", "Yoga Studio", "Organic Garden", "Sand Bath Therapy"],
+    "email": "hello@lasolei.com"
+  },
+  {
+    "name": "Talist Siwa",
+    "img": "/attached_assets/talist-siwa_1751833699938.jpg",
+    "blurb": "Intimate boutique lodge among ancient date palms",
+    "coords": [29.199, 25.518],
+    "category": "eco-luxury",
+    "price": "$65/night",
+    "amenities": ["Private Gardens", "Date Palm Groves", "Eco-Friendly Design", "Wellness Treatments"],
+    "email": "hello@lasolei.com"
+  },
+  {
+    "name": "Adrère Amellal",
+    "img": "/attached_assets/adrerre-amelal_1751755031600.jpg",
+    "blurb": "Iconic earth-brick ecolodge on shimmering salt lake",
+    "coords": [29.205, 25.519],
+    "category": "eco-luxury",
+    "price": "$840/night",
+    "amenities": ["Salt Lake Access", "Organic Cuisine", "Stargazing Deck", "Desert Spa"],
+    "email": "hello@lasolei.com"
+  },
+  {
+    "name": "Azad Siwa Hotel",
+    "img": "/attached_assets/azad-siwa-hotel_1751832908544.jpg",
+    "blurb": "Modern comfort blended with traditional Siwan hospitality",
+    "coords": [29.204, 25.516],
+    "category": "eco-luxury",
+    "price": "$60/night",
+    "amenities": ["Modern Amenities", "Traditional Hospitality", "Oasis Views", "Local Experiences"],
+    "email": "hello@lasolei.com"
+  },
+  {
+    "name": "Siwa Shali Resort",
+    "img": "/attached_assets/siwa-shali-resort-_1751832607933.jpg",
+    "blurb": "Luxury desert camp under star-filled skies",
+    "coords": [29.195, 25.505],
+    "category": "glamping",
+    "price": "From $75/night",
+    "amenities": ["Luxury Tents", "Campfire Dining", "Desert Excursions", "Astronomy Tours"],
+    "email": "hello@lasolei.com"
+  }
+]

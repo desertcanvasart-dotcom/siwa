@@ -1,0 +1,85 @@
+
+[
+  {
+    "name": "Soléi Desert Retreat",
+    "img": "/attached_assets/Cover_1763399616165.png",
+    "blurb": "Where the desert meets the sky - intimate 6-room retreat with panoramic pool",
+    "coords": [29.206, 25.520],
+    "category": "eco-luxury",
+    "price": "$60+",
+    "description": "Where golden sands whisper stories of peace — Soléi Desert Retreat invites you to reconnect with nature. Enjoy breathtaking sunsets, a serene pool, and authentic Siwan hospitality in a secluded desert haven.",
+    "amenities": ["Panoramic Pool", "Desert Lounge", "Fire Pit", "Private Terraces", "Great Sand Sea Views", "Desert Lake Vistas"],
+    "eco": true,
+    "luxury": true,
+    "slug": "solei-desert-retreat",
+    "location": "Cairo, Egypt",
+    "phone": "+20 120 688 7575",
+    "email": "hello@lasolei.com"
+  },
+  {
+    "name": "Adrère Amellal",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "blurb": "World-famous earth-brick ecolodge facing a shimmering salt lake",
+    "coords": [29.205, 25.519],
+    "category": "eco-luxury",
+    "description": "Built entirely from salt rock and clay by hand, this legendary ecolodge offers an authentic desert experience without sacrificing luxury. Wake to sunrise over the salt lake and dine by candlelight under star-filled skies.",
+    "amenities": ["Salt Lake Views", "Candlelit Dining", "Eco-Architecture", "Star Gazing", "Desert Spa"],
+    "eco": true,
+    "luxury": true
+  },
+  {
+    "name": "Soléi Siwa Sanctuary",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "blurb": "Contemporary desert retreat blending modern luxury with ancient wisdom",
+    "coords": [29.203, 25.517],
+    "category": "luxury",
+    "description": "Our flagship Siwa property combines modern amenities with traditional desert architecture. Experience world-class wellness treatments using ancient Egyptian healing methods in a contemporary luxury setting.",
+    "amenities": ["Ancient Healing Spa", "Infinity Pool", "Oracle Temple Views", "Gourmet Dining", "Private Desert Tours"],
+    "eco": false,
+    "luxury": true
+  },
+  {
+    "name": "Talist Eco Lodge",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "blurb": "Sustainable palm grove hideaway with solar power and organic gardens",
+    "coords": [29.208, 25.521],
+    "category": "eco-boutique",
+    "description": "Nestled in ancient palm groves, this eco-friendly lodge operates entirely on solar power. Enjoy organic meals from the on-site garden while staying in beautifully crafted mud-brick accommodations.",
+    "amenities": ["Solar Powered", "Organic Gardens", "Palm Grove Setting", "Mud-Brick Architecture", "Sustainable Practices"],
+    "eco": true,
+    "luxury": false
+  },
+  {
+    "name": "Desert Rose Camp",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "blurb": "Luxury desert camping under the clearest night skies in Egypt",
+    "coords": [29.201, 25.523],
+    "category": "glamping",
+    "description": "Experience the romance of desert camping with luxury amenities. Each tent features comfortable bedding, private bathrooms, and unobstructed views of the Milky Way in one of the world's darkest sky areas.",
+    "amenities": ["Dark Sky Reserve", "Luxury Tents", "Stargazing Deck", "Desert Excursions", "Bedouin Dining"],
+    "eco": true,
+    "luxury": true
+  },
+  {
+    "name": "Shali Lodge",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "blurb": "Historic lodge built within the ancient ruins of Shali fortress",
+    "coords": [29.207, 25.519],
+    "category": "heritage",
+    "description": "Stay within the ancient walls of Shali, the 13th-century fortress that once protected Siwa. This unique lodge preserves historical architecture while offering modern comfort and cultural immersion.",
+    "amenities": ["Historic Setting", "Cultural Tours", "Traditional Architecture", "Museum Access", "Local Crafts"],
+    "eco": false,
+    "luxury": false
+  },
+  {
+    "name": "Salt Lake Wellness Resort",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "blurb": "Healing-focused resort specializing in salt therapy and wellness retreats",
+    "coords": [29.204, 25.520],
+    "category": "wellness",
+    "description": "Dedicated to holistic healing using Siwa's natural mineral-rich environment. Specializes in salt therapy, meditation retreats, and detoxification programs using ancient Egyptian wellness traditions.",
+    "amenities": ["Salt Therapy Pools", "Wellness Programs", "Meditation Gardens", "Detox Cuisine", "Healing Treatments"],
+    "eco": true,
+    "luxury": true
+  }
+]

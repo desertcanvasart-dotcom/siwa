@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Address Beach Resort",
+    "img": "/attached_assets/Address beach Resort _1758144493080.jpg",
+    "blurb": "Chic, beachfront serenity with panoramic sea views and private pool suites",
+    "coords": [30.947, 28.461],
+    "category": "flagship",
+    "description": "Experience unparalleled luxury at Address Beach Resort, where contemporary design meets Mediterranean elegance. Our beachfront sanctuary offers pristine white sand beaches, world-class amenities, and breathtaking sunset views.",
+    "amenities": ["Private Pool Suites", "Panoramic Sea Views", "Spa & Wellness", "Fine Dining", "Beach Service"]
+  },
+  {
+    "name": "Rixos Premium Alamein",
+    "img": "/attached_assets/Rixos Premium Alamein_1758143858817.png",
+    "blurb": "All-inclusive opulence, gourmet dining, and world-class entertainment",
+    "coords": [30.952, 28.468],
+    "category": "flagship",
+    "description": "A flagship all-inclusive resort offering the pinnacle of luxury with gourmet restaurants, premium entertainment, and exceptional service in an stunning beachfront setting.",
+    "amenities": ["All-Inclusive Luxury", "Gourmet Dining", "World-Class Entertainment", "Premium Suites", "Multiple Pools"]
+  },
+  {
+    "name": "Casa Cook North Coast",
+    "img": "/attached_assets/Casa Cook North Coast _001_1758143858816.png",
+    "blurb": "Boho-luxe lifestyle haven for design lovers and soulful escapists",
+    "coords": [30.943, 28.455],
+    "category": "flagship",
+    "description": "A design-forward retreat combining bohemian aesthetics with luxury comfort, perfect for travelers seeking authentic style and soulful experiences.",
+    "amenities": ["Boho-Luxe Design", "Adults Only", "Lifestyle Experiences", "Artisan Cuisine", "Wellness Programs"]
+  },
+  {
+    "name": "The G Hotel Seashell",
+    "img": "/attached_assets/The G Hotel Seashell_1758142922930.png",
+    "blurb": "Glamorous seaside living with a fashion-forward edge",
+    "coords": [30.938, 28.449],
+    "category": "flagship",
+    "description": "Sophisticated beachfront glamour meets contemporary design in this fashion-forward resort offering stylish accommodations and trendy seaside living.",
+    "amenities": ["Fashion-Forward Design", "Glamorous Suites", "Trendy Beach Club", "Rooftop Dining", "Designer Shopping"]
+  },
+  {
+    "name": "JAZ Almaza Beach Resort",
+    "img": "/attached_assets/JAZ Almaza Beach-Resort_1758143858816.jpg",
+    "blurb": "Family-friendly comfort on one of the coast's most pristine stretches",
+    "coords": [30.941, 28.453],
+    "category": "flagship",
+    "description": "Exceptional family resort on pristine beachfront, offering comfort, entertainment, and memorable experiences for travelers of all ages.",
+    "amenities": ["Family-Friendly", "Pristine Beach", "Kids Club", "Water Activities", "All-Inclusive Options"]
+  },
+  {
+    "name": "Vida Marina Marassi",
+    "img": "/attached_assets/Vida Marina Resort Marassi _1758142322079.jpg",
+    "blurb": "Contemporary, connected, and steps from the region's liveliest marina",
+    "coords": [30.944, 28.456],
+    "category": "marassi",
+    "description": "Modern lifestyle hotel in the heart of Marassi, offering contemporary comfort steps away from the vibrant marina, restaurants, and entertainment.",
+    "amenities": ["Marina Location", "Contemporary Design", "Vibrant Nightlife", "Restaurant Access", "Modern Amenities"]
+  },
+  {
+    "name": "Al Alamein Hotel",
+    "img": "/attached_assets/Al Alamein Hotel__1758143858816.png",
+    "blurb": "A heritage icon reimagined for modern comfort and timeless style",
+    "coords": [30.948, 28.462],
+    "category": "marassi",
+    "description": "Historic hotel reimagined with modern luxury while preserving its heritage character, offering timeless elegance and contemporary comfort.",
+    "amenities": ["Heritage Character", "Modern Luxury", "Timeless Style", "Historic Significance", "Elegant Design"]
+  },
+  {
+    "name": "Address Golf Resort",
+    "img": "/attached_assets/Address Golf Resort_1758143858790.jpg",
+    "blurb": "For those who pair waves with world-class greens",
+    "coords": [30.946, 28.459],
+    "category": "marassi",
+    "description": "Premier golf resort combining championship greens with beachfront luxury, perfect for golfers seeking the ultimate coastal sporting experience.",
+    "amenities": ["Championship Golf", "Beachfront Location", "Golf Packages", "Pro Shop", "Golfer's Paradise"]
+  }
+]

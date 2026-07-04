@@ -1,0 +1,93 @@
+[
+  {
+    "title": "Sunset Sand-Surfing",
+    "category": "Desert & Dunes",
+    "img": "/attached_assets/Sunset Sand-Surfing_1764121434251.JPG",
+    "type": "image",
+    "summary": "Ride down golden dunes on custom boards as the sun dips behind the Great Sand Sea.",
+    "description": "Experience the thrill of sand surfing down the massive dunes of the Great Sand Sea. Our expert guides provide custom sand boards and safety equipment for an unforgettable desert adventure. Watch the sunset paint the dunes in golden hues while you glide down the soft sand slopes.",
+    "duration": "2 hrs",
+    "price": "$39",
+    "eco": false,
+    "luxury": true,
+    "wellness": false
+  },
+  {
+    "title": "Salt Lake Float Therapy",
+    "category": "Salt Lakes",
+    "img": "/attached_assets/Salt Lake Float Therapy_1764121600762.mp4",
+    "type": "video",
+    "summary": "Float effortlessly in mineral-rich salt lakes with therapeutic properties.",
+    "description": "Immerse yourself in the healing waters of Siwa's famous salt lakes. The high mineral content allows you to float effortlessly while absorbing beneficial salts and minerals through your skin. This natural therapy has been used for centuries to treat skin conditions and promote relaxation.",
+    "duration": "90 mins",
+    "price": "$29",
+    "eco": true,
+    "luxury": false,
+    "wellness": true
+  },
+  {
+    "title": "Cleopatra Spring Soak",
+    "category": "Salt Lakes",
+    "img": "/attached_assets/Cleopatra Spring Soak_1764123896008.JPG",
+    "type": "image",
+    "summary": "Soak in the legendary crystal-clear spring where Queen Cleopatra once bathed, surrounded by fragrant date palms.",
+    "description": "Soak in the legendary crystal-clear spring where Queen Cleopatra once bathed, surrounded by fragrant date palms.",
+    "duration": "1 hr",
+    "price": "$10",
+    "eco": true,
+    "luxury": false,
+    "wellness": true
+  },
+  {
+    "title": "Desert Breathwork Meditation",
+    "category": "Wellbeing",
+    "img": "/attached_assets/Desert Breathwork Meditation_1764121642405.JPG",
+    "type": "image",
+    "summary": "A calming guided breathwork session in the quiet Siwa desert to relax the mind and restore balance.",
+    "description": "A calming guided breathwork session in the quiet Siwa desert to relax the mind and restore balance.",
+    "duration": "4 hrs",
+    "price": "$95",
+    "eco": true,
+    "luxury": true,
+    "wellness": true
+  },
+  {
+    "title": "Traditional Sand Bath Healing",
+    "category": "Wellbeing",
+    "img": "/attached_assets/Traditional Sand Bath Healing_1764121689995.JPG",
+    "type": "image",
+    "summary": "Ancient therapeutic practice using naturally heated desert sand.",
+    "description": "Experience this traditional healing method where you're buried in naturally heated sand that has absorbed the sun's energy. The therapy improves circulation, relieves joint pain, and detoxifies the body. This ancient practice has been used by desert peoples for centuries.",
+    "duration": "45 mins",
+    "price": "$55",
+    "eco": true,
+    "luxury": false,
+    "wellness": true
+  },
+  {
+    "title": "Oracle Temple Pilgrimage",
+    "category": "Culture & History",
+    "img": "/attached_assets/Oracale_Temple_Pilgrimage_cover_1765482517097.JPG",
+    "type": "image",
+    "summary": "Visit the legendary temple where Alexander the Great sought divine guidance.",
+    "description": "Embark on a spiritual journey to Siwa's ancient Temple of the Oracle, one of Egypt's most mystical and historically significant landmarks. This pilgrimage follows sacred pathways once traveled by pharaohs, pilgrims, and even Alexander the Great.",
+    "duration": "1-1.5 hrs",
+    "price": "$10",
+    "eco": true,
+    "luxury": false,
+    "wellness": false
+  },
+  {
+    "title": "Oracle Temple Pilgrimage",
+    "category": "Culture & History",
+    "img": "/attached_assets/Oracale Temple Pilgrimage  cover_1764131441571.JPG",
+    "type": "image",
+    "summary": "Visit the legendary Temple of Amun, one of the most revered oracles in the ancient Mediterranean world where Alexander the Great sought divine status.",
+    "description": "Embark on a spiritual journey to Siwa's ancient Temple of the Oracle, one of Egypt's most mystical and historically significant landmarks. This pilgrimage follows sacred pathways once traveled by pharaohs, pilgrims, and even Alexander the Great—offering a powerful blend of history, spirituality, and desert beauty. The Temple of the Oracle dates back to the 26th Dynasty and was famous for its prophetic ceremonies. Its reputation spread across the ancient world, attracting rulers and seekers of divine guidance. Walk through sacred chambers and historical ruins, and learn the story of Alexander the Great's legendary visit. Experience stunning desert landscapes surrounding the site in this culturally immersive experience with local guidance.",
+    "duration": "1–1.5 hrs",
+    "price": "$20",
+    "eco": true,
+    "luxury": false,
+    "wellness": false
+  }
+]

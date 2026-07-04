@@ -1,0 +1,82 @@
+[
+  {
+    "name": "Float in Cleopatra Pool",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Natural spa experience in mineral-rich hot springs",
+    "description": "Immerse yourself in the legendary Cleopatra Pool, a natural hot spring where the Egyptian queen is said to have bathed. The mineral-rich waters offer therapeutic benefits for skin and muscles while providing a unique historical connection.",
+    "duration": "2 hours",
+    "price": "$45 per person",
+    "category": "salt-lakes"
+  },
+  {
+    "name": "Sunset Sand-Surfing on the Great Sand Sea",
+    "img": "/attached_assets/siwa_1751042722081.mp4",
+    "type": "video",
+    "blurb": "Thrilling adventure across massive golden dunes",
+    "description": "Experience the adrenaline rush of sand-surfing down the towering dunes of the Great Sand Sea. As the sun sets, the desert transforms into a golden wonderland, creating an unforgettable adventure in one of Egypt's most spectacular landscapes.",
+    "duration": "4 hours",
+    "price": "$85 per person",
+    "category": "desert-dunes"
+  },
+  {
+    "name": "Temple of the Oracle Night Tour",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Moonlit exploration of ancient oracle sanctuary",
+    "description": "Discover the mystical Temple of Amun where Alexander the Great consulted the oracle. Under starlight, explore this sacred site while learning about ancient Egyptian mysticism and the prophetic traditions that shaped history.",
+    "duration": "3 hours",
+    "price": "$65 per person",
+    "category": "culture-history"
+  },
+  {
+    "name": "Magnesium-Rich Sand Bath Therapy",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Ancient healing treatment using Siwa's therapeutic sands",
+    "description": "Experience traditional sand therapy using Siwa's naturally heated, mineral-rich sand. This ancient healing practice helps with joint pain, circulation, and skin conditions while connecting you to timeless desert wellness traditions.",
+    "duration": "90 minutes",
+    "price": "$75 per person",
+    "category": "wellbeing"
+  },
+  {
+    "name": "Date Palm Oasis Picnic",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Gourmet meal beneath ancient palm groves",
+    "description": "Enjoy a carefully curated meal in the shade of Siwa's famous date palms. Feast on local specialties including fresh dates, olive oil, and traditional Siwan cuisine while surrounded by the peaceful sounds of desert oasis life.",
+    "duration": "2.5 hours",
+    "price": "$55 per person",
+    "category": "dining"
+  },
+  {
+    "name": "Desert Meditation & Stargazing",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Spiritual journey under the clearest skies on Earth",
+    "description": "Find inner peace through guided meditation in the silent desert, followed by stargazing in one of the world's darkest sky areas. Learn ancient Egyptian astronomical traditions while connecting with the infinite cosmos.",
+    "duration": "3.5 hours",
+    "price": "$70 per person",
+    "category": "wellbeing"
+  },
+  {
+    "name": "Traditional Craft Workshop",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Learn ancient Siwan handicrafts from local artisans",
+    "description": "Work alongside master craftspeople to create traditional Siwan handicrafts including palm frond baskets, silver jewelry, and embroidered textiles. Take home authentic pieces while supporting local artisan communities.",
+    "duration": "4 hours",
+    "price": "$95 per person",
+    "category": "culture-history"
+  },
+  {
+    "name": "Salt Lake Healing Float",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Therapeutic floating in mineral-rich salt lakes",
+    "description": "Experience effortless floating in Siwa's highly saline lakes, similar to the Dead Sea. The mineral-rich waters provide therapeutic benefits for skin conditions, joint pain, and stress relief in a stunning natural setting.",
+    "duration": "2 hours",
+    "price": "$50 per person",
+    "category": "salt-lakes"
+  }
+]

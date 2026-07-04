@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Sunset Yacht Charter",
+    "img": "/attached_assets/northcoast_1751038997736.mp4",
+    "type": "video",
+    "blurb": "Private yacht experience along the pristine coastline",
+    "description": "Sail along Egypt's stunning North Coast aboard a luxury yacht as the sun sets over the Mediterranean. Enjoy premium refreshments, water activities, and breathtaking coastal views on this unforgettable maritime adventure.",
+    "duration": "4 hours",
+    "price": "$200 per person",
+    "category": "water-sports"
+  },
+  {
+    "name": "Beach Club Experience",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Exclusive access to premium beach clubs",
+    "description": "Relax in style at the North Coast's most exclusive beach clubs. Enjoy VIP cabana service, gourmet cuisine, refreshing cocktails, and access to pristine private beaches with crystal-clear waters.",
+    "duration": "Full day",
+    "price": "$150 per person",
+    "category": "relaxation"
+  },
+  {
+    "name": "Water Sports Adventure",
+    "img": "/attached_assets/northcoast_1751038997736.mp4",
+    "type": "video",
+    "blurb": "Thrilling water activities for adventure seekers",
+    "description": "Experience the Mediterranean's crystal waters through exciting activities including jet skiing, parasailing, windsurfing, and diving. Professional instructors ensure safety while maximizing the thrill.",
+    "duration": "Half day",
+    "price": "$120 per person",
+    "category": "adventure"
+  },
+  {
+    "name": "Coastal Dining Experience",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Gourmet Mediterranean cuisine with ocean views",
+    "description": "Savor fresh seafood and Mediterranean specialties at beachfront restaurants. Experience culinary excellence while dining with your toes in the sand and the sound of waves as your soundtrack.",
+    "duration": "2-3 hours",
+    "price": "$80 per person",
+    "category": "dining"
+  },
+  {
+    "name": "Spa & Wellness Retreat",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Rejuvenating treatments with sea-inspired therapies",
+    "description": "Indulge in world-class spa treatments featuring marine-based therapies, aromatherapy massages, and wellness rituals designed to refresh your body and mind in luxurious beachfront settings.",
+    "duration": "2-4 hours",
+    "price": "$180 per person",
+    "category": "wellness"
+  },
+  {
+    "name": "Marina Nightlife",
+    "img": "/attached_assets/Hotel-Beach.jpeg (1)_1751327157755.webp",
+    "type": "image",
+    "blurb": "Vibrant evening entertainment at luxury marinas",
+    "description": "Experience the North Coast's sophisticated nightlife scene at world-class marinas. Enjoy craft cocktails, live music, and dancing under the stars with stunning yacht-filled harbor views.",
+    "duration": "Evening",
+    "price": "$100 per person",
+    "category": "nightlife"
+  }
+]
