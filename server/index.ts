@@ -15,16 +15,26 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Serve attached assets (videos, images) as static files with a
-// long cache. Filenames include timestamps so the URL changes when
-// the asset changes — safe to cache aggressively.
-app.use(
-  '/attached_assets',
-  express.static(path.resolve(process.cwd(), 'attached_assets'), {
-    maxAge: '30d',
-    immutable: true,
-  }),
-);
+// Serve attached assets (videos, images). Once the library has been
+// mirrored to the bucket (npm run migrate:assets) and
+// ATTACHED_ASSETS_FROM_BUCKET=true is set, requests redirect to the
+// bucket instead — offloads bandwidth and lets the CDN handle Range.
+// Otherwise, static files with a long cache: filenames include
+// timestamps so the URL changes when the asset changes.
+const assetsBucketBase = (process.env.OBJECT_STORAGE_PUBLIC_URL || '').replace(/\/+$/, '');
+if (process.env.ATTACHED_ASSETS_FROM_BUCKET === 'true' && assetsBucketBase) {
+  app.use('/attached_assets', (req, res) => {
+    res.redirect(301, `${assetsBucketBase}/attached_assets${req.path}`);
+  });
+} else {
+  app.use(
+    '/attached_assets',
+    express.static(path.resolve(process.cwd(), 'attached_assets'), {
+      maxAge: '30d',
+      immutable: true,
+    }),
+  );
+}
 
 app.use((req, res, next) => {
   const start = Date.now();

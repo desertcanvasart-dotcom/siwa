@@ -21,6 +21,7 @@ import {
   hotelRequestSchema
 } from "@shared/schema";
 import { sendEmail, generateHotelRequestEmail, generateEnquiryEmail, generateVisitorConfirmationEmail, escapeHtml } from "./email";
+import { objectStorageEnabled, putObject, deleteObjectByUrl, mediaKey } from "./object-storage";
 import { chat } from "./chat-service";
 import { db } from "./db";
 import { aiKnowledge } from "@shared/schema";
@@ -656,6 +657,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
+        const ext = isImage ? '.jpg' : path.extname(file.originalname || '').toLowerCase();
+
+        if (objectStorageEnabled()) {
+          // Preferred path: bytes live in the bucket, Postgres only
+          // keeps metadata + the public URL. The bucket handles Range
+          // requests and CDN caching natively.
+          const url = await putObject(mediaKey(file.originalname, ext), buffer, mimeType);
+          const created = await storage.uploadImage({
+            filename: outName,
+            originalName: file.originalname,
+            path: url,
+            size: buffer.length,
+            mimeType,
+            category,
+            pageId: pageId || null,
+            sectionId: sectionId || null,
+            description: description || null,
+            data: null,
+            uploadedBy: req.admin.id,
+          } as any);
+          results.push({ ...created, data: undefined });
+          continue;
+        }
+
+        // Legacy fallback (no bucket configured): base64 in Postgres,
+        // served from /media/:id.
         const created = await storage.uploadImage({
           filename: outName,
           originalName: file.originalname,
@@ -673,7 +700,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Now that we have an id, point the public path at the DB-served
         // URL — include the file extension so the front-end can tell an
         // image from a video (the /media route ignores it via parseInt).
-        const ext = isImage ? '.jpg' : path.extname(file.originalname || '').toLowerCase();
         const publicPath = `/media/${created.id}${ext}`;
         if ((storage as any).setImagePath) {
           await (storage as any).setImagePath(created.id, publicPath);
@@ -688,16 +714,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public: serve a DB-stored media file by id.
+  // Public: serve a media file by id. Rows migrated to object storage
+  // just redirect to the bucket (which handles Range/CDN itself);
+  // legacy DB-stored rows are served from the base64 blob with Range
+  // support so video seeking works in Safari/iOS.
   app.get('/media/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
       if (Number.isNaN(id)) return res.status(400).end();
       const image = await storage.getImage(id);
-      if (!image || !(image as any).data) return res.status(404).end();
+      if (!image) return res.status(404).end();
+
+      if (image.path && /^https?:\/\//.test(image.path)) {
+        return res.redirect(301, image.path);
+      }
+      if (!(image as any).data) return res.status(404).end();
+
       const buffer = Buffer.from((image as any).data, 'base64');
       res.setHeader('Content-Type', image.mimeType || 'application/octet-stream');
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.setHeader('Accept-Ranges', 'bytes');
+
+      const range = req.headers.range;
+      if (range) {
+        const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+        if (!match || (!match[1] && !match[2])) {
+          res.setHeader('Content-Range', `bytes */${buffer.length}`);
+          return res.status(416).end();
+        }
+        const start = match[1] ? parseInt(match[1], 10) : buffer.length - parseInt(match[2], 10);
+        const end = match[1] && match[2]
+          ? Math.min(parseInt(match[2], 10), buffer.length - 1)
+          : buffer.length - 1;
+        if (Number.isNaN(start) || start < 0 || start > end) {
+          res.setHeader('Content-Range', `bytes */${buffer.length}`);
+          return res.status(416).end();
+        }
+        res.status(206);
+        res.setHeader('Content-Range', `bytes ${start}-${end}/${buffer.length}`);
+        res.setHeader('Content-Length', end - start + 1);
+        return res.end(buffer.subarray(start, end + 1));
+      }
+
       res.setHeader('Content-Length', buffer.length);
       res.end(buffer);
     } catch (error) {
@@ -718,10 +776,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Legacy disk-stored files (path /uploads/...) — clean up if present.
       // DB-stored media (path /media/:id) has no disk file; the row delete
-      // removes the bytes.
+      // removes the bytes. Bucket-stored media is deleted from the bucket.
       if (image.path && image.path.startsWith('/uploads/')) {
         const filePath = path.join(uploadDir, path.basename(image.path));
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      } else if (image.path && /^https?:\/\//.test(image.path)) {
+        await deleteObjectByUrl(image.path);
       }
 
       const deleted = await storage.deleteImage(id);
