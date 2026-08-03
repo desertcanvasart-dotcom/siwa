@@ -83,6 +83,24 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
  * Shared HTML shell — branded, matches the site palette.
  * ────────────────────────────────────────────────────────────── */
 
+/** Escape user-supplied text before interpolating it into email HTML.
+ *  Form fields are attacker-controlled; without this a submission can
+ *  inject markup (links, fake content) into the owner's inbox. */
+export function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Escape, then preserve line breaks — for multiline fields like
+ *  message/notes that render inside HTML table cells. */
+function escapeMultiline(value: unknown): string {
+  return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
 function emailShell(title: string, bodyRows: string, footerNote: string): string {
   return `<!DOCTYPE html>
 <html>
@@ -106,11 +124,15 @@ function emailShell(title: string, bodyRows: string, footerNote: string): string
 </html>`;
 }
 
-function row(label: string, value: string): string {
+/** Render one label/value table row. Values are HTML-escaped here by
+ *  default; pass rawHtml=true only for values already escaped upstream
+ *  (e.g. escapeMultiline output). */
+function row(label: string, value: string, rawHtml = false): string {
   if (!value) return "";
+  const rendered = rawHtml ? value : escapeHtml(value);
   return `<tr>
-    <td style="padding:9px 0;border-bottom:1px solid #f0ece2;width:38%;vertical-align:top;color:#8a8270;font-size:11px;letter-spacing:1px;text-transform:uppercase;">${label}</td>
-    <td style="padding:9px 0;border-bottom:1px solid #f0ece2;color:#1a3a52;">${value}</td>
+    <td style="padding:9px 0;border-bottom:1px solid #f0ece2;width:38%;vertical-align:top;color:#8a8270;font-size:11px;letter-spacing:1px;text-transform:uppercase;">${escapeHtml(label)}</td>
+    <td style="padding:9px 0;border-bottom:1px solid #f0ece2;color:#1a3a52;">${rendered}</td>
   </tr>`;
 }
 
@@ -122,7 +144,7 @@ export function generateHotelRequestEmail(request: HotelRequest): EmailParams {
   const { name, email, phone = "", checkIn, checkOut, guests, message, hotelName, hotelEmail } = request;
 
   const html = emailShell(
-    `New booking request · ${hotelName}`,
+    `New booking request · ${escapeHtml(hotelName)}`,
     [
       row("Property", hotelName),
       row("Property contact", hotelEmail || "—"),
@@ -132,9 +154,9 @@ export function generateHotelRequestEmail(request: HotelRequest): EmailParams {
       row("Check-in", checkIn || "—"),
       row("Check-out", checkOut || "—"),
       row("Guests", String(guests)),
-      row("Message", (message || "—").replace(/\n/g, "<br>")),
+      row("Message", escapeMultiline(message || "—"), true),
     ].join(""),
-    `Reply directly to this email to reach ${name}. Submitted via the Soléi website.`,
+    `Reply directly to this email to reach ${escapeHtml(name)}. Submitted via the Soléi website.`,
   );
 
   const text = `New booking request — ${hotelName}
@@ -182,10 +204,10 @@ export function generateEnquiryEmail(p: EnquiryPayload): EmailParams {
       row("Email", p.email),
       row("Phone", p.phone || "—"),
       summaryRows,
-      row("Notes", (p.notes || "—").replace(/\n/g, "<br>")),
+      row("Notes", escapeMultiline(p.notes || "—"), true),
       row("Reference", p.reference || "—"),
     ].join(""),
-    `Reply directly to this email to reach ${p.name}. ${p.source ? `Source: ${p.source}. ` : ""}Submitted via the Soléi website.`,
+    `Reply directly to this email to reach ${escapeHtml(p.name)}. ${p.source ? `Source: ${escapeHtml(p.source)}. ` : ""}Submitted via the Soléi website.`,
   );
 
   const text = [
@@ -222,7 +244,7 @@ export function generateVisitorConfirmationEmail(p: EnquiryPayload): EmailParams
 
   const intro = `
     <tr><td colspan="2" style="padding:0 0 18px;font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#2b2b2b;">
-      Dear ${firstName},<br><br>
+      Dear ${escapeHtml(firstName)},<br><br>
       Thank you for reaching out to Soléi. We've received your enquiry and a member of our team will be in touch within <strong>24 hours</strong> with availability and next steps.<br><br>
       Here's a copy of what you sent us:
     </td></tr>`;

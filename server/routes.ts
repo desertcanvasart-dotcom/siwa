@@ -20,7 +20,7 @@ import {
   updateHotelSchema,
   hotelRequestSchema
 } from "@shared/schema";
-import { sendEmail, generateHotelRequestEmail, generateEnquiryEmail, generateVisitorConfirmationEmail } from "./email";
+import { sendEmail, generateHotelRequestEmail, generateEnquiryEmail, generateVisitorConfirmationEmail, escapeHtml } from "./email";
 import { chat } from "./chat-service";
 import { db } from "./db";
 import { aiKnowledge } from "@shared/schema";
@@ -1047,45 +1047,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create email content
+      // Create email content — every field is visitor-supplied, so
+      // escape at each interpolation.
       const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #2c5530; border-bottom: 2px solid #2c5530; padding-bottom: 10px;">
-            New Quote Request from ${fullName}
+            New Quote Request from ${escapeHtml(fullName)}
           </h2>
 
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2c5530; margin-top: 0;">Contact Information</h3>
-            <p><strong>Name:</strong> ${fullName}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
-            <p><strong>Preferred Contact Method:</strong> ${contactMethod}</p>
+            <p><strong>Name:</strong> ${escapeHtml(fullName)}</p>
+            <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+            ${phone ? `<p><strong>Phone:</strong> ${escapeHtml(phone)}</p>` : ''}
+            <p><strong>Preferred Contact Method:</strong> ${escapeHtml(contactMethod)}</p>
           </div>
 
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2c5530; margin-top: 0;">Travel Details</h3>
-            <p><strong>Travel Dates:</strong> ${dateFrom} to ${dateTo}</p>
-            <p><strong>Destination(s):</strong> ${destinations}</p>
-            <p><strong>Number of Travelers:</strong> ${numberOfTravelers}</p>
-            ${budget ? `<p><strong>Budget:</strong> ${budget}</p>` : ''}
+            <p><strong>Travel Dates:</strong> ${escapeHtml(dateFrom)} to ${escapeHtml(dateTo)}</p>
+            <p><strong>Destination(s):</strong> ${escapeHtml(destinations)}</p>
+            <p><strong>Number of Travelers:</strong> ${escapeHtml(numberOfTravelers)}</p>
+            ${budget ? `<p><strong>Budget:</strong> ${escapeHtml(budget)}</p>` : ''}
           </div>
 
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #2c5530; margin-top: 0;">Experience Preferences</h3>
             <p><strong>Experience Type(s):</strong></p>
             <ul>
-              ${experienceType.map((exp: string) => `<li>${exp}</li>`).join('')}
+              ${experienceType.map((exp: string) => `<li>${escapeHtml(exp)}</li>`).join('')}
             </ul>
             <p><strong>Accommodation Preference(s):</strong></p>
             <ul>
-              ${accommodationPreference.map((acc: string) => `<li>${acc}</li>`).join('')}
+              ${accommodationPreference.map((acc: string) => `<li>${escapeHtml(acc)}</li>`).join('')}
             </ul>
           </div>
 
           ${specialRequests ? `
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #2c5530; margin-top: 0;">Special Requests</h3>
-              <p>${specialRequests}</p>
+              <p>${escapeHtml(specialRequests)}</p>
             </div>
           ` : ''}
 
