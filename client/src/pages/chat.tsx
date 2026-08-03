@@ -34,7 +34,7 @@ const STARTERS = [
 
 export default function ChatPage() {
   const content = useSiteContent();
-  const waNumber = pickContent(content, "contact.whatsapp", "");
+  const waNumber = pickContent<string>(content, "contact.whatsapp", "");
   const waLabel = pickContent(content, "contact.whatsapp_label", "");
   const contactEmail = pickContent(content, "contact.email", "");
   const fallbackMessage = pickContent(

@@ -325,7 +325,7 @@ export default function NorthCoastAccommodation() {
             (h) =>
               active === "all" || h.categories.includes(active as Category),
           )
-          .map((h) => {
+          .map((h): Hotel => {
             const o = overlays.get(h.slug)!;
             return {
               ...h,

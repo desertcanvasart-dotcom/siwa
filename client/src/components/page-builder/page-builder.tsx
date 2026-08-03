@@ -34,7 +34,7 @@ export function PageBuilder({ pageId }: PageBuilderProps) {
   const queryClient = useQueryClient();
 
   // Fetch page data
-  const { data: page, isLoading: pageLoading } = useQuery({
+  const { data: page, isLoading: pageLoading } = useQuery<Page>({
     queryKey: ['/api/admin/pages', pageId],
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/admin/pages/${pageId}`);
@@ -44,7 +44,7 @@ export function PageBuilder({ pageId }: PageBuilderProps) {
   });
 
   // Fetch page blocks
-  const { data: blocks = [], isLoading: blocksLoading } = useQuery({
+  const { data: blocks = [], isLoading: blocksLoading } = useQuery<PageBlock[]>({
     queryKey: ['/api/admin/page-blocks', pageId],
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/admin/page-blocks/${pageId}`);
@@ -56,7 +56,7 @@ export function PageBuilder({ pageId }: PageBuilderProps) {
   });
 
   // Fetch block templates
-  const { data: templates = [] } = useQuery({
+  const { data: templates = [] } = useQuery<BlockTemplate[]>({
     queryKey: ['/api/admin/block-templates'],
   });
 
@@ -337,10 +337,9 @@ export function PageBuilder({ pageId }: PageBuilderProps) {
                             <div className="flex items-center gap-1">
                               <Switch
                                 checked={block.isVisible}
-                                onCheckedChange={(checked) => 
+                                onCheckedChange={(checked) =>
                                   handleUpdateBlock(block.id, { isVisible: checked })
                                 }
-                                size="sm"
                               />
                               <Button
                                 variant="ghost"

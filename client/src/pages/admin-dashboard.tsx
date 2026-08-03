@@ -43,6 +43,13 @@ interface Experience {
   title: string;
   category: string;
   pricePerPerson: string;
+  priceFor2?: string | null;
+  priceFor3?: string | null;
+  priceFor4?: string | null;
+  priceFor5?: string | null;
+  priceFor6?: string | null;
+  priceFor7?: string | null;
+  priceFor8?: string | null;
   duration: string;
   maxGuests: number;
   minAge: number;
@@ -114,7 +121,7 @@ function PageBuilderManagement() {
   const queryClient = useQueryClient();
 
   // Fetch pages
-  const { data: pages = [], isLoading } = useQuery({
+  const { data: pages = [], isLoading } = useQuery<Page[]>({
     queryKey: ['/api/admin/pages'],
     retry: false,
   });
@@ -402,13 +409,13 @@ export default function AdminDashboard() {
   }, [setLocation]);
 
   // Fetch experiences
-  const { data: experiences = [], isLoading: experiencesLoading } = useQuery({
+  const { data: experiences = [], isLoading: experiencesLoading } = useQuery<Experience[]>({
     queryKey: ['/api/admin/experiences'],
     retry: false,
   });
 
   // Fetch hotels
-  const { data: hotels = [], isLoading: hotelsLoading } = useQuery({
+  const { data: hotels = [], isLoading: hotelsLoading } = useQuery<Hotel[]>({
     queryKey: ['/api/admin/hotels'],
     retry: false,
   });
@@ -1990,8 +1997,8 @@ function HotelForm({
       eyebrow: formData.eyebrow || undefined,
       headline: formData.headline || undefined,
       headlineItalic: formData.headlineItalic || undefined,
-      intro: formData.intro.split(/\n\n+/).map((p) => p.trim()).filter(Boolean),
-      heroMeta: formData.heroMeta.split('\n').map((p) => p.trim()).filter(Boolean),
+      intro: formData.intro.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean),
+      heroMeta: formData.heroMeta.split('\n').map((p: string) => p.trim()).filter(Boolean),
       priceLabel: formData.priceLabel || undefined,
       facts: (formData.facts as Fact[]).filter((f) => f.label.trim() || f.value.trim()),
       rooms: (formData.rooms as Room[]).filter((r) => r.name.trim()),
@@ -2437,11 +2444,11 @@ function BlogPostForm({
       linkedExperience: formData.linkedExperience || null,
       tags: formData.tags
         .split(",")
-        .map((s) => s.trim())
+        .map((s: string) => s.trim())
         .filter(Boolean),
       content: formData.content
         .split(/\n\n+/)
-        .map((p) => p.trim())
+        .map((p: string) => p.trim())
         .filter(Boolean),
     });
   };
@@ -2708,10 +2715,10 @@ function TourForm({
       imageUrl: formData.imageUrl || null,
       isActive: formData.isActive,
       details: {
-        overview: formData.overview.split(/\n\n+/).map((p) => p.trim()).filter(Boolean),
-        includes: formData.includes.split("\n").map((s) => s.trim()).filter(Boolean),
-        excludes: formData.excludes.split("\n").map((s) => s.trim()).filter(Boolean),
-        whatToBring: formData.whatToBring.split("\n").map((s) => s.trim()).filter(Boolean),
+        overview: formData.overview.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean),
+        includes: formData.includes.split("\n").map((s: string) => s.trim()).filter(Boolean),
+        excludes: formData.excludes.split("\n").map((s: string) => s.trim()).filter(Boolean),
+        whatToBring: formData.whatToBring.split("\n").map((s: string) => s.trim()).filter(Boolean),
         itinerary: (formData.itinerary as ItineraryStep[]).filter(
           (s) => s.title.trim() || s.body.trim() || s.time.trim(),
         ),

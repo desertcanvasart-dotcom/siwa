@@ -394,7 +394,7 @@ function ResortsCarousel() {
                   </div>
                   <p className="text-gray-600 mb-4 text-sm line-clamp-2">{resort.blurb}</p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {resort.amenities?.slice(0, 2).map((amenity) => (
+                    {resort.amenities?.slice(0, 2).map((amenity: string) => (
                       <span key={amenity} className="flex items-center gap-1 bg-solei-teal/10 text-solei-teal px-3 py-1 rounded-full text-xs font-medium">
                         {amenity.includes('Pool') && <Waves className="w-3 h-3" />}
                         {amenity.includes('Dining') && <Utensils className="w-3 h-3" />}
