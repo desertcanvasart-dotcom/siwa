@@ -5,6 +5,7 @@ import multer from "multer";
 import sharp from "sharp";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
@@ -111,8 +112,19 @@ function validateHotelRequest(req: any, res: any, next: any) {
   next();
 }
 
-// JWT Secret (in production, this should be an environment variable)
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+// JWT secret — must come from the environment. Without it, fall back
+// to a random per-boot secret: logins still work, but every issued
+// token dies on restart. Never a hardcoded string an attacker can use
+// to forge admin tokens.
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  (() => {
+    console.warn(
+      "[auth] JWT_SECRET is not set — using a random per-boot secret. " +
+        "Admin sessions will not survive a restart. Set JWT_SECRET in the environment.",
+    );
+    return crypto.randomBytes(32).toString("hex");
+  })();
 
 // Multer configuration for file uploads
 const uploadDir = 'uploads';
@@ -1324,9 +1336,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const mime = file.mimetype;
         if (mime === "application/pdf") {
           // Lazy import to avoid loading pdf-parse on cold start.
-          const pdfParse = (await import("pdf-parse")).default;
-          const parsed = await pdfParse(file.buffer);
-          content = (parsed.text || "").trim();
+          // pdf-parse v2 exposes a PDFParse class, not a default function.
+          const { PDFParse } = await import("pdf-parse");
+          const parser = new PDFParse({ data: file.buffer });
+          try {
+            const parsed = await parser.getText();
+            content = (parsed.text || "").trim();
+          } finally {
+            await parser.destroy();
+          }
         } else if (mime.startsWith("text/") || mime === "application/json") {
           content = file.buffer.toString("utf8").trim();
         } else {

@@ -190,17 +190,28 @@ export class MemStorage implements IStorage {
   }
 
   private async createDefaultAdmin() {
+    // The admin account comes from the environment — never a hardcoded
+    // password. Without ADMIN_PASSWORD no account exists and /admin
+    // login is simply disabled.
+    const password = process.env.ADMIN_PASSWORD;
+    if (!password) {
+      console.warn(
+        '[auth] ADMIN_PASSWORD is not set — no admin account created; admin login is disabled.',
+      );
+      return;
+    }
+
     const bcrypt = await import('bcryptjs');
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const defaultAdmin: Admin = {
       id: this.currentAdminId++,
-      username: 'admin',
+      username: process.env.ADMIN_USERNAME || 'admin',
       password: hashedPassword,
-      email: 'admin@solei.com',
+      email: process.env.ADMIN_EMAIL || 'admin@solei.com',
       createdAt: new Date(),
     };
-    
+
     this.admins.set(defaultAdmin.id, defaultAdmin);
   }
 
