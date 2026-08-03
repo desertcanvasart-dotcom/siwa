@@ -3,11 +3,15 @@
 // the variables are injected directly, so this no-ops in production.
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 
 const app = express();
+// Gzip API responses and static files — don't rely on the hosting
+// proxy to compress.
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

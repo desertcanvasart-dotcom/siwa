@@ -216,7 +216,11 @@ export class MemStorage implements IStorage {
   }
 
   private async initializeDefaultExperiences() {
-    const defaultExperiences: Omit<Experience, 'id'>[] = [
+    // Seed objects pre-date the tour catalogue, so slug/destination/
+    // details are optional here and defaulted to null on insert.
+    type SeedExperience = Omit<Experience, 'id' | 'slug' | 'destination' | 'details'> &
+      Partial<Pick<Experience, 'slug' | 'destination' | 'details'>>;
+    const defaultExperiences: SeedExperience[] = [
       // North Coast Experiences
       {
         title: "Sunset Yacht Charter",
@@ -588,6 +592,9 @@ export class MemStorage implements IStorage {
 
     for (const experience of defaultExperiences) {
       const experienceWithId: Experience = {
+        slug: null,
+        destination: null,
+        details: null,
         ...experience,
         id: this.currentExperienceId++,
       };
@@ -743,6 +750,9 @@ export class MemStorage implements IStorage {
   async createExperience(insertExperience: InsertExperience): Promise<Experience> {
     const id = this.currentExperienceId++;
     const experience: Experience = {
+      slug: null,
+      destination: null,
+      details: null,
       maxGuests: 8,
       minAge: 12,
       difficulty: 'Easy',

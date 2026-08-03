@@ -33,8 +33,24 @@ interface ChatMessage {
   content: string;
 }
 
+// The prompt pulls the whole catalogue (4 queries) plus every uploaded
+// knowledge document. Rebuilding that on every chat message is wasted
+// DB load — cache it briefly; a 60 s stale window is invisible to
+// visitors but collapses per-message queries to ~zero.
+let promptCache: { value: string; builtAt: number } | null = null;
+const PROMPT_CACHE_TTL = 60_000;
+
 /** Builds the system prompt the AI sees on every conversation. */
 async function buildSystemPrompt(): Promise<string> {
+  if (promptCache && Date.now() - promptCache.builtAt < PROMPT_CACHE_TTL) {
+    return promptCache.value;
+  }
+  const value = await buildSystemPromptUncached();
+  promptCache = { value, builtAt: Date.now() };
+  return value;
+}
+
+async function buildSystemPromptUncached(): Promise<string> {
   let hotelLines: string[] = [];
   let experienceLines: string[] = [];
   let journeyLines: string[] = [];

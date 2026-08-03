@@ -26,7 +26,7 @@ export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
-    allowedHosts: true,
+    allowedHosts: true as const,
   };
 
   const vite = await createViteServer({
@@ -78,10 +78,28 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  app.use(
+    express.static(distPath, {
+      setHeaders: (res, filePath) => {
+        // Vite content-hashes everything under /assets, so those files
+        // can be cached forever; a changed file gets a new URL. The
+        // un-hashed index.html (also served here for "/") must always
+        // revalidate or browsers keep referencing stale asset hashes.
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        } else if (filePath.endsWith("index.html")) {
+          res.setHeader("Cache-Control", "no-cache");
+        }
+      },
+    }),
+  );
 
-  // fall through to index.html if the file doesn't exist
+  // fall through to index.html if the file doesn't exist. index.html
+  // must never be cached long-term — it's the un-hashed entry point
+  // that references the hashed assets.
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    // cacheControl: false stops sendFile overwriting the header.
+    res.setHeader("Cache-Control", "no-cache");
+    res.sendFile(path.resolve(distPath, "index.html"), { cacheControl: false });
   });
 }

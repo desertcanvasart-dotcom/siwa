@@ -36,6 +36,15 @@ const rateLimitStore = new Map<string, RateLimit>();
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
 const RATE_LIMIT_MAX_REQUESTS = 3; // Max 3 requests per IP per window
 
+// Evict expired entries so the store doesn't grow forever — one IP per
+// visitor, kept only for the duration of its window.
+setInterval(() => {
+  const now = Date.now();
+  rateLimitStore.forEach((entry, ip) => {
+    if (now - entry.lastReset > RATE_LIMIT_WINDOW) rateLimitStore.delete(ip);
+  });
+}, RATE_LIMIT_WINDOW).unref();
+
 // Rate limiting middleware
 function rateLimitMiddleware(req: any, res: any, next: any) {
   const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
@@ -71,8 +80,10 @@ function validateHotelRequest(req: any, res: any, next: any) {
 
   // Check for suspicious patterns (basic spam detection)
   const spamKeywords = ['viagra', 'casino', 'lottery', 'winner', 'congratulations', 'click here', 'free money'];
+  // No `g` flag here — a global regex keeps lastIndex state across
+  // .test() calls, which made results depend on the previous input.
   const suspiciousPatterns = [
-    /http[s]?:\/\/[^\s]+/gi, // URLs in name or message
+    /https?:\/\/\S+/i, // URLs in name or message
     /[A-Z]{10,}/, // Too many consecutive capitals
     /(.)\1{5,}/, // Repeated characters (aaaaaa)
   ];
@@ -199,38 +210,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching experiences:', error);
       res.status(500).json({ message: 'Failed to fetch experiences' });
-    }
-  });
-
-  // Public API: Get experience by title
-  app.get('/api/experiences/:title', async (req, res) => {
-    try {
-      const urlTitle = req.params.title;
-      let experience;
-
-      // First try exact match with URL format
-      const titleFromUrl = urlTitle.replace(/-/g, ' ');
-      console.log('Looking for experience with title:', titleFromUrl);
-
-      experience = await storage.getExperienceByTitle(titleFromUrl);
-
-      // If not found, try case-insensitive search
-      if (!experience) {
-        const experiences = await storage.getExperiences();
-        console.log('Available experiences:', experiences.map(exp => exp.title));
-        experience = experiences.find(exp =>
-          exp.title.toLowerCase() === titleFromUrl.toLowerCase()
-        );
-      }
-
-      if (!experience) {
-        return res.status(404).json({ message: 'Experience not found' });
-      }
-
-      res.json(experience);
-    } catch (error) {
-      console.error('Error fetching experience:', error);
-      res.status(500).json({ message: 'Failed to fetch experience' });
     }
   });
 
@@ -754,34 +733,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting image:', error);
       res.status(500).json({ message: 'Failed to delete image' });
-    }
-  });
-
-  // Public API to get experiences
-  app.get('/api/experiences', async (req, res) => {
-    try {
-      const experiences = await storage.getExperiences();
-      res.json(experiences);
-    } catch (error) {
-      console.error('Error fetching experiences:', error);
-      res.status(500).json({ message: 'Failed to fetch experiences' });
-    }
-  });
-
-  // Get specific experience by ID
-  app.get('/api/experiences/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const experience = await storage.getExperience(id);
-
-      if (!experience) {
-        return res.status(404).json({ message: 'Experience not found' });
-      }
-
-      res.json(experience);
-    } catch (error) {
-      console.error('Error fetching experience:', error);
-      res.status(500).json({ message: 'Failed to fetch experience' });
     }
   });
 
