@@ -7,3 +7,6 @@ vite.config.ts.*
 .env
 .env.*
 !.env.example
+
+# Local Claude Code state (worktrees, local settings) — never commit
+.claude/
