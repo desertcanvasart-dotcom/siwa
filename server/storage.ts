@@ -1286,17 +1286,20 @@ export class MemStorage implements IStorage {
 }
 
 /**
- * Postgres-backed storage for hotels and blog posts. Other entities
- * (users, admins, images, pages, page-blocks, videos, experiences)
- * still live in memory via the inherited MemStorage methods — those
- * will move to Postgres in later phases. Constructor seeds the hotels
- * and blog_posts tables on first boot if they're empty, so the admin
- * dashboard has data to edit immediately.
+ * Postgres-backed storage for hotels, blog posts, experiences, site
+ * content, uploaded images, pages, page blocks, block templates, and
+ * videos. Only users/admins remain in memory (admins are env-seeded on
+ * boot, so nothing is lost across restarts). Constructor seeds the
+ * hotels, blog_posts, videos, and block_templates tables on first boot
+ * if they're empty, so the admin dashboard has data to edit
+ * immediately.
  */
 export class PgStorage extends MemStorage {
   private hotelSeedPromise: Promise<void>;
   private blogSeedPromise: Promise<void>;
   private experienceSeedPromise: Promise<void>;
+  private videoSeedPromise: Promise<void>;
+  private blockTemplateSeedPromise: Promise<void>;
 
   constructor() {
     super();
@@ -1308,6 +1311,12 @@ export class PgStorage extends MemStorage {
     });
     this.experienceSeedPromise = this.seedExperiencesIfMissing().catch((err) => {
       console.error("Experience seed failed:", err);
+    });
+    this.videoSeedPromise = this.seedVideosIfEmpty().catch((err) => {
+      console.error("Video seed failed:", err);
+    });
+    this.blockTemplateSeedPromise = this.seedBlockTemplatesIfEmpty().catch((err) => {
+      console.error("Block template seed failed:", err);
     });
     // One-off (idempotent) background pass: shrink any oversized media
     // that was uploaded before compression-on-upload existed. This is
@@ -1706,6 +1715,212 @@ export class PgStorage extends MemStorage {
   async deleteBlogPost(id: number): Promise<boolean> {
     if (!db) return super.deleteBlogPost(id);
     const result = await db.delete(blogPosts).where(eq(blogPosts.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // ── Seeds for videos / block templates ──────────────────
+  // Both reuse the in-memory defaults that super() already built —
+  // no second copy of the seed data. Ids are stripped so the serial
+  // sequence stays in sync.
+
+  private async seedVideosIfEmpty(): Promise<void> {
+    if (!db) return;
+    const existing = await db.select().from(videos).limit(1);
+    if (existing.length > 0) return;
+    const defaults = await super.getVideos();
+    console.log(`Seeding ${defaults.length} videos into Postgres…`);
+    for (const { id: _id, createdAt: _c, updatedAt: _u, ...v } of defaults) {
+      await db.insert(videos).values(v as any);
+    }
+  }
+
+  private async seedBlockTemplatesIfEmpty(): Promise<void> {
+    if (!db) return;
+    const existing = await db.select().from(blockTemplates).limit(1);
+    if (existing.length > 0) return;
+    const defaults = await super.getBlockTemplates();
+    console.log(`Seeding ${defaults.length} block templates into Postgres…`);
+    for (const { id: _id, createdAt: _c, ...t } of defaults) {
+      await db.insert(blockTemplates).values(t as any);
+    }
+  }
+
+  // ── Pages ───────────────────────────────────────────────
+  async getPages(): Promise<Page[]> {
+    if (!db) return super.getPages();
+    return db.select().from(pages).orderBy(pages.id);
+  }
+
+  async getPage(id: number): Promise<Page | undefined> {
+    if (!db) return super.getPage(id);
+    const rows = await db.select().from(pages).where(eq(pages.id, id));
+    return rows[0];
+  }
+
+  async getPageBySlug(slug: string): Promise<Page | undefined> {
+    if (!db) return super.getPageBySlug(slug);
+    const rows = await db.select().from(pages).where(eq(pages.slug, slug));
+    return rows[0];
+  }
+
+  async createPage(insertPage: InsertPage): Promise<Page> {
+    if (!db) return super.createPage(insertPage);
+    const rows = await db.insert(pages).values(insertPage as any).returning();
+    return rows[0];
+  }
+
+  async updatePage(id: number, updates: Partial<InsertPage>): Promise<Page | undefined> {
+    if (!db) return super.updatePage(id, updates);
+    const rows = await db
+      .update(pages)
+      .set({ ...(updates as any), updatedAt: new Date() })
+      .where(eq(pages.id, id))
+      .returning();
+    return rows[0];
+  }
+
+  async deletePage(id: number): Promise<boolean> {
+    if (!db) return super.deletePage(id);
+    // page_blocks.page_id has ON DELETE CASCADE — blocks go with the page.
+    const result = await db.delete(pages).where(eq(pages.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // ── Page blocks ─────────────────────────────────────────
+  async getPageBlocks(pageId: number): Promise<PageBlock[]> {
+    if (!db) return super.getPageBlocks(pageId);
+    return db
+      .select()
+      .from(pageBlocks)
+      .where(eq(pageBlocks.pageId, pageId))
+      .orderBy(pageBlocks.position);
+  }
+
+  async getPageBlock(id: number): Promise<PageBlock | undefined> {
+    if (!db) return super.getPageBlock(id);
+    const rows = await db.select().from(pageBlocks).where(eq(pageBlocks.id, id));
+    return rows[0];
+  }
+
+  async createPageBlock(insertBlock: InsertPageBlock): Promise<PageBlock> {
+    if (!db) return super.createPageBlock(insertBlock);
+    const rows = await db.insert(pageBlocks).values(insertBlock as any).returning();
+    return rows[0];
+  }
+
+  async updatePageBlock(id: number, updates: Partial<InsertPageBlock>): Promise<PageBlock | undefined> {
+    if (!db) return super.updatePageBlock(id, updates);
+    const rows = await db
+      .update(pageBlocks)
+      .set({ ...(updates as any), updatedAt: new Date() })
+      .where(eq(pageBlocks.id, id))
+      .returning();
+    return rows[0];
+  }
+
+  async deletePageBlock(id: number): Promise<boolean> {
+    if (!db) return super.deletePageBlock(id);
+    const result = await db.delete(pageBlocks).where(eq(pageBlocks.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async reorderPageBlocks(pageId: number, blockIds: number[]): Promise<void> {
+    if (!db) return super.reorderPageBlocks(pageId, blockIds);
+    for (let i = 0; i < blockIds.length; i++) {
+      await db
+        .update(pageBlocks)
+        .set({ position: i, updatedAt: new Date() })
+        .where(and(eq(pageBlocks.id, blockIds[i]), eq(pageBlocks.pageId, pageId)));
+    }
+  }
+
+  // ── Block templates ─────────────────────────────────────
+  async getBlockTemplates(): Promise<BlockTemplate[]> {
+    if (!db) return super.getBlockTemplates();
+    await this.blockTemplateSeedPromise;
+    return db.select().from(blockTemplates).orderBy(blockTemplates.id);
+  }
+
+  async getBlockTemplate(id: number): Promise<BlockTemplate | undefined> {
+    if (!db) return super.getBlockTemplate(id);
+    await this.blockTemplateSeedPromise;
+    const rows = await db.select().from(blockTemplates).where(eq(blockTemplates.id, id));
+    return rows[0];
+  }
+
+  async createBlockTemplate(insertTemplate: InsertBlockTemplate): Promise<BlockTemplate> {
+    if (!db) return super.createBlockTemplate(insertTemplate);
+    const rows = await db.insert(blockTemplates).values(insertTemplate as any).returning();
+    return rows[0];
+  }
+
+  async updateBlockTemplate(id: number, updates: Partial<InsertBlockTemplate>): Promise<BlockTemplate | undefined> {
+    if (!db) return super.updateBlockTemplate(id, updates);
+    const rows = await db
+      .update(blockTemplates)
+      .set(updates as any)
+      .where(eq(blockTemplates.id, id))
+      .returning();
+    return rows[0];
+  }
+
+  async deleteBlockTemplate(id: number): Promise<boolean> {
+    if (!db) return super.deleteBlockTemplate(id);
+    const result = await db.delete(blockTemplates).where(eq(blockTemplates.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // ── Videos ──────────────────────────────────────────────
+  async getVideos(): Promise<Video[]> {
+    if (!db) return super.getVideos();
+    await this.videoSeedPromise;
+    return db.select().from(videos).where(eq(videos.isActive, true)).orderBy(videos.id);
+  }
+
+  async getVideo(id: number): Promise<Video | undefined> {
+    if (!db) return super.getVideo(id);
+    await this.videoSeedPromise;
+    const rows = await db.select().from(videos).where(eq(videos.id, id));
+    return rows[0];
+  }
+
+  async getVideoBySlug(slug: string): Promise<Video | undefined> {
+    if (!db) return super.getVideoBySlug(slug);
+    await this.videoSeedPromise;
+    const rows = await db.select().from(videos).where(eq(videos.slug, slug));
+    return rows[0];
+  }
+
+  async getVideosByCategory(category: string): Promise<Video[]> {
+    if (!db) return super.getVideosByCategory(category);
+    await this.videoSeedPromise;
+    // Case-insensitive match, same semantics as the in-memory version.
+    return db
+      .select()
+      .from(videos)
+      .where(and(eq(videos.isActive, true), sql`lower(${videos.category}) = lower(${category})`))
+      .orderBy(videos.id);
+  }
+
+  async createVideo(insertVideo: InsertVideo): Promise<Video> {
+    if (!db) return super.createVideo(insertVideo);
+    const rows = await db.insert(videos).values(insertVideo as any).returning();
+    return rows[0];
+  }
+
+  async updateVideo(id: number, updates: UpdateVideo): Promise<Video | undefined> {
+    if (!db) return super.updateVideo(id, updates);
+    const rows = await db
+      .update(videos)
+      .set({ ...(updates as any), updatedAt: new Date() })
+      .where(eq(videos.id, id))
+      .returning();
+    return rows[0];
+  }
+
+  async deleteVideo(id: number): Promise<boolean> {
+    if (!db) return super.deleteVideo(id);
+    const result = await db.delete(videos).where(eq(videos.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 }
