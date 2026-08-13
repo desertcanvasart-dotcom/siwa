@@ -220,23 +220,65 @@ export function MediaField({
   onChange,
   accept = "all",
   placeholder,
+  layout = "inline",
 }: {
   value: string;
   onChange: (url: string) => void;
   accept?: "all" | "image" | "video";
   placeholder?: string;
+  /**
+   * "inline" (default): input + Select side by side, small preview
+   * below — for full-width form rows. "stacked": large preview on
+   * top, input and full-width Select underneath — for narrow columns
+   * (e.g. the hotel wizard's per-room photo cell) where the inline
+   * row can't fit without overflowing into neighboring fields.
+   */
+  layout?: "inline" | "stacked";
 }) {
   const [open, setOpen] = useState(false);
   const looksVideo = /\.(mp4|webm|mov)$/i.test(value || "");
 
+  if (layout === "stacked") {
+    return (
+      <div className="space-y-2 min-w-0">
+        <div className="border border-sand-light bg-white aspect-[4/3] flex items-center justify-center overflow-hidden">
+          {value ? (
+            looksVideo ? (
+              <video src={value} className="w-full h-full object-cover" muted preload="metadata" />
+            ) : (
+              <img src={value} alt="preview" className="w-full h-full object-cover" />
+            )
+          ) : (
+            <ImageIcon className="w-6 h-6 text-sand" />
+          )}
+        </div>
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder || "Paste a URL"}
+          className="w-full min-w-0 px-3 py-2 bg-white border border-sand text-[0.78rem] text-navy font-body focus:border-gold outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="w-full inline-flex items-center justify-center gap-1.5 bg-gold text-navy text-[0.58rem] tracking-[0.18em] uppercase px-3 py-2 hover:bg-gold-light transition-colors whitespace-nowrap"
+        >
+          <ImageIcon className="w-3.5 h-3.5" />
+          {value ? "Change" : "Select"}
+        </button>
+        <MediaPicker open={open} onClose={() => setOpen(false)} onSelect={onChange} accept={accept} />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 min-w-0">
       <div className="flex gap-2">
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder || "Pick from library, or paste a URL"}
-          className="flex-1 px-3 py-2 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none"
+          className="flex-1 min-w-0 px-3 py-2 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none"
         />
         <button
           type="button"

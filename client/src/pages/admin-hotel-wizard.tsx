@@ -475,19 +475,24 @@ export default function AdminHotelWizardPage() {
                     Remove
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4">
-                  {/* Room image */}
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-5">
+                  {/* Room image — stacked layout so preview, URL, and
+                      button stay inside this narrow column instead of
+                      overflowing into the fields next to it. */}
+                  <div className="min-w-0">
                     <Label className="text-xs">Room photo</Label>
-                    <MediaField
-                      value={room.image ?? ""}
-                      onChange={(url) => updateRoom(i, { image: url })}
-                      accept="image"
-                      placeholder="Pick from library, or paste a URL"
-                    />
+                    <div className="mt-1.5">
+                      <MediaField
+                        value={room.image ?? ""}
+                        onChange={(url) => updateRoom(i, { image: url })}
+                        accept="image"
+                        placeholder="Paste a URL"
+                        layout="stacked"
+                      />
+                    </div>
                   </div>
                   {/* Room fields */}
-                  <div className="space-y-3">
+                  <div className="space-y-3 min-w-0">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <Label className="text-xs">Name *</Label>

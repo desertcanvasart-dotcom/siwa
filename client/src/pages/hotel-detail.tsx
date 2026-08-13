@@ -441,6 +441,9 @@ export default function HotelDetailPage() {
                           : "bg-[linear-gradient(135deg,#1a3a52_0%,#0F2436_100%)]"
                       }`}
                     >
+                      {/* Admin-uploaded room photo when present; the
+                          gradient + pattern stays as the fallback (and
+                          shows behind while the photo loads). */}
                       <div
                         className="absolute inset-0"
                         style={{
@@ -448,6 +451,14 @@ export default function HotelDetailPage() {
                             "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B89A5B' fill-opacity='0.07'%3E%3Cpath d='M20 0L21 5L20 4L19 5ZM0 20L5 21L4 20L5 19ZM40 20L35 21L36 20L35 19ZM20 40L21 35L20 36L19 35Z'/%3E%3C/g%3E%3C/svg%3E\")",
                         }}
                       />
+                      {room.image && room.image.trim().length > 0 && (
+                        <img
+                          src={room.image}
+                          alt={room.name}
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      )}
                     </div>
                     <div className="p-5 md:p-6 flex flex-col justify-between">
                       <div>
