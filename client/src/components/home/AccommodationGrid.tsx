@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "wouter";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
+import { resolvePrice, parseAmount } from "@/lib/price";
 import adrereAmellalImage from "@assets/adrerre-amelal_1751755031600.jpg";
 import taziryImage from "@assets/taziry-room-.jpg";
 import soleiOldTownImage from "@assets/solei-old-town-heritage.png";
@@ -111,11 +112,20 @@ export function AccommodationGrid() {
         .map((h) => {
         const o = overlays.get(h.slug);
         if (!o) return h;
+        // One shared resolver so the card can't disagree with the
+        // property page (it used to print the raw admin text, giving
+        // "From From $620 / night" and "$70" against the page's "€70").
+        const resolved = resolvePrice({
+          pricePerNight: o.pricePerNight,
+          rooms: o.details?.rooms,
+          fallbackAmount: parseAmount(h.price),
+          fallbackLabel: "/ night",
+        });
         return {
           ...h,
           name: o.name || h.name,
           desc: o.blurb || h.desc,
-          price: o.pricePerNight || h.price,
+          price: resolved.display || h.price,
           image: o.imageUrl || h.image,
         };
       }),

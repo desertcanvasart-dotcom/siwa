@@ -7,6 +7,7 @@ import { useReveal } from "@/components/home/useReveal";
 import { getHotelDetail, type HotelDetail } from "@/lib/hotel-data";
 import { useHotelOverlay, useHotelOverlayQuery } from "@/lib/useHotelOverlay";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
+import { resolvePrice } from "@/lib/price";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const siwaStubGradient =
@@ -75,14 +76,11 @@ export default function HotelDetailPage() {
       gallerySize: 0,
       related: [],
       basePrice: 0,
-      // Same rule as the merge below: a price-looking string can't be
-      // the label (the € amount is rendered separately).
-      priceLabel:
-        overlay.pricePerNight && !/\d/.test(overlay.pricePerNight)
-          ? overlay.pricePerNight
-          : overlay.pricePerNight
-            ? "/ night"
-            : "On request",
+      // The amount renders separately, so the label must be the trailing
+      // qualifier only — resolvePrice strips the amount and any "From".
+      priceLabel: overlay.pricePerNight
+        ? resolvePrice({ pricePerNight: overlay.pricePerNight }).label
+        : "On request",
       breadcrumbLabel: overlay.name || slug,
     };
   }, [baseFromTs, overlay, slug]);
@@ -96,29 +94,23 @@ export default function HotelDetailPage() {
     const nonEmpty = <T,>(v: T[] | undefined): T[] | undefined =>
       v && v.length > 0 ? v : undefined;
 
-    // The displayed "from" price is dynamic, never a stale hardcoded
-    // number: lowest room rate first (rooms are admin-edited in the
-    // hotel wizard), then the admin's pricePerNight field, then the
-    // inline TS fallback. Keeps the sticky bar consistent with the
-    // room-rate table when the admin changes rates.
+    // Shared resolver — the homepage card runs the exact same logic, so
+    // the two surfaces can no longer disagree on amount or currency.
     const rooms = nonEmpty(d.rooms) ?? baseHotel.rooms;
-    const roomPrices = rooms
-      .map((r) => r.price)
-      .filter((p): p is number => typeof p === "number" && p > 0);
-    const overlayPrice = parseFloat(
-      String(overlay.pricePerNight ?? "").replace(/[^\d.]/g, ""),
-    );
-    const basePrice =
-      roomPrices.length > 0
-        ? Math.min(...roomPrices)
-        : Number.isFinite(overlayPrice) && overlayPrice > 0
-          ? overlayPrice
-          : baseHotel.basePrice;
+    const resolved = resolvePrice({
+      pricePerNight: overlay.pricePerNight,
+      rooms,
+      fallbackAmount: baseHotel.basePrice,
+      fallbackLabel: baseHotel.priceLabel,
+    });
+    const basePrice = resolved.amount;
 
     // Hero meta can carry a price string too ("From €145 / night") —
-    // keep any € amount in it in sync with the dynamic price.
+    // keep both its amount AND currency in sync with the resolved price.
     const heroMeta = (nonEmpty(d.heroMeta) ?? baseHotel.heroMeta).map((m) =>
-      basePrice > 0 ? m.replace(/€\s?\d+(?:[.,]\d+)?/, `€${basePrice}`) : m,
+      basePrice > 0
+        ? m.replace(/[€$£]\s?\d+(?:[.,]\d+)?/, `${resolved.currency}${basePrice}`)
+        : m,
     );
 
     return {
@@ -140,18 +132,25 @@ export default function HotelDetailPage() {
         overlay.amenities && overlay.amenities.length > 0
           ? overlay.amenities
           : baseHotel.amenities,
-      // overlay.pricePerNight is a price string ("€145 / night") — only
-      // usable as a label when it doesn't itself contain a number, or
-      // the bar would read "€199 €145 / night".
-      priceLabel:
-        d.priceLabel ||
-        (overlay.pricePerNight && !/\d/.test(overlay.pricePerNight)
-          ? overlay.pricePerNight
-          : baseHotel.priceLabel),
+      // resolved.label is the admin's trailing qualifier with the amount
+      // and any leading "From" stripped, so rendering "<amount> <label>"
+      // can't produce "€199 €145 / night" or a doubled "From".
+      priceLabel: d.priceLabel || resolved.label,
       coverImage: overlay.imageUrl || baseHotel.coverImage,
       gallery: nonEmpty(d.gallery) ?? baseHotel.gallery,
     };
   }, [baseHotel, overlay]);
+
+  /** Currency to render prices in — whatever the admin entered for this
+   *  property. Never converted; see lib/price.ts. */
+  const currency = useMemo(
+    () =>
+      resolvePrice({
+        pricePerNight: overlay?.pricePerNight,
+        rooms: hotel?.rooms,
+      }).currency,
+    [overlay, hotel],
+  );
 
   // Full ordered photo set for the lightbox: cover first, then the
   // gallery, plus any per-room photos — de-duplicated, blanks removed.
@@ -171,14 +170,26 @@ export default function HotelDetailPage() {
   // Each card's cover image comes from the /api/hotels overlay so newly
   // uploaded photos show up.
   const relatedCards = useMemo(() => {
-    if (!hotel) return [] as Array<{ slug: string; name: string; tagLine: string; destination: string; basePrice: number; gradient: string; image?: string }>;
+    if (!hotel) return [] as Array<{ slug: string; name: string; tagLine: string; destination: string; basePrice: number; priceDisplay: string; gradient: string; image?: string }>;
     const wantSiwa = hotel.destination === "siwa-oasis";
+    // Each card resolves its own price/currency from its own overlay —
+    // a related property may be priced in a different currency.
+    const priceFor = (slug: string, fallbackAmount: number, fallbackLabel?: string) => {
+      const o = hotelsMap.get(slug);
+      return resolvePrice({
+        pricePerNight: o?.pricePerNight,
+        rooms: o?.details?.rooms,
+        fallbackAmount,
+        fallbackLabel,
+      });
+    };
     const mkFromDetail = (r: HotelDetail) => ({
       slug: r.slug,
       name: r.name,
       tagLine: r.tagLine,
       destination: r.destination,
-      basePrice: r.basePrice,
+      basePrice: priceFor(r.slug, r.basePrice, r.priceLabel).amount,
+      priceDisplay: priceFor(r.slug, r.basePrice, r.priceLabel).display,
       gradient: r.gradient,
       image: hotelsMap.get(r.slug)?.imageUrl || r.coverImage,
     });
@@ -202,7 +213,8 @@ export default function HotelDetailPage() {
           name: o.name || ts?.name || s,
           tagLine: ts?.tagLine || o.blurb || "",
           destination: wantSiwa ? "siwa-oasis" : "north-coast",
-          basePrice: ts?.basePrice ?? 0,
+          basePrice: priceFor(s, ts?.basePrice ?? 0, ts?.priceLabel).amount,
+          priceDisplay: priceFor(s, ts?.basePrice ?? 0, ts?.priceLabel).display,
           gradient: ts?.gradient || (wantSiwa ? siwaStubGradient : coastalStubGradient),
           image: o.imageUrl || ts?.coverImage,
         });
@@ -346,7 +358,7 @@ export default function HotelDetailPage() {
                 <span className="text-[0.68rem] text-ink-soft/60">From </span>
               )}
               <strong className="font-display text-[1.1rem] text-navy font-normal">
-                €{hotel.basePrice}
+                {currency}{hotel.basePrice}
               </strong>{" "}
               {hotel.priceLabel}
             </div>
@@ -494,7 +506,7 @@ export default function HotelDetailPage() {
                             From
                           </p>
                           <p className="font-display text-[1rem] text-navy">
-                            €{room.price} / night
+                            {currency}{room.price} / night
                           </p>
                         </div>
                         <a
@@ -617,9 +629,9 @@ export default function HotelDetailPage() {
           {/* ── RIGHT COLUMN — BOOKING PANEL ── */}
           <aside id="booking-panel" className="lg:sticky lg:top-[140px]">
             {isSiwa ? (
-              <SiwaBookingPanel hotel={hotel} />
+              <SiwaBookingPanel hotel={hotel} currency={currency} />
             ) : (
-              <NorthCoastBookingPanel hotel={hotel} />
+              <NorthCoastBookingPanel hotel={hotel} currency={currency} />
             )}
 
             {/* Sidebar extras */}
@@ -722,7 +734,7 @@ export default function HotelDetailPage() {
                           From
                         </span>
                         <span className="font-display text-[0.9rem] text-navy">
-                          €{r.basePrice} / night
+                          {r.priceDisplay || `€${r.basePrice} / night`}
                         </span>
                       </div>
                     )}
@@ -943,7 +955,7 @@ function BlockSection({
  *  Booking panels
  * ────────────────────────────────────────────────────────────── */
 
-function SiwaBookingPanel({ hotel }: { hotel: HotelDetail }) {
+function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: string }) {
   const [roomIdx, setRoomIdx] = useState(0);
   const [checkin, setCheckin] = useState("");
   const [checkout, setCheckout] = useState("");
@@ -986,7 +998,7 @@ function SiwaBookingPanel({ hotel }: { hotel: HotelDetail }) {
           <div className="flex items-baseline gap-2">
             <span className="text-[0.72rem] text-white/35">From</span>
             <span className="font-display text-[1.8rem] text-white font-normal">
-              €{perNight}
+              {currency}{perNight}
             </span>
             <span className="text-[0.72rem] text-white/35">
               {hotel.priceLabel}
@@ -1003,7 +1015,7 @@ function SiwaBookingPanel({ hotel }: { hotel: HotelDetail }) {
           >
             {hotel.rooms.map((r, i) => (
               <option key={r.name} value={i}>
-                {r.name} — €{r.price}/night
+                {r.name} — {currency}{r.price}/night
               </option>
             ))}
           </select>
@@ -1043,18 +1055,18 @@ function SiwaBookingPanel({ hotel }: { hotel: HotelDetail }) {
           <div className="border-t border-sand-light pt-3 mb-3">
             <div className="flex justify-between text-[0.78rem] text-ink-soft py-1">
               <span>
-                {nights} night{nights === 1 ? "" : "s"} × €{perNight}
+                {nights} night{nights === 1 ? "" : "s"} × {currency}{perNight}
               </span>
-              <span>€{subtotal.toLocaleString()}</span>
+              <span>{currency}{subtotal.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-[0.78rem] text-ink-soft py-1">
               <span>Taxes & fees</span>
-              <span>€{taxes.toLocaleString()}</span>
+              <span>{currency}{taxes.toLocaleString()}</span>
             </div>
             <div className="flex justify-between items-baseline text-[0.88rem] text-navy border-t border-sand mt-2 pt-3">
               <span>Total</span>
               <strong className="font-display text-[1.1rem] font-normal">
-                €{total.toLocaleString()}
+                {currency}{total.toLocaleString()}
               </strong>
             </div>
           </div>
@@ -1089,7 +1101,7 @@ function SiwaBookingPanel({ hotel }: { hotel: HotelDetail }) {
   );
 }
 
-function NorthCoastBookingPanel({ hotel }: { hotel: HotelDetail }) {
+function NorthCoastBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: string }) {
   const [checkin, setCheckin] = useState("");
   const [checkout, setCheckout] = useState("");
   const [roomName, setRoomName] = useState(hotel.rooms[0]?.name ?? "");
@@ -1118,7 +1130,7 @@ function NorthCoastBookingPanel({ hotel }: { hotel: HotelDetail }) {
           <div className="flex items-baseline gap-2">
             <span className="text-[0.72rem] text-white/45">From</span>
             <span className="font-display text-[1.6rem] text-white font-normal">
-              €{hotel.basePrice}
+              {currency}{hotel.basePrice}
             </span>
             <span className="text-[0.72rem] text-white/45">
               {hotel.priceLabel}
@@ -1190,7 +1202,7 @@ function NorthCoastBookingPanel({ hotel }: { hotel: HotelDetail }) {
           >
             {hotel.rooms.map((r) => (
               <option key={r.name} value={r.name}>
-                {r.name} — from €{r.price}/night
+                {r.name} — from {currency}{r.price}/night
               </option>
             ))}
           </select>

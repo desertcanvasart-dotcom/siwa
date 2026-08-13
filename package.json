@@ -13,6 +13,7 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "check:links": "node scripts/check-internal-links.mjs",
+    "check:prices": "node scripts/check-prices.mjs",
     "migrate:media": "tsx scripts/migrate-media-to-object-storage.ts",
     "migrate:assets": "tsx scripts/upload-attached-assets.ts"
   },

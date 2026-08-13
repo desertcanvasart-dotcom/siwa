@@ -28,6 +28,12 @@ export function useHotelsBySlug(): Map<string, HotelOverlay> {
         amenities: Array.isArray(h.amenities) ? h.amenities : undefined,
         destination: h.destination ?? undefined,
         category: h.category ?? undefined,
+        // Needed so listing cards can resolve the same "from" price as
+        // the detail page (lowest room rate) instead of falling back to
+        // the free-text field and disagreeing with it.
+        details: h.details ?? undefined,
+        latitude: h.latitude ?? null,
+        longitude: h.longitude ?? null,
       })) as Array<HotelOverlay & { slug?: string }>;
     },
     staleTime: 60_000,
