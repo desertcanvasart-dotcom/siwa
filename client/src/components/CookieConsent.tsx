@@ -14,6 +14,10 @@ import { Link } from "wouter";
  */
 const STORAGE_KEY = "solei-consent";
 
+/** Fired by the footer's "Cookie settings" link (or anything else)
+ *  to re-open the banner so a visitor can change their choice. */
+export const COOKIE_SETTINGS_EVENT = "solei-cookie-settings";
+
 function updateGtagConsent(granted: boolean) {
   const g = (window as any).gtag;
   if (typeof g === "function") {
@@ -33,6 +37,10 @@ export function CookieConsent() {
       // Storage unavailable (private mode edge cases) — stay hidden
       // rather than nag on every page view.
     }
+    // Re-open on demand — the footer's "Cookie settings" link.
+    const open = () => setVisible(true);
+    window.addEventListener(COOKIE_SETTINGS_EVENT, open);
+    return () => window.removeEventListener(COOKIE_SETTINGS_EVENT, open);
   }, []);
 
   const choose = (granted: boolean) => {

@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
+import { COOKIE_SETTINGS_EVENT } from "@/components/CookieConsent";
 
 const siwaLinks = [
   { label: "Destination", href: "/siwa-oasis" },
@@ -120,6 +121,13 @@ export function Footer() {
             >
               {privacyLabel}
             </Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event(COOKIE_SETTINGS_EVENT))}
+              className="text-[0.65rem] text-white/35 hover:text-white/90 transition-colors"
+            >
+              Cookie settings
+            </button>
           </div>
         </div>
       </div>
