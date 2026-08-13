@@ -22,6 +22,15 @@ export interface TourReview {
   text: string;
 }
 
+/** Free-form label/value pair — lets each tour carry whatever extra
+ *  attributes it needs (e.g. "Difficulty: Moderate", "Language:
+ *  English & Arabic") without a schema change. Mirrors the hotels'
+ *  "Quick facts". */
+export interface TourFact {
+  label: string;
+  value: string;
+}
+
 export interface TourDetail {
   /** Paragraphs shown above the inclusion list. Falls back to the
    *  experience's `description` when empty. */
@@ -36,6 +45,8 @@ export interface TourDetail {
   whatToBring?: string[];
   faqs?: TourFaq[];
   reviews?: TourReview[];
+  /** Custom label/value facts shown in the "Good to know" panel. */
+  facts?: TourFact[];
   /** Optional meeting point / pick-up note shown near the CTA. */
   meetingPoint?: string;
   /** Cancellation policy summary. */

@@ -351,6 +351,15 @@ export default function TourDetailPage() {
                   <dt className="text-ink-soft/65 font-body">Category</dt>
                   <dd className="text-navy font-display text-right">{tour.category}</dd>
                 </div>
+                {/* Admin-defined custom fields, same row style */}
+                {(details.facts ?? [])
+                  .filter((f) => f.label?.trim() && f.value?.trim())
+                  .map((f) => (
+                    <div key={f.label} className="flex justify-between gap-4 border-t border-sand-light pt-3">
+                      <dt className="text-ink-soft/65 font-body">{f.label}</dt>
+                      <dd className="text-navy font-display text-right">{f.value}</dd>
+                    </div>
+                  ))}
               </dl>
 
               <Link

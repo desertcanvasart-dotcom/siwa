@@ -32,6 +32,7 @@ const STEPS = [
 
 type ItineraryStep = { time: string; title: string; body: string };
 type Faq = { q: string; a: string };
+type Fact = { label: string; value: string };
 
 const emptyForm = {
   title: "",
@@ -52,6 +53,7 @@ const emptyForm = {
   whatToBring: "",
   itinerary: [] as ItineraryStep[],
   faqs: [] as Faq[],
+  facts: [] as Fact[],
   meetingPoint: "",
   cancellationPolicy: "",
 };
@@ -105,6 +107,7 @@ export default function AdminTourWizardPage() {
       whatToBring: Array.isArray(d.whatToBring) ? d.whatToBring.join("\n") : "",
       itinerary: Array.isArray(d.itinerary) ? d.itinerary : [],
       faqs: Array.isArray(d.faqs) ? d.faqs : [],
+      facts: Array.isArray(d.facts) ? d.facts : [],
       meetingPoint: d.meetingPoint ?? "",
       cancellationPolicy: d.cancellationPolicy ?? "",
     });
@@ -137,6 +140,12 @@ export default function AdminTourWizardPage() {
   const removeFaq = (i: number) =>
     set({ faqs: form.faqs.filter((_, idx) => idx !== i) });
 
+  const addFact = () => set({ facts: [...form.facts, { label: "", value: "" }] });
+  const updateFact = (i: number, patch: Partial<Fact>) =>
+    set({ facts: form.facts.map((f, idx) => (idx === i ? { ...f, ...patch } : f)) });
+  const removeFact = (i: number) =>
+    set({ facts: form.facts.filter((_, idx) => idx !== i) });
+
   const buildPayload = () => ({
     title: form.title,
     slug: form.slug,
@@ -162,6 +171,7 @@ export default function AdminTourWizardPage() {
       whatToBring: form.whatToBring.split("\n").map((s) => s.trim()).filter(Boolean),
       itinerary: form.itinerary.filter((s) => s.title.trim() || s.body.trim() || s.time.trim()),
       faqs: form.faqs.filter((f) => f.q.trim() || f.a.trim()),
+      facts: form.facts.filter((f) => f.label.trim() || f.value.trim()),
       meetingPoint: form.meetingPoint || undefined,
       cancellationPolicy: form.cancellationPolicy || undefined,
     },
@@ -458,6 +468,42 @@ export default function AdminTourWizardPage() {
               ))}
             </section>
 
+            {/* Custom fields — free label/value pairs so tours that
+                need extra attributes (difficulty, language, season…)
+                can carry them without a code change. */}
+            <section className="space-y-3 pt-3 border-t border-sand-light">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-display text-[1rem] text-navy">Custom fields</h3>
+                  <p className="text-xs text-ink-soft/65">
+                    Any extra label / value pairs — shown in the "Good to know" panel.
+                  </p>
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={addFact}>
+                  <Plus className="w-3.5 h-3.5 mr-1.5" />
+                  Add field
+                </Button>
+              </div>
+              {form.facts.length === 0 && (
+                <p className="text-sm text-ink-soft/65 italic">No custom fields yet.</p>
+              )}
+              {form.facts.map((f, i) => (
+                <div key={i} className="flex gap-3 items-end">
+                  <div className="w-44 sm:w-52">
+                    <Label className="text-xs">Label</Label>
+                    <Input value={f.label} onChange={(e) => updateFact(i, { label: e.target.value })} placeholder="Difficulty" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <Label className="text-xs">Value</Label>
+                    <Input value={f.value} onChange={(e) => updateFact(i, { value: e.target.value })} placeholder="Moderate — some walking on sand" />
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => removeFact(i)} className="text-rose-600">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </section>
+
             <section className="pt-3 border-t border-sand-light space-y-3">
               <div>
                 <Label>Meeting point</Label>
@@ -490,6 +536,7 @@ export default function AdminTourWizardPage() {
             <ReviewRow label="Image" value={form.imageUrl || "—"} />
             <ReviewRow label="Itinerary" value={`${form.itinerary.length} step${form.itinerary.length === 1 ? "" : "s"}`} />
             <ReviewRow label="FAQs" value={`${form.faqs.length}`} />
+            <ReviewRow label="Custom fields" value={`${form.facts.length}`} />
             <ReviewRow label="Status" value={form.isActive ? "Active" : "Hidden"} />
           </StepCard>
         )}
