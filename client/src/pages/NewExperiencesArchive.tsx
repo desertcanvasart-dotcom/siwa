@@ -262,19 +262,19 @@ const UPSELL_PROPS = [
     slug: "adrere-amellal",
     name: "Adrere Amellal",
     type: "Eco Lodge · No electricity · Salt lake front",
-    price: "From €320",
+    price: "From $320",
   },
   {
     slug: "taziry-ecolodge",
     name: "Taziry Ecolodge",
     type: "Boutique Eco Lodge · Salt lake views",
-    price: "From €180",
+    price: "From $180",
   },
   {
     slug: "solei-old-town",
     name: "Soléi Old Town",
     type: "Heritage Stay · Soléi owned",
-    price: "From €145",
+    price: "From $145",
   },
 ];
 
@@ -408,7 +408,7 @@ export default function NewExperiencesArchive() {
               <div className="flex gap-10 border-t border-gold/15 pt-6">
                 {[
                   { num: "10", label: "Experiences" },
-                  { num: "€35", label: "Starting from" },
+                  { num: "$35", label: "Starting from" },
                   { num: "½–2", label: "Days duration" },
                 ].map((s) => (
                   <div key={s.label}>
@@ -643,7 +643,7 @@ export default function NewExperiencesArchive() {
                     View all 8 Siwa properties
                   </div>
                   <div className="text-[0.65rem] text-white/30 mt-0.5">
-                    Including 3 Soléi-owned · From €95/night
+                    Including 3 Soléi-owned · From $95/night
                   </div>
                 </div>
                 <span className="font-display text-[0.9rem] text-gold flex-shrink-0 ml-4">
@@ -800,7 +800,7 @@ function FeaturedCard({ exp }: { exp: Experience }) {
           <div>
             <div className="text-[0.62rem] text-ink-soft/45">From</div>
             <div className="font-display text-[1.3rem] text-navy">
-              €{exp.price}{" "}
+              ${exp.price}{" "}
               <span className="font-body text-[0.8rem] text-ink-soft font-light">
                 per person
               </span>
@@ -875,7 +875,7 @@ function ExpCard({ exp, delayClass }: { exp: Experience; delayClass: string }) {
           <div>
             <div className="text-[0.62rem] text-ink-soft/45">From</div>
             <div className="font-display text-[1.05rem] text-navy">
-              €{exp.price} pp
+              ${exp.price} pp
             </div>
           </div>
           <span className="text-[0.58rem] tracking-[0.16em] uppercase text-navy bg-gold px-4 py-2 whitespace-nowrap group-hover:bg-gold-light transition-colors">

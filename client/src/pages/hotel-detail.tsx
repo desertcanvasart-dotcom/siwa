@@ -105,11 +105,11 @@ export default function HotelDetailPage() {
     });
     const basePrice = resolved.amount;
 
-    // Hero meta can carry a price string too ("From €145 / night") —
+    // Hero meta can carry a price string too ("From $145 / night") —
     // keep both its amount AND currency in sync with the resolved price.
     const heroMeta = (nonEmpty(d.heroMeta) ?? baseHotel.heroMeta).map((m) =>
       basePrice > 0
-        ? m.replace(/[€$£]\s?\d+(?:[.,]\d+)?/, `${resolved.currency}${basePrice}`)
+        ? m.replace(/[$$£]\s?\d+(?:[.,]\d+)?/, `${resolved.currency}${basePrice}`)
         : m,
     );
 
@@ -134,7 +134,7 @@ export default function HotelDetailPage() {
           : baseHotel.amenities,
       // resolved.label is the admin's trailing qualifier with the amount
       // and any leading "From" stripped, so rendering "<amount> <label>"
-      // can't produce "€199 €145 / night" or a doubled "From".
+      // can't produce "$199 $145 / night" or a doubled "From".
       priceLabel: d.priceLabel || resolved.label,
       coverImage: overlay.imageUrl || baseHotel.coverImage,
       gallery: nonEmpty(d.gallery) ?? baseHotel.gallery,
@@ -734,7 +734,7 @@ export default function HotelDetailPage() {
                           From
                         </span>
                         <span className="font-display text-[0.9rem] text-navy">
-                          {r.priceDisplay || `€${r.basePrice} / night`}
+                          {r.priceDisplay || `$${r.basePrice} / night`}
                         </span>
                       </div>
                     )}

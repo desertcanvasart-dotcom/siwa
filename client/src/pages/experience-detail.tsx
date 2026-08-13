@@ -147,7 +147,7 @@ export default function ExperienceDetailPage() {
             <div className="text-[0.75rem] text-ink-soft">
               From{" "}
               <strong className="font-display text-[1rem] text-navy font-normal">
-                €{exp.price}
+                ${exp.price}
               </strong>{" "}
               {exp.priceSuffix} ·{" "}
               {exp.heroTags[1] ?? exp.timeSlots[0]}
@@ -427,7 +427,7 @@ export default function ExperienceDetailPage() {
                             From
                           </span>
                           <span className="font-display text-[0.9rem] text-navy">
-                            €{r.price} pp
+                            ${r.price} pp
                           </span>
                         </div>
                         <span
@@ -542,7 +542,7 @@ function BookingPanel({ exp }: { exp: ExperienceDetail }) {
     : guests * exp.price;
   const rowLabel = isPrivate
     ? `Private — up to ${exp.maxGuests} guests`
-    : `${guests} guest${guests > 1 ? "s" : ""} × €${exp.price}`;
+    : `${guests} guest${guests > 1 ? "s" : ""} × $${exp.price}`;
 
   const showSummary = date.length > 0;
 
@@ -571,7 +571,7 @@ function BookingPanel({ exp }: { exp: ExperienceDetail }) {
           <div className="flex items-baseline gap-2">
             <span className="text-[0.72rem] text-white/35">From</span>
             <span className="font-display text-[1.8rem] text-white font-normal">
-              €{exp.price}
+              ${exp.price}
             </span>
             <span className="text-[0.72rem] text-white/35">
               {exp.priceSuffix}
@@ -615,7 +615,7 @@ function BookingPanel({ exp }: { exp: ExperienceDetail }) {
           >
             {Array.from({ length: exp.maxGuests }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
-                {n} {n === 1 ? "person" : "people"} — €{n * exp.price}
+                {n} {n === 1 ? "person" : "people"} — ${n * exp.price}
               </option>
             ))}
           </select>
@@ -625,7 +625,7 @@ function BookingPanel({ exp }: { exp: ExperienceDetail }) {
           <div className="border-t border-sand-light pt-3 mb-3">
             <div className="flex justify-between text-[0.78rem] text-ink-soft py-1">
               <span>{rowLabel}</span>
-              <span>€{total}</span>
+              <span>${total}</span>
             </div>
             <div className="flex justify-between text-[0.78rem] text-ink-soft py-1">
               <span>Booking fee</span>
@@ -634,7 +634,7 @@ function BookingPanel({ exp }: { exp: ExperienceDetail }) {
             <div className="flex justify-between items-baseline text-[0.88rem] text-navy border-t border-sand mt-2 pt-3">
               <span>Total</span>
               <strong className="font-display text-[1.1rem] font-normal">
-                €{total}
+                ${total}
               </strong>
             </div>
           </div>
@@ -659,7 +659,7 @@ function BookingPanel({ exp }: { exp: ExperienceDetail }) {
                   : "text-coastal border-coastal/30"
               }`}
             >
-              {isPrivate ? "✓ Private selected" : `€${exp.privatePrice} flat`}
+              {isPrivate ? "✓ Private selected" : `$${exp.privatePrice} flat`}
             </span>
           </button>
         )}
@@ -711,7 +711,7 @@ function EnquiryPanel({ exp }: { exp: ExperienceDetail }) {
           <div className="flex items-baseline gap-2">
             <span className="text-[0.72rem] text-white/40">From</span>
             <span className="font-display text-[1.8rem] text-white font-normal">
-              €{exp.price}
+              ${exp.price}
             </span>
             <span className="text-[0.72rem] text-white/40">
               {exp.priceSuffix}

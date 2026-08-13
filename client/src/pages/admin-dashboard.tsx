@@ -2308,7 +2308,7 @@ function HotelForm({
                 <Input value={room.occupancy} onChange={(e) => updateAt('rooms', i, { occupancy: e.target.value })} />
               </div>
               <div>
-                <Label className="text-xs">Price (€)</Label>
+                <Label className="text-xs">Price ($)</Label>
                 <Input type="number" value={room.price}
                   onChange={(e) => updateAt('rooms', i, { price: Number(e.target.value) || 0 })} />
               </div>
@@ -2769,7 +2769,7 @@ function TourForm({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="pricePerPerson">Price per person (€)</Label>
+            <Label htmlFor="pricePerPerson">Price per person ($)</Label>
             <Input id="pricePerPerson" type="number" step="1" value={formData.pricePerPerson} onChange={(e) => setFormData({ ...formData, pricePerPerson: e.target.value })} />
           </div>
           <div>

@@ -168,7 +168,7 @@ const SECTIONS: FaqSection[] = [
               <Link href="/north-coast/transportation">
                 Cairo day trip vehicle
               </Link>{" "}
-              from €140 — private vehicle with a driver for the full day,
+              from $140 — private vehicle with a driver for the full day,
               flexible itinerary, return in the evening. Best suited to
               guests who want a taste of the coast without committing to an
               overnight stay.
@@ -300,11 +300,11 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               Once we've confirmed availability with your chosen property,
-              we generate a secure payment link via Tab.travel and send it
-              to you via WhatsApp or email — whichever you prefer. You
-              click the link, review the booking details, and pay in EUR or
-              USD. No account required. No payment information stored on
-              our end.
+              we generate a secure payment link and send it to you via
+              WhatsApp or email — whichever you prefer. You click the
+              link, review the booking details, and pay in USD. No
+              account required. No payment information stored on our
+              end.
             </p>
             <p>
               After payment you receive a booking confirmation with your
@@ -493,7 +493,7 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               If you have time for two: add the flamingo lagoon morning. It
-              costs €45 per person, takes half a day, and produces the kind
+              costs $45 per person, takes half a day, and produces the kind
               of reaction most guests describe as genuinely unexpected —
               they had no idea flamingos existed fifteen minutes from their
               resort.
@@ -514,27 +514,27 @@ const SECTIONS: FaqSection[] = [
               items={[
                 <>
                   <strong>Private sunset sailing</strong> — open
-                  Mediterranean, 3 hours, from €85pp
+                  Mediterranean, 3 hours, from $85pp
                 </>,
                 <>
                   <strong>Flamingo watching</strong> — the lagoons behind
-                  the resort strip, half day, from €45pp
+                  the resort strip, half day, from $45pp
                 </>,
                 <>
                   <strong>Open water swimming</strong> — guided early
-                  morning swims in Almaza Bay, 2 hours, from €30pp
+                  morning swims in Almaza Bay, 2 hours, from $30pp
                 </>,
                 <>
                   <strong>El Alamein heritage visit</strong> — WWII
-                  battlefield, museum, cemetery, half day, from €35pp
+                  battlefield, museum, cemetery, half day, from $35pp
                 </>,
                 <>
                   <strong>Private coastline drive</strong> — Cairo to
-                  Matrouh by sea, full day, from €120pp
+                  Matrouh by sea, full day, from $120pp
                 </>,
                 <>
                   <strong>Local seafood lunch</strong> — off the tourist
-                  strip, fishing spots, midday, from €40pp
+                  strip, fishing spots, midday, from $40pp
                 </>,
               ]}
             />
@@ -623,7 +623,7 @@ const SECTIONS: FaqSection[] = [
               Coastal Road for arrivals, the Desert Road for departures.
             </p>
             <p>
-              We arrange all transport with private vehicles from €80 per
+              We arrange all transport with private vehicles from $80 per
               vehicle Cairo–North Coast. Depart before 9am to avoid Cairo
               traffic — Friday morning departures should be especially
               early as Friday afternoon return traffic on the Coastal Road
@@ -650,7 +650,7 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               We arrange airport pickups from both airports — Borg El Arab
-              from €45 per vehicle, Cairo International from €80 per
+              from $45 per vehicle, Cairo International from $80 per
               vehicle, with flight tracking included.
             </p>
           </>
@@ -669,20 +669,20 @@ const SECTIONS: FaqSection[] = [
               title="Within-coast transfer distances"
               items={[
                 <>
-                  <strong>Marassi ↔ Almaza Bay:</strong> ~1 hour · From €40
+                  <strong>Marassi ↔ Almaza Bay:</strong> ~1 hour · From $40
                   per vehicle
                 </>,
                 <>
                   <strong>Marassi ↔ El Alamein:</strong> ~30 minutes · From
-                  €25 per vehicle
+                  $25 per vehicle
                 </>,
                 <>
                   <strong>Property to experience:</strong> On-demand · From
-                  €20
+                  $20
                 </>,
                 <>
                   <strong>On-demand in-area:</strong> Any point on the coast
-                  · From €15
+                  · From $15
                 </>,
               ]}
             />
@@ -783,7 +783,7 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               All Soléi bookings — accommodation, experiences,
-              transportation — are settled in EUR or USD via our secure
+              transportation — are settled in USD via our secure
               payment links. You do not need foreign currency for anything
               we arrange directly.
             </p>

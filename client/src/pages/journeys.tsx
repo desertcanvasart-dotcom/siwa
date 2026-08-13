@@ -245,7 +245,7 @@ function JourneyCard({
           <div>
             <p className="text-[0.62rem] text-ink-soft/55">From</p>
             <p className="font-display text-[1.05rem] text-navy">
-              €{Number(journey.pricePerPerson).toFixed(0)} pp
+              ${Number(journey.pricePerPerson).toFixed(0)} pp
             </p>
           </div>
           <span className="text-[0.6rem] tracking-[0.18em] uppercase text-gold group-hover:underline">

@@ -12,9 +12,12 @@
  *   1. Amount: the lowest room rate when the property has rooms (those
  *      are what the admin actually maintains), otherwise the number in
  *      the free-text `pricePerNight` field.
- *   2. Currency: whatever symbol the admin typed in `pricePerNight`.
- *      Never converted — showing "€70" for a stored "$70" would
- *      misstate the price.
+ *   2. Currency: always USD. Every Soléi price is quoted in USD, so the
+ *      symbol is pinned rather than read from the free-text field —
+ *      that field had drifted to a mix of $ and €, which made the same
+ *      property look differently priced on different pages. Amounts are
+ *      never converted; only the symbol is normalised, because the
+ *      stored numbers were always USD amounts.
  *   3. Label: the admin's trailing words ("/ night · breakfast
  *      included"), with any leading "From" stripped so callers can add
  *      their own prefix without doubling it.
@@ -31,7 +34,12 @@ export interface PriceParts {
   display: string;
 }
 
-const DEFAULT_CURRENCY = "€";
+/**
+ * The one currency Soléi quotes in. Change this single constant if that
+ * ever moves — do NOT reintroduce per-record symbols, which is how the
+ * $/€ split happened.
+ */
+export const CANONICAL_CURRENCY = "$";
 const DEFAULT_LABEL = "/ night";
 
 /** First number in a string: "From $620 / night" → 620. */
@@ -82,7 +90,8 @@ export function resolvePrice(src: PriceSource): PriceParts {
         ? fromText
         : (src.fallbackAmount ?? 0);
 
-  const currency = detectCurrency(src.pricePerNight) ?? DEFAULT_CURRENCY;
+  // Pinned, not read from the record — see CANONICAL_CURRENCY.
+  const currency = CANONICAL_CURRENCY;
   const label = extractLabel(src.pricePerNight) || src.fallbackLabel || DEFAULT_LABEL;
 
   return {

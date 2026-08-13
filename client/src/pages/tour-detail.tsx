@@ -195,7 +195,7 @@ export default function TourDetailPage() {
               <div>
                 <p className="text-[0.55rem] tracking-[0.22em] uppercase text-white/45 mb-1">From</p>
                 <p className="font-display text-[1.3rem] text-gold">
-                  €{pricePerPerson}
+                  ${pricePerPerson}
                   <span className="text-white/45 text-[0.85rem] font-body ml-1">/ guest</span>
                 </p>
               </div>
@@ -343,7 +343,7 @@ export default function TourDetailPage() {
             <div className="bg-white border border-sand p-7">
               <p className="text-[0.55rem] tracking-[0.3em] uppercase text-gold mb-1">From</p>
               <p className="font-display text-[1.6rem] text-navy">
-                €{pricePerPerson}
+                ${pricePerPerson}
                 <span className="text-ink-soft/55 text-[0.78rem] font-body ml-2">per guest</span>
               </p>
 

@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Arch } from "@/components/ui/Arch";
 import { useReveal } from "@/components/home/useReveal";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
+import { resolvePrice, parseAmount } from "@/lib/price";
 import addressBeachImage from "@assets/Address beach Resort _1758144493080.jpg";
 import vidaMarinaImage from "@assets/Vida Marina Resort Marassi _1758142322079.jpg";
 import addressGolfImage from "@assets/Address Golf Resort_1758143858790.jpg";
@@ -66,7 +67,7 @@ const marassi: Hotel[] = [
       "Spa & wellness",
       "Kids club",
     ],
-    price: "€290 / night",
+    price: "$290 / night",
     categories: ["luxury", "marassi"],
     gradient: "bg-[linear-gradient(155deg,#1a4a6a_0%,#0F2436_100%)]",
     image: addressBeachImage,
@@ -85,7 +86,7 @@ const marassi: Hotel[] = [
       "Rooftop pool",
       "Water sports",
     ],
-    price: "€210 / night",
+    price: "$210 / night",
     categories: ["luxury", "marassi"],
     gradient: "bg-[linear-gradient(155deg,#2F6F8F_0%,#1a4a6a_100%)]",
     image: vidaMarinaImage,
@@ -103,7 +104,7 @@ const marassi: Hotel[] = [
       "Clubhouse dining",
       "Spa access",
     ],
-    price: "€240 / night",
+    price: "$240 / night",
     categories: ["luxury", "marassi"],
     gradient: "bg-[linear-gradient(155deg,#2F6F8F_0%,#1a3a52_100%)]",
     image: addressGolfImage,
@@ -121,7 +122,7 @@ const marassi: Hotel[] = [
       "Yoga & wellness",
       "Adults-friendly",
     ],
-    price: "€195 / night",
+    price: "$195 / night",
     categories: ["boutique", "marassi"],
     gradient: "bg-[linear-gradient(155deg,#235570_0%,#2F6F8F_100%)]",
     image: casaCookImage,
@@ -142,7 +143,7 @@ const almaza: Hotel[] = [
       "Multiple restaurants",
       "Water sports centre",
     ],
-    price: "€175 / night",
+    price: "$175 / night",
     categories: ["luxury", "almaza"],
     gradient: "bg-[linear-gradient(155deg,#1d5070_0%,#0F2436_100%)]",
     image: jazAlmazaImage,
@@ -160,7 +161,7 @@ const almaza: Hotel[] = [
       "Personalised service",
       "Quiet location",
     ],
-    price: "€185 / night",
+    price: "$185 / night",
     categories: ["boutique", "almaza"],
     gradient: "bg-[linear-gradient(155deg,#163a52_0%,#2F6F8F_100%)]",
     image: gHotelImage,
@@ -182,7 +183,7 @@ const alamein: Hotel[] = [
       "Premium spa",
       "Kids waterpark",
     ],
-    price: "€260 / night",
+    price: "$260 / night",
     categories: ["luxury", "alamein"],
     gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#2F6F8F_100%)]",
     image: rixosImage,
@@ -200,7 +201,7 @@ const alamein: Hotel[] = [
       "Near WWII museum",
       "Quiet location",
     ],
-    price: "€175 / night",
+    price: "$175 / night",
     categories: ["boutique", "alamein"],
     gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#3d8aad_100%)]",
     image: alAlameinImage,
@@ -242,7 +243,7 @@ const howSteps = [
   {
     n: "3.",
     title: "Receive your payment link",
-    text: "A secure Tab.travel payment link arrives via WhatsApp or email within 24 hours. Pay in EUR or USD.",
+    text: "A secure Tab.travel payment link arrives via WhatsApp or email within 24 hours. Pay in USD.",
   },
   {
     n: "4.",
@@ -255,22 +256,22 @@ const upsellMoments = [
   {
     slug: "private-yacht-sunset-ritual",
     title: "Private yacht sunset ritual",
-    detail: "Sunset · 3 hours · From €120pp",
+    detail: "Sunset · 3 hours · From $120pp",
   },
   {
     slug: "signature-dinner-experience",
     title: "Signature dinner experience",
-    detail: "Evening · 3 hours · From €140pp",
+    detail: "Evening · 3 hours · From $140pp",
   },
   {
     slug: "coastal-wellness-ritual",
     title: "Coastal wellness ritual",
-    detail: "Morning · Half day · From €130pp",
+    detail: "Morning · Half day · From $130pp",
   },
   {
     slug: "beach-club-experience",
     title: "Beach club experience",
-    detail: "Day · Flexible · From €75pp",
+    detail: "Day · Flexible · From $75pp",
   },
 ];
 
@@ -331,7 +332,14 @@ export default function NorthCoastAccommodation() {
               ...h,
               name: o.name || h.name,
               desc: o.blurb || h.desc,
-              price: o.pricePerNight || h.price,
+              // Shared resolver — pins USD, strips a baked-in "From",
+              // prefers the lowest room rate.
+              price:
+                resolvePrice({
+                  pricePerNight: o.pricePerNight,
+                  rooms: o.details?.rooms,
+                  fallbackAmount: parseAmount(h.price),
+                }).display || h.price,
               image: o.imageUrl || h.image,
             };
           }),
@@ -352,7 +360,11 @@ export default function NorthCoastAccommodation() {
         type: "Partner Property · North Coast",
         desc: o.blurb || o.description || "",
         highlights: o.amenities || [],
-        price: o.pricePerNight || "On request",
+        price:
+          resolvePrice({
+            pricePerNight: o.pricePerNight,
+            rooms: o.details?.rooms,
+          }).display || "On request",
         categories: extraCats,
         gradient: "bg-[linear-gradient(155deg,#1a4a6a_0%,#0F2436_100%)]",
         image: o.imageUrl,
@@ -450,7 +462,7 @@ export default function NorthCoastAccommodation() {
                 {[
                   { num: "8", label: "Properties" },
                   { num: "3", label: "Locations" },
-                  { num: "€175", label: "Starting from" },
+                  { num: "$175", label: "Starting from" },
                 ].map((s) => (
                   <div key={s.label}>
                     <div className="font-display text-[2rem] font-normal text-gold leading-none">

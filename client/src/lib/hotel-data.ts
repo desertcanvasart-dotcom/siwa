@@ -19,7 +19,7 @@ export interface HotelRoom {
   sqm: string;
   beds: string;
   occupancy: string;
-  price: number; // € / night — base rate for the listing
+  price: number; // $ / night — base rate for the listing
   image?: string; // Optional room photograph URL
 }
 
@@ -68,7 +68,7 @@ export interface HotelDetail {
   /** Slugs of 3 sibling properties to show in "Other properties". */
   related: string[];
   basePrice: number;
-  /** Human-readable from-line (e.g. "€320 / night · full board"). */
+  /** Human-readable from-line (e.g. "$320 / night · full board"). */
   priceLabel: string;
   /** Displayed in breadcrumb. */
   breadcrumbLabel: string;
@@ -98,7 +98,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Amellal.",
     tagLine: "Eco Lodge · No electricity · Salt lake front",
     heroTag: "Eco Lodge · No electricity · Salt lake front",
-    heroMeta: ["Siwa Oasis, Egypt", "White Mountain", "Est. 1997", "36 rooms", "From €320 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "White Mountain", "Est. 1997", "36 rooms", "From $320 / night"],
     breadcrumbLabel: "Adrère Amellal",
     gradient: siwaDestGradient,
     eyebrow: "The property",
@@ -200,7 +200,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Eco-Lodge.",
     tagLine: "Boutique Eco Lodge · Solar · Siwan Cuisine",
     heroTag: "Eco Lodge · 100% solar · Salt lake views",
-    heroMeta: ["Siwa Oasis, Egypt", "Salt lake edge", "18 rooms & chalets", "From €180 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "Salt lake edge", "18 rooms & chalets", "From $180 / night"],
     breadcrumbLabel: "Taziry Eco-Lodge",
     gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#1a4060_60%,#1a3a52_100%)]",
     eyebrow: "The property",
@@ -293,7 +293,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Old Town.",
     tagLine: "Heritage Stay · Historic Center · Shali Views",
     heroTag: "Soléi Owned · Heritage Stay · Old City",
-    heroMeta: ["Siwa Oasis, Egypt", "Old Medina", "12 rooms", "From €145 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "Old Medina", "12 rooms", "From $145 / night"],
     breadcrumbLabel: "Soléi Old Town",
     gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#1e3a50_60%,#0F2436_100%)]",
     eyebrow: "Soléi Owned",
@@ -386,7 +386,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Royal.",
     tagLine: "Royal Villa · 5 Bedrooms · 4 Pools",
     heroTag: "Soléi Owned · Royal Villa · Whole-property bookings",
-    heroMeta: ["Siwa Oasis, Egypt", "Private estate", "5 bedrooms · 4 pools", "From €195 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "Private estate", "5 bedrooms · 4 pools", "From $195 / night"],
     breadcrumbLabel: "Soléi Royal",
     gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#0d2a40_60%,#1a3a52_100%)]",
     eyebrow: "Soléi Owned",
@@ -461,7 +461,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Desert Retreat.",
     tagLine: "Desert Lodge · Salt Flats · Completely Remote",
     heroTag: "Soléi Owned · Desert Lodge · 3 rooms only",
-    heroMeta: ["Great Sand Sea, Egypt", "3 rooms", "Full board", "From €240 / night"],
+    heroMeta: ["Great Sand Sea, Egypt", "3 rooms", "Full board", "From $240 / night"],
     breadcrumbLabel: "Soléi Desert Retreat",
     gradient: "bg-[linear-gradient(155deg,#0a1e2e_0%,#1a3a52_45%,#0F2436_100%)]",
     eyebrow: "Soléi Owned",
@@ -554,7 +554,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Salt Caves.",
     tagLine: "Wellness Retreat · Natural Caves · Ancient Healing",
     heroTag: "Soléi Owned · Wellness Retreat · Cave rooms",
-    heroMeta: ["Siwa Oasis, Egypt", "Salt cave rooms", "Wellness retreat", "From €175 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "Salt cave rooms", "Wellness retreat", "From $175 / night"],
     breadcrumbLabel: "Soléi Salt Caves",
     gradient: "bg-[linear-gradient(155deg,#162030_0%,#0a1828_45%,#1a2e40_100%)]",
     eyebrow: "Soléi Owned",
@@ -647,7 +647,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Resort.",
     tagLine: "Classic Resort · Since 2004 · Pool & Gardens",
     heroTag: "Resort · Old-city adjacent · Family-friendly",
-    heroMeta: ["Siwa Oasis, Egypt", "Old city edge", "88 rooms", "From €110 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "Old city edge", "88 rooms", "From $110 / night"],
     breadcrumbLabel: "Siwa Shali Resort",
     gradient: "bg-[linear-gradient(155deg,#162d3e_0%,#1a3a52_60%,#0F2436_100%)]",
     eyebrow: "The property",
@@ -731,7 +731,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Eco-Lodge & Spa.",
     tagLine: "Wellness Sanctuary · Panoramic Pool · Spa",
     heroTag: "Eco Lodge · Spa · Desert panorama",
-    heroMeta: ["Siwa Oasis, Egypt", "Desert edge", "22 rooms", "From €160 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "Desert edge", "22 rooms", "From $160 / night"],
     breadcrumbLabel: "Ghaliet Eco-Lodge & Spa",
     gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#163040_60%,#1a3a52_100%)]",
     eyebrow: "The property",
@@ -815,7 +815,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Siwa.",
     tagLine: "Family-Run Eco Lodge · Lake Views · Solar",
     heroTag: "Eco Lodge · Family-run · 100% solar",
-    heroMeta: ["Siwa Oasis, Egypt", "Lake edge", "14 rooms & chalets", "From €130 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "Lake edge", "14 rooms & chalets", "From $130 / night"],
     breadcrumbLabel: "Talist Siwa",
     gradient: "bg-[linear-gradient(155deg,#1a3850_0%,#0F2436_60%,#162a3c_100%)]",
     eyebrow: "The property",
@@ -908,7 +908,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Hotel.",
     tagLine: "Boutique Hotel · Salt-Brick · Near Oracle Temple",
     heroTag: "Boutique · 9.4 rated · Near Oracle Temple",
-    heroMeta: ["Siwa Oasis, Egypt", "Central Siwa", "18 rooms", "From €95 / night"],
+    heroMeta: ["Siwa Oasis, Egypt", "Central Siwa", "18 rooms", "From $95 / night"],
     breadcrumbLabel: "Azad Siwa Hotel",
     gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#152c3e_60%,#0F2436_100%)]",
     eyebrow: "The property",
@@ -994,7 +994,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Marassi.",
     tagLine: "Luxury Resort · Marassi · Direct beach access",
     heroTag: "Flagship Property · Mediterranean front · Enquire to book",
-    heroMeta: ["North Coast, Egypt", "Marassi", "Private beach", "From €290 / night"],
+    heroMeta: ["North Coast, Egypt", "Marassi", "Private beach", "From $290 / night"],
     breadcrumbLabel: "Address Beach Resort Marassi",
     gradient: "bg-[linear-gradient(155deg,#1a4a6a_0%,#0F2436_100%)]",
     eyebrow: "The property",
@@ -1091,7 +1091,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Marassi.",
     tagLine: "Luxury Resort · Marassi Marina · Mediterranean front",
     heroTag: "Marina · Sea views · Enquire to book",
-    heroMeta: ["North Coast, Egypt", "Marassi Marina", "Sea-view rooms", "From €210 / night"],
+    heroMeta: ["North Coast, Egypt", "Marassi Marina", "Sea-view rooms", "From $210 / night"],
     breadcrumbLabel: "Vida Marina Resort Marassi",
     gradient: "bg-[linear-gradient(155deg,#2F6F8F_0%,#1a4a6a_100%)]",
     eyebrow: "The property",
@@ -1179,7 +1179,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Golf Resort.",
     tagLine: "Golf Resort · Marassi · 18-hole course",
     heroTag: "Golf · Sea views · Enquire to book",
-    heroMeta: ["North Coast, Egypt", "Marassi", "18-hole course", "From €240 / night"],
+    heroMeta: ["North Coast, Egypt", "Marassi", "18-hole course", "From $240 / night"],
     breadcrumbLabel: "Address Marassi Golf Resort",
     gradient: "bg-[linear-gradient(155deg,#2F6F8F_0%,#1a3a52_100%)]",
     eyebrow: "The property",
@@ -1267,7 +1267,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "North Coast.",
     tagLine: "Boutique Resort · Design hotel · Beachfront",
     heroTag: "Boutique · Design-led · Enquire to book",
-    heroMeta: ["North Coast, Egypt", "Design hotel", "Beachfront", "From €195 / night"],
+    heroMeta: ["North Coast, Egypt", "Design hotel", "Beachfront", "From $195 / night"],
     breadcrumbLabel: "Casa Cook North Coast",
     gradient: "bg-[linear-gradient(155deg,#235570_0%,#2F6F8F_100%)]",
     eyebrow: "The property",
@@ -1355,7 +1355,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Beach Resort.",
     tagLine: "Beach Resort · Almaza Bay · All-inclusive option",
     heroTag: "Almaza Bay · Beach · Enquire to book",
-    heroMeta: ["North Coast, Egypt", "Almaza Bay", "Private beach", "From €175 / night"],
+    heroMeta: ["North Coast, Egypt", "Almaza Bay", "Private beach", "From $175 / night"],
     breadcrumbLabel: "Jaz Almaza Beach Resort",
     gradient: "bg-[linear-gradient(155deg,#1d5070_0%,#0F2436_100%)]",
     eyebrow: "The property",
@@ -1439,7 +1439,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Seashell.",
     tagLine: "Boutique Hotel · Almaza Bay · Intimate",
     heroTag: "Boutique · Almaza Bay · Enquire to book",
-    heroMeta: ["North Coast, Egypt", "Almaza Bay", "Villa options", "From €185 / night"],
+    heroMeta: ["North Coast, Egypt", "Almaza Bay", "Villa options", "From $185 / night"],
     breadcrumbLabel: "The G Hotel Seashell",
     gradient: "bg-[linear-gradient(155deg,#163a52_0%,#2F6F8F_100%)]",
     eyebrow: "The property",
@@ -1523,7 +1523,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Alamein.",
     tagLine: "Premium Resort · El Alamein · Ultra all-inclusive",
     heroTag: "Premium · All-inclusive · Enquire to book",
-    heroMeta: ["North Coast, Egypt", "El Alamein", "Private beach", "From €260 / night"],
+    heroMeta: ["North Coast, Egypt", "El Alamein", "Private beach", "From $260 / night"],
     breadcrumbLabel: "Rixos Premium Alamein",
     gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#2F6F8F_100%)]",
     eyebrow: "The property",
@@ -1616,7 +1616,7 @@ export const HOTEL_DETAILS: Record<string, HotelDetail> = {
     nameItalic: "Hotel.",
     tagLine: "Heritage Hotel · El Alamein · Sea front",
     heroTag: "Heritage · Coastal · Enquire to book",
-    heroMeta: ["North Coast, Egypt", "El Alamein", "Sea-front position", "From €175 / night"],
+    heroMeta: ["North Coast, Egypt", "El Alamein", "Sea-front position", "From $175 / night"],
     breadcrumbLabel: "Al Alamein Hotel",
     gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#3d8aad_100%)]",
     eyebrow: "The property",

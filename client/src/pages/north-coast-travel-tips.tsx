@@ -39,8 +39,8 @@ const QUICK_REF: { k: string; v: string }[] = [
   { k: "Card payments", v: "Widely accepted at resorts" },
   { k: "Mobile signal", v: "Good throughout" },
   { k: "Water", v: "Bottled only" },
-  { k: "Accommodation from", v: "€175 / night" },
-  { k: "Experiences from", v: "€30 / person" },
+  { k: "Accommodation from", v: "$175 / night" },
+  { k: "Experiences from", v: "$30 / person" },
   { k: "Booking method", v: "Enquiry — 24hr response" },
 ];
 
@@ -181,7 +181,7 @@ export default function NorthCoastTravelTipsPage() {
                 </p>
                 <TipBox label="Soléi tip">
                   We arrange private vehicles from Cairo from{" "}
-                  <strong>€80 per vehicle</strong>. No shared transfers.
+                  <strong>$80 per vehicle</strong>. No shared transfers.
                   Flight tracking included for airport pickups.{" "}
                   <Link href="/north-coast/transportation">
                     View transport options →
@@ -196,9 +196,9 @@ export default function NorthCoastTravelTipsPage() {
                   Bay, and El Alamein — are spread over roughly 100km of
                   coastline with no public transport between them. We
                   arrange all within-coast transfers: Marassi to Almaza Bay
-                  (~1 hour, from €40), Marassi to El Alamein (~30 min,
-                  from €25), and on-demand property-to-experience transfers
-                  from €20.
+                  (~1 hour, from $40), Marassi to El Alamein (~30 min,
+                  from $25), and on-demand property-to-experience transfers
+                  from $20.
                 </p>
               </SubBlock>
 
@@ -411,7 +411,7 @@ export default function NorthCoastTravelTipsPage() {
                   nearby resorts fly home without knowing they exist. A
                   quiet morning drive with a guide who knows where they
                   gather — two hours in a landscape that feels nothing
-                  like the coast you just left. From €45 per person. Book
+                  like the coast you just left. From $45 per person. Book
                   before arrival.
                 </p>
               </SubBlock>
@@ -423,7 +423,7 @@ export default function NorthCoastTravelTipsPage() {
                   water — the resorts recede, the scale of the
                   Mediterranean becomes apparent, and the light in the
                   last forty minutes before sunset is extraordinary. Three
-                  hours, from €85 per person. The experience most guests
+                  hours, from $85 per person. The experience most guests
                   name first when they describe what made the North Coast
                   feel like somewhere.
                 </p>
@@ -435,7 +435,7 @@ export default function NorthCoastTravelTipsPage() {
                   before the beach fills and the water churns. Almaza Bay
                   has some of the clearest water on the Mediterranean —
                   experiencing it properly means getting in at 6am before
-                  the day begins. From €30 per person. Also available:
+                  the day begins. From $30 per person. Also available:
                   guided snorkelling, paddleboarding, and kayaking through
                   most resort water sports centres.
                 </p>
@@ -449,7 +449,7 @@ export default function NorthCoastTravelTipsPage() {
                   and undervisited historical sites in Egypt, thirty
                   minutes from the Marassi resort cluster. A half-day with
                   a guide who explains the context produces a genuinely
-                  powerful experience. From €35 per person.
+                  powerful experience. From $35 per person.
                 </p>
               </SubBlock>
 
@@ -461,7 +461,7 @@ export default function NorthCoastTravelTipsPage() {
                   beaches are. Local seafood lunch at the fishing spots
                   where the catch comes in at noon and is on the table by
                   1pm — simple, fresh, and the kind of meal you compare
-                  everything else to. From €40 per person.
+                  everything else to. From $40 per person.
                 </p>
                 <TipBox label="Booking note">
                   All North Coast experiences are arranged by our team —
@@ -504,7 +504,7 @@ export default function NorthCoastTravelTipsPage() {
                   resort guests miss by staying within the property. Our
                   seafood lunch experience takes you to the fishing spots
                   we know — off the main strip, no tourist markup, the
-                  catch of that morning. From €40 per person including
+                  catch of that morning. From $40 per person including
                   transport from your resort.
                 </p>
               </SubBlock>
@@ -590,7 +590,7 @@ export default function NorthCoastTravelTipsPage() {
                   and at most resort restaurants. Egyptian Pounds (EGP)
                   needed for anything outside the resort zone — towns,
                   roadside stops, tips for local guides and drivers. All
-                  Soléi bookings are settled in EUR or USD via secure
+                  Soléi bookings are settled in USD via secure
                   payment links.
                 </p>
               </SubBlock>
@@ -627,15 +627,15 @@ export default function NorthCoastTravelTipsPage() {
                   {[
                     {
                       title: "Accommodation",
-                      text: "€175–€290+ per night. Casa Cook from €195. Rixos Alamein from €260 (all-inclusive). Enquiry-based booking for all properties.",
+                      text: "$175–$290+ per night. Casa Cook from $195. Rixos Alamein from $260 (all-inclusive). Enquiry-based booking for all properties.",
                     },
                     {
                       title: "Experiences",
-                      text: "€30–€120 per person. Sunset sailing from €85. Flamingo morning from €45. El Alamein from €35. All enquiry-based.",
+                      text: "$30–$120 per person. Sunset sailing from $85. Flamingo morning from $45. El Alamein from $35. All enquiry-based.",
                     },
                     {
                       title: "Transportation",
-                      text: "Cairo–North Coast from €80 per vehicle. Within-coast transfers from €15. Cairo day trip from €140.",
+                      text: "Cairo–North Coast from $80 per vehicle. Within-coast transfers from $15. Cairo day trip from $140.",
                     },
                     {
                       title: "Food outside resort",

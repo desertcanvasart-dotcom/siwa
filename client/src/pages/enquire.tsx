@@ -987,7 +987,7 @@ export default function EnquirePage() {
                   {
                     n: "3.",
                     strong: "Payment link sent",
-                    rest: " once everything is agreed. Secure, in EUR or USD. No payment before you're ready.",
+                    rest: " once everything is agreed. Secure, in USD. No payment before you're ready.",
                   },
                   {
                     n: "4.",

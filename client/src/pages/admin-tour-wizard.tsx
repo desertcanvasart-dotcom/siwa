@@ -305,7 +305,7 @@ export default function AdminTourWizardPage() {
               </Field>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Field label="Price per person (€)">
+              <Field label="Price per person ($)">
                 <Input
                   type="number"
                   value={form.pricePerPerson}
@@ -531,7 +531,7 @@ export default function AdminTourWizardPage() {
             <ReviewRow label="Slug" value={form.slug || "—"} />
             <ReviewRow label="Destination" value={form.destination === "siwa" ? "Siwa Oasis" : "North Coast"} />
             <ReviewRow label="Duration" value={form.duration || "—"} />
-            <ReviewRow label="Price" value={`€${form.pricePerPerson || 0} / guest`} />
+            <ReviewRow label="Price" value={`$${form.pricePerPerson || 0} / guest`} />
             <ReviewRow label="Max guests" value={String(form.maxGuests)} />
             <ReviewRow label="Image" value={form.imageUrl || "—"} />
             <ReviewRow label="Itinerary" value={`${form.itinerary.length} step${form.itinerary.length === 1 ? "" : "s"}`} />

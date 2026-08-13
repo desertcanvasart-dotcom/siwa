@@ -433,7 +433,7 @@ export default function AdminHotelWizardPage() {
                 <Input
                   value={form.pricePerNight}
                   onChange={(e) => set({ pricePerNight: e.target.value })}
-                  placeholder="€320 / night"
+                  placeholder="$320 / night"
                 />
               </Field>
               <Field label="Amenities (comma-separated)">
@@ -502,7 +502,7 @@ export default function AdminHotelWizardPage() {
                   className="font-mono text-xs"
                   value={form.heroMeta}
                   onChange={(e) => set({ heroMeta: e.target.value })}
-                  placeholder={"Siwa Oasis\n36 rooms\nFrom €320 / night"}
+                  placeholder={"Siwa Oasis\n36 rooms\nFrom $320 / night"}
                 />
               </Field>
               <Field label="Price label">
@@ -596,7 +596,7 @@ export default function AdminHotelWizardPage() {
                         <Input value={room.occupancy} onChange={(e) => updateRoom(i, { occupancy: e.target.value })} placeholder="2 guests" />
                       </div>
                       <div>
-                        <Label className="text-xs">Price (€)</Label>
+                        <Label className="text-xs">Price ($)</Label>
                         <Input
                           type="number"
                           value={room.price}

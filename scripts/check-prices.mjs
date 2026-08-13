@@ -6,13 +6,13 @@
  * prefix that the cards add again ("From From $620 / night"), and some
  * text amounts contradict the room rates the page actually shows.
  *
- * The rendering code now normalises all of that (see client/src/lib/
- * price.ts), but this reports the underlying DATA problems, which only
- * the owner can decide about — a stored "$70" is a different amount of
- * money from "€70" and must never be auto-converted.
+ * All Soléi prices are quoted in USD, and the UI now pins the symbol
+ * (see CANONICAL_CURRENCY in client/src/lib/price.ts), so a stray "€"
+ * in the data no longer reaches a visitor. It is still worth cleaning
+ * up, so it is reported as a note rather than a failure.
  *
  * Usage:  node scripts/check-prices.mjs [baseUrl]
- * Exits 1 on hard inconsistencies (mixed currencies / duplicated From),
+ * Exits 1 when a stored value would fight the UI (a baked-in "From"),
  * 0 when only advisory notes remain.
  */
 
@@ -63,10 +63,11 @@ for (const h of hotels) {
   }
 }
 
-if (currencies.size > 1) {
-  const summary = [...currencies.entries()].map(([c, n]) => `${c}×${n}`).join(", ");
-  errors.push(
-    `Mixed currencies across properties (${summary}). Pick one canonical currency — a stored "$70" is not "€70".`,
+const nonUsd = [...currencies.entries()].filter(([c]) => c !== "$");
+if (nonUsd.length > 0) {
+  const summary = nonUsd.map(([c, n]) => `${c}×${n}`).join(", ");
+  notes.push(
+    `Stored prices still carry a non-USD symbol (${summary}). Pages render USD regardless, but the field is worth tidying.`,
   );
 }
 

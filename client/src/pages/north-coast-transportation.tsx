@@ -52,7 +52,7 @@ const FEATURED_ROUTE: RouteCard = {
     { key: "Vehicle", val: "Private air-conditioned SUV" },
     { key: "Drop-off", val: "Direct to your property" },
   ],
-  price: "€80 per vehicle",
+  price: "$80 per vehicle",
 };
 
 const ROUTES: RouteCard[] = [
@@ -66,7 +66,7 @@ const ROUTES: RouteCard[] = [
       { key: "Road type", val: "Coastal road — Mediterranean visible" },
       { key: "Vehicle", val: "Private SUV" },
     ],
-    price: "€45 per vehicle",
+    price: "$45 per vehicle",
   },
   {
     num: "Route 03",
@@ -79,7 +79,7 @@ const ROUTES: RouteCard[] = [
       { key: "Style", val: "Full-day coastal approach" },
       { key: "Vehicle", val: "Private SUV with flexible stops" },
     ],
-    price: "€120 per vehicle",
+    price: "$120 per vehicle",
   },
   {
     num: "Route 04",
@@ -91,7 +91,7 @@ const ROUTES: RouteCard[] = [
       { key: "Recommended", val: "Early morning — before 8am ideal" },
       { key: "Vehicle", val: "Private SUV" },
     ],
-    price: "€80 per vehicle",
+    price: "$80 per vehicle",
   },
 ];
 
@@ -113,7 +113,7 @@ const TRANSFERS: TransferCard[] = [
     coverageLabel: "Covers",
     coverage: "All Marassi properties · Almaza Bay resorts · One-way or return",
     duration: "~1 hour · Private vehicle",
-    price: "From €40",
+    price: "From $40",
   },
   {
     num: "02",
@@ -122,7 +122,7 @@ const TRANSFERS: TransferCard[] = [
     coverageLabel: "Covers",
     coverage: "Marassi · El Alamein sites · Al Alamein Hotel · Rixos Premium",
     duration: "~30 min · Private vehicle",
-    price: "From €25",
+    price: "From $25",
   },
   {
     num: "03",
@@ -131,7 +131,7 @@ const TRANSFERS: TransferCard[] = [
     coverageLabel: "Covers",
     coverage: "Marassi Marina · Flamingo lagoon · Seafood spots · Coastline drive start",
     duration: "On-demand · Private vehicle",
-    price: "From €20",
+    price: "From $20",
   },
   {
     num: "04",
@@ -140,7 +140,7 @@ const TRANSFERS: TransferCard[] = [
     coverageLabel: "Airports",
     coverage: "Cairo International · Borg El Arab · Marsa Matrouh",
     duration: "Flexible · Flight tracked",
-    price: "From €45",
+    price: "From $45",
   },
   {
     num: "05",
@@ -149,7 +149,7 @@ const TRANSFERS: TransferCard[] = [
     coverageLabel: "Includes",
     coverage: "Round-trip vehicle · Driver for the full day · Flexible itinerary",
     duration: "Full day · Private vehicle",
-    price: "From €140",
+    price: "From $140",
   },
   {
     num: "06",
@@ -158,7 +158,7 @@ const TRANSFERS: TransferCard[] = [
     coverageLabel: "Covers",
     coverage: "Any point on the North Coast · Any time · No minimum",
     duration: "On-demand · Private vehicle",
-    price: "From €15",
+    price: "From $15",
   },
 ];
 
@@ -248,7 +248,7 @@ const PRACTICAL = [
   {
     numeral: "IV",
     title: "Payment & tolls",
-    desc: "All transport fees settled in advance with Soléi. Drivers handle any road tolls as part of the agreed price — no surprise additions. Payment in EUR or USD via secure link.",
+    desc: "All transport fees settled in advance with Soléi. Drivers handle any road tolls as part of the agreed price — no surprise additions. Payment in USD via secure link.",
   },
   {
     numeral: "V",

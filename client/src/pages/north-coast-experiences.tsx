@@ -230,19 +230,19 @@ const UPSELL_PROPS = [
     slug: "address-beach-resort-marassi",
     name: "Address Beach Resort Marassi",
     type: "Luxury Resort · Marassi · Beach front",
-    price: "From €290",
+    price: "From $290",
   },
   {
     slug: "casa-cook-north-coast",
     name: "Casa Cook North Coast",
     type: "Boutique Resort · Design-led",
-    price: "From €195",
+    price: "From $195",
   },
   {
     slug: "jaz-almaza-beach-resort",
     name: "Jaz Almaza Beach Resort",
     type: "Beach Resort · Almaza Bay",
-    price: "From €175",
+    price: "From $175",
   },
 ];
 
@@ -354,7 +354,7 @@ export default function NorthCoastExperiencesPage() {
               <div className="flex gap-10 border-t border-white/10 pt-6">
                 {[
                   { num: "6", label: "Experiences" },
-                  { num: "€30", label: "Starting from" },
+                  { num: "$30", label: "Starting from" },
                   { num: "24h", label: "Response time" },
                 ].map((s) => (
                   <div key={s.label}>
@@ -604,7 +604,7 @@ export default function NorthCoastExperiencesPage() {
                     View all 7 North Coast properties
                   </div>
                   <div className="text-[0.65rem] text-white/30 mt-0.5">
-                    Marassi · Almaza Bay · El Alamein · From €175/night
+                    Marassi · Almaza Bay · El Alamein · From $175/night
                   </div>
                 </div>
                 <span className="font-display text-[0.9rem] text-gold flex-shrink-0 ml-4">
@@ -773,7 +773,7 @@ function FeaturedCard({ exp }: { exp: Experience }) {
           <div>
             <div className="text-[0.62rem] text-ink-soft/45">From</div>
             <div className="font-display text-[1.3rem] text-navy">
-              €{exp.price}{" "}
+              ${exp.price}{" "}
               <span className="font-body text-[0.8rem] text-ink-soft font-light">
                 {exp.priceSuffix ?? "per person"}
               </span>
@@ -860,7 +860,7 @@ function ExpCard({
           <div>
             <div className="text-[0.62rem] text-ink-soft/45">From</div>
             <div className="font-display text-[1.05rem] text-navy">
-              €{exp.price} pp
+              ${exp.price} pp
             </div>
           </div>
           <span className="text-[0.58rem] tracking-[0.16em] uppercase text-white bg-coastal px-4 py-2 whitespace-nowrap group-hover:bg-[#266080] transition-colors">

@@ -192,7 +192,7 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               All Soléi bookings — accommodation, experiences, transportation
-              — are settled in EUR or USD via our secure payment links. You
+              — are settled in USD via our secure payment links. You
               do not need local currency for anything we arrange directly.
             </p>
           </>
@@ -301,7 +301,7 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               It is the highest-priced property in our Siwa portfolio at
-              €320/night (Garden Room) for precisely this reason. Guests who
+              $320/night (Garden Room) for precisely this reason. Guests who
               choose it knowing what it is report some of the most
               compelling stays we hear about.
             </p>
@@ -481,7 +481,7 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               It is the experience most guests name first when describing
-              their time in Siwa. From €45 per person.
+              their time in Siwa. From $45 per person.
             </p>
           </>
         ),
@@ -631,7 +631,7 @@ const SECTIONS: FaqSection[] = [
             <p>
               We arrange all Siwa transportation with private vehicles and
               drivers we know personally. The Cairo–Siwa route runs from
-              €180 per vehicle. Depart before 7am to arrive by mid-afternoon.
+              $180 per vehicle. Depart before 7am to arrive by mid-afternoon.
             </p>
           </>
         ),
@@ -650,7 +650,7 @@ const SECTIONS: FaqSection[] = [
             <p>
               Most guests fly into Cairo International and drive from there.
               If you're flying into Marsa Matrouh, we arrange the 3-hour
-              onward transfer from €95 per vehicle.
+              onward transfer from $95 per vehicle.
             </p>
           </>
         ),

@@ -37,8 +37,8 @@ const QUICK_REF: { k: string; v: string }[] = [
   { k: "Dress in town", v: "Modest — shoulders & knees covered" },
   { k: "Mobile signal", v: "Intermittent — download offline" },
   { k: "Water", v: "Bottled only" },
-  { k: "Accommodation from", v: "€95 / night" },
-  { k: "Experiences from", v: "€35 / person" },
+  { k: "Accommodation from", v: "$95 / night" },
+  { k: "Experiences from", v: "$35 / person" },
 ];
 
 const MUST_SEE = [
@@ -167,7 +167,7 @@ export default function SiwaTravelTipsPage() {
                 <TipBox label="Soléi tip">
                   We arrange all transport with private vehicles and drivers
                   who know this route personally. From{" "}
-                  <strong>€180 per vehicle</strong>. No shared transfers.{" "}
+                  <strong>$180 per vehicle</strong>. No shared transfers.{" "}
                   <Link href="/siwa-oasis/transportation">
                     View transport options →
                   </Link>
@@ -193,7 +193,7 @@ export default function SiwaTravelTipsPage() {
                   from Cairo to Marsa Matrouh. Most guests flying from
                   abroad arrive at Cairo International and drive from there.
                   If you fly into Marsa Matrouh, we arrange the onward
-                  transfer from €95 per vehicle.
+                  transfer from $95 per vehicle.
                 </p>
               </SubBlock>
 
@@ -359,7 +359,7 @@ export default function SiwaTravelTipsPage() {
               <SubBlock title="Budget guesthouses">
                 <p>
                   Azad Siwa Hotel is the most affordable property in our
-                  portfolio at from €95/night. Beyond our curated list,
+                  portfolio at from $95/night. Beyond our curated list,
                   Siwa town has simple guesthouses at much lower price
                   points for travellers on tight budgets. These are not
                   properties we vet or recommend, but they are viable for
@@ -382,7 +382,7 @@ export default function SiwaTravelTipsPage() {
                   single experience most guests name first when describing
                   what Siwa gave them. Not the views, not the desert drive,
                   not the temple — the float. At sunset. In silence. It is
-                  from €45 per person and it books before almost everything
+                  from $45 per person and it books before almost everything
                   else in peak season.
                 </p>
               </SubBlock>
@@ -393,7 +393,7 @@ export default function SiwaTravelTipsPage() {
                   Cleopatra. Cool, clear water, a carved stone setting, and
                   the particular calm of a place visited continuously for
                   two thousand years. Best in the early morning before it
-                  gets busy. From €35 per person.
+                  gets busy. From $35 per person.
                 </p>
               </SubBlock>
 
@@ -404,7 +404,7 @@ export default function SiwaTravelTipsPage() {
                   sunset is one of the more purely joyful things available
                   in Siwa, combining the physicality of the desert with
                   light that makes the dunes look like they're glowing from
-                  inside. From €85 per group.
+                  inside. From $85 per group.
                 </p>
               </SubBlock>
 
@@ -415,7 +415,7 @@ export default function SiwaTravelTipsPage() {
                   looking for. Most visitors walk through in twenty minutes.
                   Half a day with a guide who explains the political and
                   spiritual context of the visit produces a fundamentally
-                  different experience. From €35 per person.
+                  different experience. From $35 per person.
                 </p>
               </SubBlock>
 
@@ -425,7 +425,7 @@ export default function SiwaTravelTipsPage() {
                   in any city you have ever been in. A Bedouin camp, dinner
                   in the open air, and the kind of sleep people describe
                   for years afterward because of what surrounded it. From
-                  €120 per person including dinner.
+                  $120 per person including dinner.
                 </p>
                 <TipBox label="Booking note">
                   All Siwa experiences book directly on our site — instant
@@ -546,7 +546,7 @@ export default function SiwaTravelTipsPage() {
                 <p>
                   ATMs exist in Siwa town but are unreliable — bring
                   sufficient Egyptian Pounds from Cairo or Alexandria. All
-                  Soléi bookings are settled in EUR or USD via secure
+                  Soléi bookings are settled in USD via secure
                   payment links. Credit cards are not widely accepted in
                   small local businesses — cash is king for anything in the
                   town market.
@@ -584,15 +584,15 @@ export default function SiwaTravelTipsPage() {
                   {[
                     {
                       title: "Accommodation",
-                      text: "€95–€320+ per night depending on property. Our Soléi properties from €145. Budget guesthouses from ~€20 (not curated).",
+                      text: "$95–$320+ per night depending on property. Our Soléi properties from $145. Budget guesthouses from ~$20 (not curated).",
                     },
                     {
                       title: "Experiences",
-                      text: "€35–€180 per person. Most half-day experiences fall between €35–€55. The Full Siwa Day at €180 covers the most ground.",
+                      text: "$35–$180 per person. Most half-day experiences fall between $35–$55. The Full Siwa Day at $180 covers the most ground.",
                     },
                     {
                       title: "Transportation",
-                      text: "Cairo–Siwa from €180 per vehicle. Desert drives from €65. In-oasis transfers from €15.",
+                      text: "Cairo–Siwa from $180 per vehicle. Desert drives from $65. In-oasis transfers from $15.",
                     },
                     {
                       title: "Food in town",

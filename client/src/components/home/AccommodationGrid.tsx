@@ -28,7 +28,7 @@ const hotels: Hotel[] = [
     name: "Adrere Amellal",
     location: "Siwa Oasis · Eco Lodge",
     desc: "Built from karsheef salt rock and palm wood. No electricity. No noise. Just the oasis as it has always been.",
-    price: "€320 / night",
+    price: "$320 / night",
     dest: "Siwa Oasis",
     image: adrereAmellalImage,
     gradientClass:
@@ -40,7 +40,7 @@ const hotels: Hotel[] = [
     name: "Taziry Ecolodge",
     location: "Siwa Oasis · Boutique Lodge",
     desc: "Mud-brick villas overlooking the salt lake. Quiet mornings, warm evenings, the stars at night.",
-    price: "€180 / night",
+    price: "$180 / night",
     dest: "Siwa Oasis",
     image: taziryImage,
     gradientClass:
@@ -52,7 +52,7 @@ const hotels: Hotel[] = [
     name: "Soléi Old Town",
     location: "Siwa Oasis · Heritage Stay",
     desc: "Stone walls, cool interiors, a rooftop that overlooks the shali fortress at dusk.",
-    price: "€145 / night",
+    price: "$145 / night",
     dest: "Siwa Oasis",
     image: soleiOldTownImage,
     gradientClass:
@@ -64,7 +64,7 @@ const hotels: Hotel[] = [
     name: "Vida Marina Resort Marassi",
     location: "North Coast · Resort",
     desc: "Mediterranean-facing. Clean lines, open sea, and enough space to feel genuinely alone.",
-    price: "€210 / night",
+    price: "$210 / night",
     dest: "North Coast",
     image: vidaMarinaImage,
     gradientClass:
@@ -76,7 +76,7 @@ const hotels: Hotel[] = [
     name: "Address Beach Resort",
     location: "North Coast · Luxury Resort",
     desc: "Refined, unhurried, positioned directly on the water. The coast at its most quiet.",
-    price: "€290 / night",
+    price: "$290 / night",
     dest: "North Coast",
     image: addressBeachImage,
     gradientClass:
@@ -88,7 +88,7 @@ const hotels: Hotel[] = [
     name: "Casa Cook North Coast",
     location: "North Coast · Boutique Resort",
     desc: "Bohemian, warm, designed for people who travel slowly. Every corner feels considered.",
-    price: "€195 / night",
+    price: "$195 / night",
     dest: "North Coast",
     image: casaCookImage,
     gradientClass:
@@ -114,7 +114,7 @@ export function AccommodationGrid() {
         if (!o) return h;
         // One shared resolver so the card can't disagree with the
         // property page (it used to print the raw admin text, giving
-        // "From From $620 / night" and "$70" against the page's "€70").
+        // "From From $620 / night" and "$70" against the page's "$70").
         const resolved = resolvePrice({
           pricePerNight: o.pricePerNight,
           rooms: o.details?.rooms,

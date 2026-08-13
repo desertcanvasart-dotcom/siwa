@@ -82,7 +82,7 @@ export interface ExperienceDetail {
   /** "Good to know" notes — each rendered as a line item */
   notes: string[];
   reviews: ExperienceReview[];
-  /** Price per person in EUR */
+  /** Price per person in USD */
   price: number;
   /** Optional flat rate for private booking; omitted => no private toggle */
   privatePrice?: number;
@@ -122,7 +122,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     blockHeadline: "When the water turns the colour of",
     blockHeadlineItalic: "the sky.",
     heroTagGold: "Signature experience",
-    heroTags: ["Water · Wellness", "Sunset · 2–3 hours", "From €45 per person"],
+    heroTags: ["Water · Wellness", "Sunset · 2–3 hours", "From $45 per person"],
     heroMeta: ["Siwa salt lakes", "Small group — max 6", "All abilities", "Year-round"],
     gallerySize: 8,
     gradient:
@@ -140,8 +140,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "None — all abilities" },
       { label: "Minimum age", value: "8 years" },
       { label: "Meeting point", value: "Siwa lake shore — details sent on booking" },
-      { label: "Price", value: "€45 per person" },
-      { label: "Private option", value: "€220 for up to 6 guests" },
+      { label: "Price", value: "$45 per person" },
+      { label: "Private option", value: "$220 for up to 6 guests" },
       { label: "Season", value: "Year-round" },
     ],
     includes: [
@@ -219,7 +219,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     titleItalic: "Surfing.",
     blockHeadline: "Wooden boards, golden dunes, and the",
     blockHeadlineItalic: "Great Sand Sea.",
-    heroTags: ["Desert", "Sunset · 2 hours", "From €40 per person"],
+    heroTags: ["Desert", "Sunset · 2 hours", "From $40 per person"],
     heroMeta: ["Great Sand Sea", "Small group — max 8", "All levels", "Year-round"],
     gallerySize: 6,
     gradient:
@@ -236,8 +236,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "Beginner-friendly" },
       { label: "Minimum age", value: "10 years" },
       { label: "Meeting point", value: "Lodge pickup · Siwa town" },
-      { label: "Price", value: "€40 per person" },
-      { label: "Private option", value: "€180 for up to 6 guests" },
+      { label: "Price", value: "$40 per person" },
+      { label: "Private option", value: "$180 for up to 6 guests" },
       { label: "Season", value: "Year-round" },
     ],
     includes: [
@@ -306,7 +306,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     titleItalic: "Spring Soak.",
     blockHeadline: "Two thousand years of",
     blockHeadlineItalic: "clear water.",
-    heroTags: ["Water · Heritage", "Morning · 1–2 hours", "From €35 per person"],
+    heroTags: ["Water · Heritage", "Morning · 1–2 hours", "From $35 per person"],
     heroMeta: ["Aghurmi village", "All ages", "Year-round"],
     gallerySize: 5,
     gradient:
@@ -323,8 +323,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "None — all ages" },
       { label: "Minimum age", value: "All ages welcome" },
       { label: "Meeting point", value: "Aghurmi · details sent on booking" },
-      { label: "Price", value: "€35 per person" },
-      { label: "Private option", value: "€150 for up to 6 guests" },
+      { label: "Price", value: "$35 per person" },
+      { label: "Private option", value: "$150 for up to 6 guests" },
       { label: "Season", value: "Year-round" },
     ],
     includes: [
@@ -392,7 +392,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     titleItalic: "& Meditation.",
     blockHeadline: "Still, vast, and",
     blockHeadlineItalic: "without distraction.",
-    heroTags: ["Wellness · Desert", "Sunrise · 90 minutes", "From €50 per person"],
+    heroTags: ["Wellness · Desert", "Sunrise · 90 minutes", "From $50 per person"],
     heroMeta: ["Edge of the sand sea", "Max 8 guests", "All levels", "Year-round"],
     gallerySize: 4,
     gradient:
@@ -409,8 +409,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "Beginner-friendly" },
       { label: "Minimum age", value: "14 years" },
       { label: "Meeting point", value: "Lodge pickup · pre-dawn" },
-      { label: "Price", value: "€50 per person" },
-      { label: "Private option", value: "€240 for up to 4 guests" },
+      { label: "Price", value: "$50 per person" },
+      { label: "Private option", value: "$240 for up to 4 guests" },
       { label: "Season", value: "Year-round" },
     ],
     includes: [
@@ -479,7 +479,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     titleItalic: "the Stars.",
     blockHeadline: "A night without walls or",
     blockHeadlineItalic: "a ceiling.",
-    heroTags: ["Desert · Overnight", "Dinner included", "From €120 per person"],
+    heroTags: ["Desert · Overnight", "Dinner included", "From $120 per person"],
     heroMeta: ["Bedouin camp", "Group or private", "October–April recommended"],
     gallerySize: 7,
     gradient:
@@ -496,8 +496,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "None — comfort camping" },
       { label: "Minimum age", value: "12 years" },
       { label: "Meeting point", value: "Lodge pickup" },
-      { label: "Price", value: "€120 per person" },
-      { label: "Private option", value: "€900 flat — up to 6 guests" },
+      { label: "Price", value: "$120 per person" },
+      { label: "Private option", value: "$900 flat — up to 6 guests" },
       { label: "Best season", value: "October–April" },
     ],
     includes: [
@@ -574,7 +574,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     titleItalic: "Ride.",
     blockHeadline: "Through the palm groves and into the",
     blockHeadlineItalic: "gold hour.",
-    heroTags: ["Desert", "Sunset · 2 hours", "From €55 per person"],
+    heroTags: ["Desert", "Sunset · 2 hours", "From $55 per person"],
     heroMeta: ["Oasis edge", "Beginners welcome", "Max 6 riders", "Year-round"],
     gallerySize: 5,
     gradient:
@@ -591,8 +591,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "Beginner-friendly" },
       { label: "Minimum age", value: "12 years" },
       { label: "Meeting point", value: "Siwan stables · outside town" },
-      { label: "Price", value: "€55 per person" },
-      { label: "Private option", value: "€240 for up to 4 riders" },
+      { label: "Price", value: "$55 per person" },
+      { label: "Private option", value: "$240 for up to 4 riders" },
       { label: "Season", value: "Year-round" },
     ],
     includes: [
@@ -661,7 +661,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     titleItalic: "Stargazing.",
     blockHeadline: "The clearest sky you have",
     blockHeadlineItalic: "ever seen.",
-    heroTags: ["Desert · Night", "3 hours", "From €55 per person"],
+    heroTags: ["Desert · Night", "3 hours", "From $55 per person"],
     heroMeta: ["Great Sand Sea", "Telescope provided", "Max 8 guests"],
     gallerySize: 5,
     gradient:
@@ -678,8 +678,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "None" },
       { label: "Minimum age", value: "8 years" },
       { label: "Meeting point", value: "Lodge pickup" },
-      { label: "Price", value: "€55 per person" },
-      { label: "Private option", value: "€280 for up to 6 guests" },
+      { label: "Price", value: "$55 per person" },
+      { label: "Private option", value: "$280 for up to 6 guests" },
       { label: "Best conditions", value: "Around new moon" },
     ],
     includes: [
@@ -748,7 +748,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     titleItalic: "Pilgrimage.",
     blockHeadline: "Where Alexander sought",
     blockHeadlineItalic: "divine counsel.",
-    heroTags: ["Heritage", "Morning · Half day", "From €35 per person"],
+    heroTags: ["Heritage", "Morning · Half day", "From $35 per person"],
     heroMeta: ["Aghurmi", "Max 8 guests", "Moderate walking", "Year-round"],
     gallerySize: 6,
     gradient:
@@ -765,8 +765,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "Moderate walking" },
       { label: "Minimum age", value: "10 years" },
       { label: "Meeting point", value: "Aghurmi village" },
-      { label: "Price", value: "€35 per person" },
-      { label: "Private option", value: "€160 for up to 6 guests" },
+      { label: "Price", value: "$35 per person" },
+      { label: "Private option", value: "$160 for up to 6 guests" },
       { label: "Season", value: "Year-round (mornings preferred)" },
     ],
     includes: [
@@ -835,7 +835,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     titleItalic: "Sand Bath Healing.",
     blockHeadline: "An ancient Siwan",
     blockHeadlineItalic: "practice.",
-    heroTags: ["Wellness", "Sunrise · 1 hour", "From €45 per person"],
+    heroTags: ["Wellness", "Sunrise · 1 hour", "From $45 per person"],
     heroMeta: ["Local healer", "Max 6 guests", "Summer mornings only"],
     gallerySize: 4,
     gradient:
@@ -852,8 +852,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "None" },
       { label: "Minimum age", value: "16 years" },
       { label: "Meeting point", value: "Lodge pickup · pre-dawn" },
-      { label: "Price", value: "€45 per person" },
-      { label: "Private option", value: "€200 for up to 4 guests" },
+      { label: "Price", value: "$45 per person" },
+      { label: "Private option", value: "$200 for up to 4 guests" },
       { label: "Best season", value: "June–September" },
     ],
     includes: [
@@ -923,7 +923,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     blockHeadline: "One day. The whole",
     blockHeadlineItalic: "oasis.",
     heroTagGold: "Premium · Private",
-    heroTags: ["Full day", "From €180 per person", "Lunch included"],
+    heroTags: ["Full day", "From $180 per person", "Lunch included"],
     heroMeta: ["Siwa-wide", "Private guide & vehicle", "Max 6 guests"],
     gallerySize: 9,
     gradient:
@@ -940,8 +940,8 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "Moderate — some walking" },
       { label: "Minimum age", value: "10 years" },
       { label: "Meeting point", value: "Lodge pickup · 7:30am" },
-      { label: "Price", value: "€180 per person" },
-      { label: "Group rate", value: "€950 flat for up to 6" },
+      { label: "Price", value: "$180 per person" },
+      { label: "Group rate", value: "$950 flat for up to 6" },
       { label: "Season", value: "Year-round" },
     ],
     includes: [
@@ -1027,7 +1027,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     blockHeadline: "The Mediterranean at the hour it",
     blockHeadlineItalic: "earns its reputation.",
     heroTagGold: "Enquire to book",
-    heroTags: ["Water · Private", "Sunset · 3 hours", "From €85 per person"],
+    heroTags: ["Water · Private", "Sunset · 3 hours", "From $85 per person"],
     heroMeta: ["Mediterranean Sea", "Private — up to 6 guests", "Year-round", "Captain & crew included"],
     gallerySize: 6,
     gradient:
@@ -1046,7 +1046,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Crew", value: "Captain + 1 crew member" },
       { label: "Minimum age", value: "No restriction" },
       { label: "Departure point", value: "Marassi Marina — details on confirmation" },
-      { label: "Price", value: "€85 per person" },
+      { label: "Price", value: "$85 per person" },
       { label: "Season", value: "Year-round · Best Apr–Nov" },
     ],
     includes: [
@@ -1129,7 +1129,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     blockHeadline: "A landscape that feels nothing like the",
     blockHeadlineItalic: "coast you just left.",
     heroTagGold: "Enquire to book",
-    heroTags: ["Nature", "Morning · Half day", "From €45 per person"],
+    heroTags: ["Nature", "Morning · Half day", "From $45 per person"],
     heroMeta: ["Coastal lagoons", "Max 8 guests", "Year-round", "Guide included"],
     gallerySize: 5,
     gradient:
@@ -1146,7 +1146,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "None — easy walking" },
       { label: "Minimum age", value: "8 years" },
       { label: "Meeting point", value: "Resort pickup · details on confirmation" },
-      { label: "Price", value: "€45 per person" },
+      { label: "Price", value: "$45 per person" },
       { label: "Season", value: "Year-round" },
       { label: "Best conditions", value: "October–April" },
     ],
@@ -1217,7 +1217,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     blockHeadline: "Almaza Bay before the",
     blockHeadlineItalic: "beach fills.",
     heroTagGold: "Enquire to book",
-    heroTags: ["Water", "Morning · 2 hours", "From €30 per person"],
+    heroTags: ["Water", "Morning · 2 hours", "From $30 per person"],
     heroMeta: ["Almaza Bay", "Max 6 swimmers", "Swim ability required", "Apr–Nov"],
     gallerySize: 4,
     gradient:
@@ -1234,7 +1234,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "Confident swimmer required" },
       { label: "Minimum age", value: "14 years" },
       { label: "Meeting point", value: "Almaza Bay beach · details on confirmation" },
-      { label: "Price", value: "€30 per person" },
+      { label: "Price", value: "$30 per person" },
       { label: "Distance", value: "500m–1.5km based on ability" },
       { label: "Season", value: "April–November" },
     ],
@@ -1305,7 +1305,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     blockHeadline: "A coast most visitors only see",
     blockHeadlineItalic: "from a bus window.",
     heroTagGold: "Enquire to book",
-    heroTags: ["Coastal", "Full day · Flexible", "From €120 per person"],
+    heroTags: ["Coastal", "Full day · Flexible", "From $120 per person"],
     heroMeta: ["Alexandria to Marsa Matrouh corridor", "Private vehicle & guide", "Year-round"],
     gallerySize: 5,
     gradient:
@@ -1322,7 +1322,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "None — vehicle-based" },
       { label: "Minimum age", value: "No restriction" },
       { label: "Meeting point", value: "Resort pickup" },
-      { label: "Price", value: "€120 per person" },
+      { label: "Price", value: "$120 per person" },
       { label: "Season", value: "Year-round" },
       { label: "Lunch", value: "Included — local seafood" },
     ],
@@ -1401,7 +1401,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     blockHeadline: "The turning point of the",
     blockHeadlineItalic: "North Africa campaign.",
     heroTagGold: "Enquire to book",
-    heroTags: ["Heritage", "Morning · Half day", "From €35 per person"],
+    heroTags: ["Heritage", "Morning · Half day", "From $35 per person"],
     heroMeta: ["El Alamein", "Max 8 guests", "Guide included", "Year-round"],
     gallerySize: 6,
     gradient:
@@ -1418,7 +1418,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "Moderate walking" },
       { label: "Minimum age", value: "12 years" },
       { label: "Meeting point", value: "Resort pickup" },
-      { label: "Price", value: "€35 per person" },
+      { label: "Price", value: "$35 per person" },
       { label: "Sites covered", value: "Museum · Commonwealth · German memorial" },
       { label: "Season", value: "Year-round" },
     ],
@@ -1489,7 +1489,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
     blockHeadline: "The catch came in this",
     blockHeadlineItalic: "morning.",
     heroTagGold: "Enquire to book",
-    heroTags: ["Food", "Midday · 2–3 hours", "From €40 per person"],
+    heroTags: ["Food", "Midday · 2–3 hours", "From $40 per person"],
     heroMeta: ["Off-strip fishing village", "Max 8 guests", "Transport included"],
     gallerySize: 5,
     gradient:
@@ -1506,7 +1506,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       { label: "Difficulty", value: "None" },
       { label: "Minimum age", value: "No restriction" },
       { label: "Meeting point", value: "Resort pickup" },
-      { label: "Price", value: "€40 per person" },
+      { label: "Price", value: "$40 per person" },
       { label: "Menu", value: "Whatever came in that morning" },
       { label: "Season", value: "Year-round" },
     ],

@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Arch } from "@/components/ui/Arch";
 import { useReveal } from "@/components/home/useReveal";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
+import { resolvePrice, parseAmount } from "@/lib/price";
 import adrereAmellalImage from "@assets/adrerre-amelal_1751755031600.jpg";
 import taziryImage from "@assets/taziry-room-.jpg";
 import ghalietImage from "@assets/galit-lodge-siwa_1751833109925.jpg";
@@ -28,7 +29,7 @@ interface SoleiHotel {
   name: string;         // plain string for display
   nameItalic: string;   // italic part after "Soléi "
   type: string;
-  fromPrice: string;    // e.g. "€145"
+  fromPrice: string;    // e.g. "$145"
   priceNote: string;    // e.g. "/ night"
   highlights: string[];
   gradient: string;     // Tailwind bg class
@@ -58,7 +59,7 @@ const soleiCollection: SoleiHotel[] = [
     name: "Soléi Old Town",
     nameItalic: "Old Town",
     type: "Heritage Stay · Ancient Medina · Shali Views",
-    fromPrice: "€145",
+    fromPrice: "$145",
     priceNote: "/ night",
     highlights: ["Old City", "Shali fortress views", "Heritage rooms", "Rooftop terrace"],
     gradient: "bg-[linear-gradient(155deg,#1e3a52_0%,#0F2436_45%,#0e2030_100%)]",
@@ -69,7 +70,7 @@ const soleiCollection: SoleiHotel[] = [
     name: "Soléi Royal",
     nameItalic: "Royal",
     type: "Premium Stay · Desert Edge · Private Garden",
-    fromPrice: "€195",
+    fromPrice: "$195",
     priceNote: "/ night",
     highlights: ["Private salt pool", "Walled garden", "Desert edge", "Full board available"],
     gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#152a3c_45%,#1a3850_100%)]",
@@ -80,7 +81,7 @@ const soleiCollection: SoleiHotel[] = [
     name: "Soléi Desert Retreat",
     nameItalic: "Desert Retreat",
     type: "Desert Lodge · Salt Flats · Completely Remote",
-    fromPrice: "€240",
+    fromPrice: "$240",
     priceNote: "/ night · full board",
     highlights: ["3 rooms only", "Great Sand Sea", "No light pollution", "Fire-cooked meals", "Star-gazing deck"],
     gradient: "bg-[linear-gradient(155deg,#0a1e2e_0%,#1a3a52_45%,#0F2436_100%)]",
@@ -91,7 +92,7 @@ const soleiCollection: SoleiHotel[] = [
     name: "Soléi Salt Caves",
     nameItalic: "Salt Caves",
     type: "Wellness Retreat · Natural Caves · Ancient Healing",
-    fromPrice: "€175",
+    fromPrice: "$175",
     priceNote: "/ night",
     highlights: ["Cave rooms", "Salt air therapy", "Ancient microclimate", "Guided cave walks"],
     gradient: "bg-[linear-gradient(155deg,#162030_0%,#0a1828_45%,#1a2e40_100%)]",
@@ -106,7 +107,7 @@ const partnerProperties: PartnerHotel[] = [
     type: "Eco Lodge · White Mountain · Lake views",
     desc: "Egypt's most celebrated eco-lodge. Built entirely from karsheef salt rock and palm wood into the white mountain at the edge of the salt lake. No electricity, no internet, no noise — just the oasis in its most elemental form. Oil lamps at night. The silence is the point.",
     highlights: ["No electricity", "Oil lamp lighting", "Salt lake front", "Organic farm"],
-    price: "€320 / night",
+    price: "$320 / night",
     categories: ["eco"],
     gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#0F2436_60%,#0a1e2e_100%)]",
     image: adrereAmellalImage,
@@ -118,7 +119,7 @@ const partnerProperties: PartnerHotel[] = [
     type: "Boutique Eco Lodge · Salt lake views · Pool",
     desc: "Mud-brick villas arranged around a courtyard garden, with uninterrupted views of Siwa's salt lakes. A salt water pool, organic meals, and the kind of unhurried service that earns its reputation quietly. More accessible than Adrere Amellal, no less considered.",
     highlights: ["Salt water pool", "Lake views", "Organic kitchen", "Mud-brick villas"],
-    price: "€180 / night",
+    price: "$180 / night",
     categories: ["eco", "boutique"],
     gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#1a4060_60%,#1a3a52_100%)]",
     image: taziryImage,
@@ -130,7 +131,7 @@ const partnerProperties: PartnerHotel[] = [
     type: "Eco Lodge · Spa · Natural salt pool",
     desc: "Traditional Siwan mud architecture with a spa grounded in local healing knowledge — salt baths, sand treatments, herbal wraps. A natural salt pool filled from the oasis's own springs. The only lodge in Siwa where rest feels like an active choice rather than a default.",
     highlights: ["Natural salt pool", "Traditional spa", "Sand treatments", "Healing rituals"],
-    price: "€160 / night",
+    price: "$160 / night",
     categories: ["eco", "boutique"],
     gradient: "bg-[linear-gradient(155deg,#152a3c_0%,#1a3a52_60%,#0F2436_100%)]",
     image: ghalietImage,
@@ -142,7 +143,7 @@ const partnerProperties: PartnerHotel[] = [
     type: "Boutique Hotel · Desert edge · Infinity pool",
     desc: "On the quiet side of the oasis where the palms thin out and the desert begins. An infinity pool that appears to pour directly into the sand sea. Rooms are generous, calm, and thoughtfully designed — not traditional Siwan architecture, but respectful of it.",
     highlights: ["Infinity pool", "Desert panorama", "Spacious rooms", "Restaurant on site"],
-    price: "€130 / night",
+    price: "$130 / night",
     categories: ["boutique"],
     gradient: "bg-[linear-gradient(155deg,#1a3850_0%,#0F2436_60%,#162a3c_100%)]",
     image: talistImage,
@@ -154,7 +155,7 @@ const partnerProperties: PartnerHotel[] = [
     type: "Resort · Old City · Garden · Pool",
     desc: "A palm-shaded resort set between the old city walls and the date orchards, with a pool and gardens that feel genuinely lush. Rooms are comfortable and well-maintained. The best choice for families or those who want reliable amenities alongside the oasis experience.",
     highlights: ["Swimming pool", "Palm gardens", "Old city location", "Family friendly"],
-    price: "€110 / night",
+    price: "$110 / night",
     categories: ["resort"],
     gradient: "bg-[linear-gradient(155deg,#162d3e_0%,#1a3a52_60%,#0F2436_100%)]",
     image: siwaShaliImage,
@@ -166,7 +167,7 @@ const partnerProperties: PartnerHotel[] = [
     type: "Boutique Hotel · Central Siwa · Rooftop",
     desc: "A quietly considered boutique hotel in the centre of Siwa town. Rooftop views across the oasis, locally sourced meals, and a team that takes pride in knowing the area well. The most central option on this list — useful if you plan to spend time in the medina on foot.",
     highlights: ["Rooftop restaurant", "Central location", "Local cuisine", "Walking access"],
-    price: "€95 / night",
+    price: "$95 / night",
     categories: ["boutique"],
     gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#1e3a50_60%,#0F2436_100%)]",
     image: azadImage,
@@ -175,10 +176,10 @@ const partnerProperties: PartnerHotel[] = [
 ];
 
 const upsellMoments = [
-  { slug: "salt-and-spring-escape",        title: "Salt & Spring Escape",          detail: "Half day · 2–3 hours · From €60pp" },
-  { slug: "desert-sunset-experience",      title: "Desert Sunset Experience",      detail: "Sunset · 3–4 hours · From €80pp" },
-  { slug: "desert-night-experience",       title: "Desert Night Experience",       detail: "Sunset → Morning · From €150pp" },
-  { slug: "solei-signature-siwa-journey",  title: "Soléi Signature Siwa Journey",  detail: "Full day → Night · From €250pp" },
+  { slug: "salt-and-spring-escape",        title: "Salt & Spring Escape",          detail: "Half day · 2–3 hours · From $60pp" },
+  { slug: "desert-sunset-experience",      title: "Desert Sunset Experience",      detail: "Sunset · 3–4 hours · From $80pp" },
+  { slug: "desert-night-experience",       title: "Desert Night Experience",       detail: "Sunset → Morning · From $150pp" },
+  { slug: "solei-signature-siwa-journey",  title: "Soléi Signature Siwa Journey",  detail: "Full day → Night · From $250pp" },
 ];
 
 const bookingSteps = [
@@ -250,7 +251,14 @@ export default function SiwaOasisAccommodation() {
             ...inline,
             name: overlay?.name || inline.name,
             desc: overlay?.blurb || inline.desc,
-            price: overlay?.pricePerNight || inline.price,
+            // Shared resolver: pins USD, strips a baked-in "From", and
+            // prefers the lowest room rate — same as every other surface.
+            price:
+              resolvePrice({
+                pricePerNight: overlay?.pricePerNight,
+                rooms: overlay?.details?.rooms,
+                fallbackAmount: parseAmount(inline.price),
+              }).display || inline.price,
             image: overlay?.imageUrl || inline.image,
           }
         : {
@@ -259,7 +267,11 @@ export default function SiwaOasisAccommodation() {
             type: "Hotel",
             desc: overlay?.blurb || overlay?.description || "",
             highlights: Array.isArray(overlay?.amenities) ? overlay!.amenities! : [],
-            price: overlay?.pricePerNight || "On request",
+            price:
+              resolvePrice({
+                pricePerNight: overlay?.pricePerNight,
+                rooms: overlay?.details?.rooms,
+              }).display || "On request",
             categories: ["eco"],
             gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#0F2436_60%,#2a5a7a_100%)]",
             image: overlay?.imageUrl,
@@ -282,7 +294,14 @@ export default function SiwaOasisAccommodation() {
         return {
           ...h,
           name: o.name || h.name,
-          fromPrice: o.pricePerNight ? o.pricePerNight.split(" / ")[0] : h.fromPrice,
+          fromPrice: (() => {
+            const p = resolvePrice({
+              pricePerNight: o.pricePerNight,
+              rooms: o.details?.rooms,
+              fallbackAmount: parseAmount(h.fromPrice),
+            });
+            return p.amount > 0 ? `${p.currency}${p.amount.toLocaleString()}` : h.fromPrice;
+          })(),
           image: o.imageUrl || h.image,
         };
       }),
@@ -341,7 +360,7 @@ export default function SiwaOasisAccommodation() {
                 {[
                   { num: "10",  label: "Properties" },
                   { num: "4",   label: "Soléi owned" },
-                  { num: "€95", label: "Starting from" },
+                  { num: "$95", label: "Starting from" },
                 ].map(s => (
                   <div key={s.label}>
                     <div className="font-display text-[2rem] font-normal text-gold leading-none">{s.num}</div>

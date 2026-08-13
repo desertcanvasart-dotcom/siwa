@@ -42,7 +42,7 @@ const FEATURED_ROUTE: RouteCard = {
     { key: "Stops", val: "Flexible — Marsa Matrouh, rest stops as needed" },
     { key: "Vehicle", val: "Private SUV or 4×4 — air-conditioned" },
   ],
-  price: "€180 per vehicle",
+  price: "$180 per vehicle",
 };
 
 const ROUTES: RouteCard[] = [
@@ -56,7 +56,7 @@ const ROUTES: RouteCard[] = [
       { key: "Road type", val: "Mixed — paved & sand road" },
       { key: "Vehicle", val: "Private 4×4 recommended" },
     ],
-    price: "€95 per vehicle",
+    price: "$95 per vehicle",
   },
   {
     num: "Route 03",
@@ -68,7 +68,7 @@ const ROUTES: RouteCard[] = [
       { key: "Road type", val: "Coastal then paved desert" },
       { key: "Vehicle", val: "Private SUV — air-conditioned" },
     ],
-    price: "€140 per vehicle",
+    price: "$140 per vehicle",
   },
   {
     num: "Route 04",
@@ -80,7 +80,7 @@ const ROUTES: RouteCard[] = [
       { key: "Departure", val: "Early morning recommended" },
       { key: "Vehicle", val: "Private SUV or 4×4" },
     ],
-    price: "€180 per vehicle",
+    price: "$180 per vehicle",
   },
 ];
 
@@ -102,7 +102,7 @@ const DRIVES: DriveCard[] = [
     includesLabel: "Includes",
     includes: "Dune driving · Sand sea viewpoints · Sunset stop · Traditional tea",
     duration: "Half or full day · 4×4 · Private",
-    price: "From €85",
+    price: "From $85",
   },
   {
     num: "02",
@@ -111,7 +111,7 @@ const DRIVES: DriveCard[] = [
     includesLabel: "Includes",
     includes: "Siwa Lake stop · Cleopatra Spring · Birket Zeitoun · Hidden springs",
     duration: "Half day · 4×4 · Private",
-    price: "From €65",
+    price: "From $65",
   },
   {
     num: "03",
@@ -120,7 +120,7 @@ const DRIVES: DriveCard[] = [
     includesLabel: "Includes",
     includes: "Oracle Temple · Mountain of the Dead · Aghurmi · Shali fortress views",
     duration: "Full morning · Vehicle + guide · Private",
-    price: "From €75",
+    price: "From $75",
   },
   {
     num: "04",
@@ -129,7 +129,7 @@ const DRIVES: DriveCard[] = [
     includesLabel: "Includes",
     includes: "Pre-dawn departure · Dune position for sunrise · Breakfast in the desert",
     duration: "3–4 hours · 4×4 · Private",
-    price: "From €95",
+    price: "From $95",
   },
   {
     num: "05",
@@ -138,7 +138,7 @@ const DRIVES: DriveCard[] = [
     includesLabel: "Covers",
     includes: "Lodge pickups · Experience drop-offs · Town centre · Airport",
     duration: "On demand · Private vehicle",
-    price: "From €15",
+    price: "From $15",
   },
   {
     num: "06 · Bespoke",
@@ -147,7 +147,7 @@ const DRIVES: DriveCard[] = [
     includesLabel: "Includes",
     includes: "Full day vehicle · Local guide · Lunch arranged · No fixed itinerary",
     duration: "Full day · Private · Bespoke",
-    price: "From €145",
+    price: "From $145",
   },
 ];
 
@@ -209,7 +209,7 @@ const HOW_STEPS = [
   {
     n: "3.",
     strong: "Payment link sent",
-    rest: "Secure payment via WhatsApp or email. Pay in EUR or USD. No payment until vehicle is confirmed.",
+    rest: "Secure payment via WhatsApp or email. Pay in USD. No payment until vehicle is confirmed.",
   },
   {
     n: "4.",

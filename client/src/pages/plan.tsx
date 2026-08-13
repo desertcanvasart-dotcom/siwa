@@ -8,6 +8,7 @@ import { useReveal } from "@/components/home/useReveal";
 import { HOTEL_DETAILS } from "@/lib/hotel-data";
 import { useHotelOverlay } from "@/lib/useHotelOverlay";
 import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
+import { CANONICAL_CURRENCY } from "@/lib/price";
 import { Clock, ArrowUpRight, Check, ChevronUp, Car, CarFront, Bus, Plane } from "lucide-react";
 
 /**
@@ -106,7 +107,7 @@ function useExperienceOptions(destination: string) {
 
 /* ── Pricing helpers ────────────────────────────────────────── */
 
-/** Pull the first number out of a price string like "€320 / night"
+/** Pull the first number out of a price string like "$320 / night"
  *  or "150.00" → 320 / 150. Returns 0 when nothing parses. */
 function parseMoney(input: unknown): number {
   if (typeof input === "number") return input;
@@ -133,7 +134,8 @@ const TRANSFER_PRICES: Record<string, number> = {
   "alexandria|north-coast": 45,
 };
 
-const euro = (n: number) => `€${n.toLocaleString()}`;
+/** Money formatter — USD is the one currency Soléi quotes in. */
+const money = (n: number) => `${CANONICAL_CURRENCY}${n.toLocaleString()}`;
 
 /** Vehicle options for the private transfer. Flight is arranged and
  *  quoted separately by the team, so it carries no road price. */
@@ -235,8 +237,8 @@ export default function PlanPage() {
         label: hotelName,
         detail:
           nights > 0
-            ? `${nights} night${nights === 1 ? "" : "s"} × ${euro(perNight)}`
-            : `${euro(perNight)} / night — add dates`,
+            ? `${nights} night${nights === 1 ? "" : "s"} × ${money(perNight)}`
+            : `${money(perNight)} / night — add dates`,
         amount: nights > 0 ? nights * perNight : 0,
       });
     }
@@ -256,7 +258,7 @@ export default function PlanPage() {
     for (const exp of selectedExps) {
       items.push({
         label: exp.name,
-        detail: `${euro(exp.pricePerPerson)} pp × ${pax} guest${pax === 1 ? "" : "s"}`,
+        detail: `${money(exp.pricePerPerson)} pp × ${pax} guest${pax === 1 ? "" : "s"}`,
         amount: exp.pricePerPerson * pax,
       });
     }
@@ -311,7 +313,7 @@ export default function PlanPage() {
       if (expDate) lines.push({ label: "Experience date", value: fmtDate(expDate) });
     }
     if (estimate.total > 0) {
-      lines.push({ label: "Estimated total", value: `${euro(estimate.total)} (indicative)` });
+      lines.push({ label: "Estimated total", value: `${money(estimate.total)} (indicative)` });
     }
     return lines.filter((l) => l.value);
   };
@@ -582,8 +584,8 @@ export default function PlanPage() {
                           </Field>
                           <p className="text-[0.72rem] text-ink-soft/60 leading-[1.6] pb-1">
                             {expSlugs.length === 1
-                              ? `Added to your enquiry — ${euro(selectedExps[0]?.pricePerPerson ?? 0)} per person, for ${pax} guest${pax === 1 ? "" : "s"}.`
-                              : `${expSlugs.length} experiences added — ${euro(selectedExps.reduce((s, e) => s + e.pricePerPerson, 0))} per person combined, for ${pax} guest${pax === 1 ? "" : "s"}.`}{" "}
+                              ? `Added to your enquiry — ${money(selectedExps[0]?.pricePerPerson ?? 0)} per person, for ${pax} guest${pax === 1 ? "" : "s"}.`
+                              : `${expSlugs.length} experiences added — ${money(selectedExps.reduce((s, e) => s + e.pricePerPerson, 0))} per person combined, for ${pax} guest${pax === 1 ? "" : "s"}.`}{" "}
                             Final pricing confirmed by our team.
                           </p>
                         </div>
@@ -828,7 +830,7 @@ function TourCard({
             {exp.pricePerPerson > 0 ? (
               <>
                 <span className="text-[0.55rem] text-ink-soft/50 uppercase tracking-wider">From </span>
-                <span className="font-display text-[0.95rem] text-navy">{euro(exp.pricePerPerson)}</span>
+                <span className="font-display text-[0.95rem] text-navy">{money(exp.pricePerPerson)}</span>
                 <span className="text-[0.6rem] text-ink-soft/55"> pp</span>
               </>
             ) : (
@@ -888,7 +890,7 @@ function EstimateBar({
                     <span className="block text-[0.66rem] text-ink-soft/60">{it.detail}</span>
                   </dt>
                   <dd className="font-display text-[0.9rem] text-navy whitespace-nowrap">
-                    {it.amount > 0 ? euro(it.amount) : "—"}
+                    {it.amount > 0 ? money(it.amount) : "—"}
                   </dd>
                 </div>
               ))}
@@ -914,7 +916,7 @@ function EstimateBar({
                 Estimated total
               </p>
               <p className="font-display text-[1.35rem] text-white leading-none mt-0.5">
-                {total > 0 ? euro(total) : "—"}
+                {total > 0 ? money(total) : "—"}
                 <span className="text-[0.6rem] text-white/40 tracking-wide ml-1.5 font-body">indicative</span>
               </p>
             </div>

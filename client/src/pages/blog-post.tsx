@@ -335,7 +335,7 @@ export default function BlogPostPage() {
                   <p className="font-display text-[1.15rem] md:text-[1.3rem] text-white font-normal leading-tight">
                     {linkedExp.name}{" "}
                     <em className="italic text-gold">
-                      — from €{linkedExp.price} per person
+                      — from ${linkedExp.price} per person
                     </em>
                   </p>
                 </div>
