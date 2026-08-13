@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { HOTEL_DETAILS } from "@/lib/hotel-data";
 import { useHotelOverlay } from "@/lib/useHotelOverlay";
+import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
 import { Clock, ArrowUpRight, Check, ChevronUp, Car, CarFront, Bus, Plane } from "lucide-react";
 
 /**
@@ -72,26 +73,24 @@ interface ExperienceOption {
 }
 
 function useExperienceOptions(destination: string) {
-  const { data = [] } = useQuery<ExperienceOption[]>({
-    queryKey: ["/api/experiences"],
-    queryFn: async () => {
-      const res = await fetch("/api/experiences");
-      if (!res.ok) return [];
-      const json = await res.json();
-      if (!Array.isArray(json)) return [];
-      return json.map((e: any) => ({
-        slug: e.slug,
-        name: e.title,
+  // Reads the shared raw cache and maps locally — declaring another
+  // useQuery on the same key with a different shape would clobber it
+  // for every other consumer.
+  const { data: raw } = useExperiencesRaw();
+  const data = useMemo<ExperienceOption[]>(
+    () =>
+      raw.map((e) => ({
+        slug: e.slug ?? "",
+        name: e.title ?? "",
         destination: e.destination ?? null,
         category: e.category ?? "",
         duration: e.duration ?? "",
         pricePerPerson: parseMoney(e.pricePerPerson),
         imageUrl: e.imageUrl ?? "",
         summary: e.summary ?? "",
-      }));
-    },
-    staleTime: 60_000,
-  });
+      })),
+    [raw],
+  );
   return useMemo(
     () =>
       data.filter(

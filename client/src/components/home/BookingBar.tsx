@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Calendar } from "lucide-react";
+import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
 
 type StepId = "accommodation" | "experiences" | "transportation";
 
@@ -24,22 +24,19 @@ interface ExperienceOption {
  * automatically disappears from this picker.
  */
 function useExperienceOptions() {
-  const { data = [] } = useQuery<ExperienceOption[]>({
-    queryKey: ["/api/experiences"],
-    queryFn: async () => {
-      const res = await fetch("/api/experiences");
-      if (!res.ok) return [];
-      const json = await res.json();
-      if (!Array.isArray(json)) return [];
-      return json.map((e: any) => ({
-        slug: e.slug,
-        name: e.title,
+  // Derive from the shared raw cache — see useExperiencesRaw for why a
+  // second useQuery on this key would corrupt other consumers.
+  const { data: raw } = useExperiencesRaw();
+  const data = useMemo<ExperienceOption[]>(
+    () =>
+      raw.map((e) => ({
+        slug: e.slug ?? "",
+        name: e.title ?? "",
         destination: e.destination ?? null,
         category: e.category ?? "",
-      }));
-    },
-    staleTime: 60_000,
-  });
+      })),
+    [raw],
+  );
 
   return useMemo(() => {
     // Single-destination experiences only (exclude multi-night journeys,

@@ -8,11 +8,17 @@ import { useReveal } from "@/components/home/useReveal";
 import { Arch } from "@/components/ui/Arch";
 import { HOTEL_DETAILS } from "@/lib/hotel-data";
 import { EXPERIENCE_DETAILS } from "@/lib/experience-data";
+import { useExperiencesBySlug } from "@/lib/useExperiencesBySlug";
 
 /** Slugs the public API still publishes (drafts are filtered server-side). */
 function useActiveSlugs(endpoint: string): Set<string> {
   const { data } = useQuery<string[]>({
-    queryKey: [endpoint],
+    // Must NOT be a bare [endpoint]: this returns slug strings, while
+    // other consumers cache the raw record objects under that key. Same
+    // key + different shapes meant whichever hook mounted first won,
+    // and the losers read fields that didn't exist. Matches the
+    // convention in lib/useActiveSlugs.ts.
+    queryKey: [endpoint, "slugs"],
     queryFn: async () => {
       const res = await fetch(endpoint);
       if (!res.ok) return [];
@@ -46,6 +52,17 @@ function useActiveSlugs(endpoint: string): Set<string> {
  * ────────────────────────────────────────────────────────────── */
 
 type EnquiryType = "accommodation" | "experience" | "transport";
+
+/** "honeymoon-escape" → "Honeymoon Escape". Only a stopgap for the
+ *  moment before live records load — never a substitute for the real
+ *  title. */
+function prettifySlug(slug: string): string {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
 
 const ROUTE_OPTIONS = [
   {
@@ -121,6 +138,12 @@ export default function EnquirePage() {
   const paramDest = params.get("destination");
   const paramProperty = params.get("property");
   const paramExp = params.get("exp");
+  // Curated journeys arrive as ?journey=<slug>. They're experience
+  // records with category "Curated Journey", but they're multi-night,
+  // often multi-destination, and always private — so they need their
+  // own labelling and defaults rather than being called an
+  // "Experience enquiry" with group defaults.
+  const paramJourney = params.get("journey");
   const paramRoute = params.get("route");
   const paramCheckin = params.get("checkin") ?? "";
   const paramCheckout = params.get("checkout") ?? "";
@@ -143,6 +166,18 @@ export default function EnquirePage() {
   // dropdowns automatically.
   const activeHotelSlugs = useActiveSlugs("/api/hotels");
   const activeExpSlugs = useActiveSlugs("/api/experiences");
+  // Live records keyed by slug. EXPERIENCE_DETAILS is a static bundled
+  // list, so anything created in the admin (every curated journey, for
+  // one) isn't in it — looking names up here is what stops the form
+  // showing a raw slug like "honeymoon-escape".
+  const liveBySlug = useExperiencesBySlug();
+  /** Display name for any experience/journey slug, live data first. */
+  const nameForSlug = (slug: string | null): string =>
+    !slug
+      ? ""
+      : liveBySlug.get(slug)?.title ??
+        EXPERIENCE_DETAILS.find((e) => e.slug === slug)?.name ??
+        "";
 
   const allHotels = useMemo(() => Object.values(HOTEL_DETAILS), []);
   const siwaHotels = useMemo(
@@ -184,15 +219,18 @@ export default function EnquirePage() {
   const [accomRoom, setAccomRoom] = useState(paramRoom);
 
   /* ── Experience form state ─────────────────────────────── */
+  // A journey with no single destination spans both regions — leave
+  // the destination unset rather than silently claiming one of them.
+  const journeyDest = paramJourney ? liveBySlug.get(paramJourney)?.destination : undefined;
   const derivedExpDest = paramDest === "north-coast" || paramDest === "siwa"
     ? paramDest
-    : paramExp
-      ? (ncExps.some((e) => e.slug === paramExp) ? "north-coast" : "siwa")
-      : "";
+    : paramJourney
+      ? (journeyDest === "north-coast" || journeyDest === "siwa" ? journeyDest : "")
+      : paramExp
+        ? (ncExps.some((e) => e.slug === paramExp) ? "north-coast" : "siwa")
+        : "";
   const [expDest, setExpDest] = useState(derivedExpDest);
-  const initialExpName = paramExp
-    ? (EXPERIENCE_DETAILS.find((e) => e.slug === paramExp)?.name ?? "")
-    : "";
+  const initialExpName = nameForSlug(paramJourney ?? paramExp);
   const [expName, setExpName] = useState(initialExpName);
   const [expDate, setExpDate] = useState(paramDate);
   // Convert numeric guests param to the dropdown option string
@@ -206,8 +244,12 @@ export default function EnquirePage() {
     return paramGuests;
   })();
   const [expGuests, setExpGuests] = useState(initialExpGuests);
+  // Curated journeys are private by definition — never default one to
+  // "shared with other guests".
   const [expPrivate, setExpPrivate] = useState(
-    paramPrivate ? "Private — just our group" : "Group experience (shared with other guests)",
+    paramPrivate || paramJourney
+      ? "Private — just our group"
+      : "Group experience (shared with other guests)",
   );
   const [expStaying, setExpStaying] = useState(paramStaying);
   const [expNotes, setExpNotes] = useState(paramNotes);
@@ -221,17 +263,33 @@ export default function EnquirePage() {
   const accomCheckinPrefilled = !!paramCheckin;
   const accomCheckoutPrefilled = !!paramCheckout;
   const accomRoomPrefilled = !!paramRoom;
-  const expNamePrefilled = !!paramExp;
+  const expNamePrefilled = !!(paramExp || paramJourney);
+
+  // liveBySlug arrives after the first render, so backfill the name and
+  // destination once it lands — but never overwrite what the visitor
+  // has already chosen themselves.
+  useEffect(() => {
+    const slug = paramJourney ?? paramExp;
+    if (!slug) return;
+    const live = liveBySlug.get(slug);
+    if (!live) return;
+    setExpName((prev) => prev || live.title || "");
+    if (live.destination === "north-coast" || live.destination === "siwa") {
+      setExpDest((prev) => prev || live.destination!);
+    }
+  }, [liveBySlug, paramExp, paramJourney]);
   const expDatePrefilled = !!paramDate;
   const transportRoutePrefilled = !!paramRoute;
 
   /* ── Context banner ────────────────────────────────────── */
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  // Only claim something was pre-filled when it actually was. A bare
+  // ?type=… (e.g. the "Plan your journey" CTA) selects a tab but fills
+  // nothing, so the banner must stay hidden.
   const showBanner = !bannerDismissed && (
     accomPropertyPrefilled ||
     expNamePrefilled ||
-    transportRoutePrefilled ||
-    paramType !== null
+    transportRoutePrefilled
   );
 
   const bannerTitle = useMemo(() => {
@@ -239,20 +297,30 @@ export default function EnquirePage() {
       const h = allHotels.find((x) => x.slug === paramProperty);
       return `Accommodation enquiry — ${h?.name ?? paramProperty}`;
     }
+    if (paramJourney) {
+      // Fall back to the prettified slug only while live data loads.
+      const name = nameForSlug(paramJourney) || prettifySlug(paramJourney);
+      return `Journey enquiry — ${name}`;
+    }
     if (expNamePrefilled) {
-      const e = EXPERIENCE_DETAILS.find((x) => x.slug === paramExp);
-      return `Experience enquiry — ${e?.name ?? paramExp}`;
+      const name = nameForSlug(paramExp) || prettifySlug(paramExp ?? "");
+      return `Experience enquiry — ${name}`;
     }
     if (tab === "transport") return "Transportation enquiry";
     return "Pre-filled from your selection";
-  }, [accomPropertyPrefilled, expNamePrefilled, paramProperty, paramExp, tab, allHotels]);
+  }, [accomPropertyPrefilled, expNamePrefilled, paramProperty, paramExp, paramJourney, tab, allHotels, liveBySlug]);
 
   const bannerDesc = useMemo(() => {
     if (accomPropertyPrefilled) return "We've pre-filled the property from your selection. Add your dates and we'll confirm availability.";
+    if (paramJourney) {
+      return journeyDest === "north-coast" || journeyDest === "siwa"
+        ? "We've pre-filled your journey. Add your preferred start date and we'll build the itinerary around it."
+        : "We've pre-filled your journey — it spans both the North Coast and Siwa. Add your preferred start date and we'll build the itinerary around it.";
+    }
     if (expNamePrefilled) return "We've pre-filled the experience from your selection. Add your preferred date and we'll confirm availability.";
     if (tab === "transport") return "Tell us your route and travel date — we'll confirm vehicle availability within 24 hours.";
     return "We've filled in what we know. Review below and add anything we've missed.";
-  }, [accomPropertyPrefilled, expNamePrefilled, tab]);
+  }, [accomPropertyPrefilled, expNamePrefilled, paramJourney, journeyDest, tab]);
 
   /* ── Success state ─────────────────────────────────────── */
   const [submitted, setSubmitted] = useState(false);
@@ -272,10 +340,20 @@ export default function EnquirePage() {
       if (accomAdults) lines.push({ label: "Guests", value: accomAdults });
       if (accomRoom) lines.push({ label: "Room preference", value: accomRoom });
     } else if (tab === "experience") {
-      lines.push({ label: "Type", value: "Experience" });
-      if (expDest) lines.push({ label: "Destination", value: expDest === "siwa" ? "Siwa Oasis" : "North Coast" });
-      if (expName) lines.push({ label: "Experience", value: expName });
-      if (expDate) lines.push({ label: "Date", value: expDate });
+      // A journey must not reach the team labelled as a one-off
+      // experience — it's a multi-night itinerary, and when it has no
+      // single destination it covers both regions.
+      const isJourneyEnquiry = !!paramJourney;
+      lines.push({ label: "Type", value: isJourneyEnquiry ? "Curated journey" : "Experience" });
+      if (expDest) {
+        lines.push({ label: "Destination", value: expDest === "siwa" ? "Siwa Oasis" : "North Coast" });
+      } else if (isJourneyEnquiry) {
+        lines.push({ label: "Destination", value: "North Coast + Siwa Oasis" });
+      }
+      if (expName) {
+        lines.push({ label: isJourneyEnquiry ? "Journey" : "Experience", value: expName });
+      }
+      if (expDate) lines.push({ label: isJourneyEnquiry ? "Preferred start date" : "Date", value: expDate });
       if (expGuests) lines.push({ label: "Guests", value: expGuests });
       if (expPrivate) lines.push({ label: "Privacy", value: expPrivate });
       if (expStaying) lines.push({ label: "Staying at", value: expStaying });

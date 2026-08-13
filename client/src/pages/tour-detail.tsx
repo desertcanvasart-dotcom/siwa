@@ -120,7 +120,16 @@ export default function TourDetailPage() {
   }
   if (!tour) return null;
 
-  const enquireHref = `/enquire?type=experience&destination=${dest === "siwa" ? "siwa" : "north-coast"}&exp=${tour.slug}`;
+  // Journeys are multi-night, private by definition, and may span both
+  // regions — so they enquire as a journey, and only pass a destination
+  // when the record actually has one (tour.destination is null for the
+  // cross-destination journeys).
+  const enquireHref = isJourney
+    ? `/enquire?type=experience&journey=${tour.slug}` +
+      (tour.destination === "siwa" || tour.destination === "north-coast"
+        ? `&destination=${tour.destination}`
+        : "")
+    : `/enquire?type=experience&destination=${dest === "siwa" ? "siwa" : "north-coast"}&exp=${tour.slug}`;
   const pricePerPerson = Number(tour.pricePerPerson || "0");
 
   return (
@@ -194,7 +203,7 @@ export default function TourDetailPage() {
                 href={enquireHref}
                 className="ml-auto bg-gold text-navy px-7 py-3 text-[0.62rem] tracking-[0.22em] uppercase font-body hover:bg-gold-light transition-colors"
               >
-                Request this experience →
+                {isJourney ? "Request this journey" : "Request this experience"} →
               </Link>
             </div>
           </div>
@@ -366,7 +375,7 @@ export default function TourDetailPage() {
                 href={enquireHref}
                 className="mt-6 block text-center bg-gold text-navy py-3 text-[0.62rem] tracking-[0.22em] uppercase font-body hover:bg-gold-light transition-colors"
               >
-                Request this experience
+                {isJourney ? "Request this journey" : "Request this experience"}
               </Link>
 
               {(details.meetingPoint || details.cancellationPolicy) && (

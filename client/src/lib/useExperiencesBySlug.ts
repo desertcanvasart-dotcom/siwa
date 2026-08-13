@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useExperiencesRaw } from "./useExperiencesRaw";
 
 /**
  * Phase 2 data hook. Fetches /api/experiences and returns a map
@@ -21,15 +21,15 @@ export interface ExperienceOverlay {
 }
 
 export function useExperiencesBySlug(): Map<string, ExperienceOverlay> {
-  const { data } = useQuery<Array<ExperienceOverlay & { slug?: string }>>({
-    queryKey: ["/api/experiences"],
-    queryFn: async () => {
-      const res = await fetch(`/api/experiences`);
-      if (!res.ok) return [];
-      const json = await res.json();
-      if (!Array.isArray(json)) return [];
-      return json.map((e: any) => ({
-        slug: e.slug ?? undefined,
+  // Shares the raw cache entry with every other /api/experiences
+  // consumer, then derives this shape locally.
+  const { data } = useExperiencesRaw();
+
+  return useMemo(() => {
+    const map = new Map<string, ExperienceOverlay>();
+    for (const e of data) {
+      if (!e.slug) continue;
+      map.set(e.slug, {
         title: e.title ?? undefined,
         summary: e.summary ?? undefined,
         description: e.description ?? undefined,
@@ -38,17 +38,7 @@ export function useExperiencesBySlug(): Map<string, ExperienceOverlay> {
         pricePerPerson: e.pricePerPerson ?? undefined,
         imageUrl: e.imageUrl ?? undefined,
         destination: e.destination ?? undefined,
-      }));
-    },
-    staleTime: 60_000,
-    retry: false,
-  });
-
-  return useMemo(() => {
-    const map = new Map<string, ExperienceOverlay>();
-    if (!data) return map;
-    for (const e of data) {
-      if (e.slug) map.set(e.slug, e);
+      });
     }
     return map;
   }, [data]);
