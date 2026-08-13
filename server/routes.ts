@@ -1321,6 +1321,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CHAT (public) + AI KNOWLEDGE (admin)
   // ═════════════════════════════════════════════════════════
 
+  // Honest availability signal for the concierge UI. The page used to
+  // claim "live" unconditionally and only revealed it was offline after
+  // the visitor's first message failed.
+  app.get('/api/chat/status', (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ available: !!process.env.OPENAI_API_KEY });
+  });
+
   app.post('/api/chat', async (req, res) => {
     try {
       const { messages } = req.body;

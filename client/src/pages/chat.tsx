@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
 import { SEO } from "@/components/seo";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
@@ -45,6 +46,18 @@ export default function ChatPage() {
     "contact.fallback_message",
     "Sorry — I'm not available right now. Please try again in a moment, or reach our team directly and they'll come back to you within the hour.",
   );
+
+  // null = still checking. Lets the UI open in fallback mode instead of
+  // promising a reply the server can't produce.
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/chat/status")
+      .then((r) => (r.ok ? r.json() : { available: false }))
+      .then((j) => { if (!cancelled) setAiAvailable(!!j?.available); })
+      .catch(() => { if (!cancelled) setAiAvailable(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -159,12 +172,28 @@ export default function ChatPage() {
               {/* Conversation strip header */}
               <div className="flex items-center justify-between px-5 md:px-7 py-3.5 border-b border-sand-light bg-cream/40">
                 <div className="flex items-center gap-2.5">
+                  {/* Status reflects a real health check — never claim
+                      "live" before we know the AI is reachable. */}
                   <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-[#5a8a6a] opacity-60 animate-ping" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5a8a6a]" />
+                    {aiAvailable === true && (
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-[#5a8a6a] opacity-60 animate-ping" />
+                    )}
+                    <span
+                      className={`relative inline-flex rounded-full h-2 w-2 ${
+                        aiAvailable === true
+                          ? "bg-[#5a8a6a]"
+                          : aiAvailable === false
+                            ? "bg-ink-soft/35"
+                            : "bg-ink-soft/20"
+                      }`}
+                    />
                   </span>
                   <p className="text-[0.6rem] tracking-[0.28em] uppercase text-ink-soft/70">
-                    Soléi concierge · live
+                    {aiAvailable === true
+                      ? "Soléi concierge · live"
+                      : aiAvailable === false
+                        ? "Soléi concierge · offline"
+                        : "Soléi concierge"}
                   </p>
                 </div>
                 {waHref && (
@@ -185,7 +214,42 @@ export default function ChatPage() {
                 ref={scrollRef}
                 className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-9 py-7"
               >
-                {messages.length === 0 && (
+                {messages.length === 0 && aiAvailable === false && (
+                  <div className="h-full flex flex-col items-center justify-center text-center">
+                    <Arch className="w-10 h-auto text-gold mb-5 opacity-50" />
+                    <p className="text-[0.5rem] tracking-[0.36em] uppercase text-gold mb-3">
+                      Concierge offline
+                    </p>
+                    <p className="font-display text-[1.2rem] md:text-[1.35rem] text-navy leading-[1.4] mb-4 max-w-md">
+                      Our AI concierge is unavailable right now — but our
+                      team is not.
+                    </p>
+                    <p className="text-[0.82rem] text-ink-soft leading-[1.75] mb-7 max-w-md">
+                      Message us and a real person will reply, usually within
+                      the hour.
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {waHref && (
+                        <a
+                          href={waHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 bg-gold text-navy px-6 py-3 text-[0.6rem] tracking-[0.2em] uppercase hover:bg-gold-light transition-colors"
+                        >
+                          <WhatsAppIcon className="w-3.5 h-3.5" />
+                          {waLabel || "WhatsApp us"}
+                        </a>
+                      )}
+                      <Link
+                        href="/enquire"
+                        className="inline-block border border-sand text-navy px-6 py-3 text-[0.6rem] tracking-[0.2em] uppercase hover:border-gold transition-colors"
+                      >
+                        Send an enquiry
+                      </Link>
+                    </div>
+                  </div>
+                )}
+                {messages.length === 0 && aiAvailable !== false && (
                   <div className="h-full flex flex-col items-center justify-center text-center">
                     <Arch className="w-10 h-auto text-gold mb-5 opacity-70" />
                     <p className="text-[0.5rem] tracking-[0.36em] uppercase text-gold mb-3">
