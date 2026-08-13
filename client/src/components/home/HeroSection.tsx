@@ -1,10 +1,8 @@
-import { BookingBar } from "./BookingBar";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 
 /**
  * Homepage hero — navy + looping salt-lake video.
  * Title, sub, eyebrow animate in on mount (fade-up).
- * BookingBar bleeds into the cream Intro strip below.
  */
 export function HeroSection() {
   const content = useSiteContent();
@@ -61,7 +59,7 @@ export function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 px-5 sm:px-6 md:px-12 lg:px-20 pb-0 max-w-[1400px] w-full mx-auto">
+      <div className="relative z-10 px-5 sm:px-6 md:px-12 lg:px-20 pb-16 sm:pb-20 md:pb-24 max-w-[1400px] w-full mx-auto">
         <p className="flex items-center gap-3 sm:gap-4 text-[0.55rem] sm:text-[0.6rem] tracking-[0.36em] sm:tracking-[0.42em] uppercase
             text-gold mb-6 sm:mb-8 animate-fade-up animation-delay-400">
           <span className="w-6 sm:w-7 h-px bg-gold/60" />
@@ -81,17 +79,9 @@ export function HeroSection() {
         </h1>
 
         <p className="text-[0.82rem] sm:text-[0.88rem] text-white/65 max-w-[42ch] sm:max-w-[46ch] leading-[1.85] sm:leading-[1.95]
-            mb-10 sm:mb-14 animate-fade-up animation-delay-800">
+            animate-fade-up animation-delay-800">
           {subhead}
         </p>
-
-        {/* Booking bar */}
-        <div
-          className="animate-fade-up"
-          style={{ animationDelay: "1.1s" }}
-        >
-          <BookingBar />
-        </div>
       </div>
 
       {/* Scroll indicator — hidden below md to avoid colliding with content */}
