@@ -136,10 +136,14 @@ export default function Journal() {
   const ncPosts = rest.filter((p) => p.destination === "north-coast");
   const otherPosts = rest.filter((p) => !p.destination);
 
-  const totalReadTime = blogPosts.reduce((a, p) => a + p.readTime, 0);
-  const avgRead = blogPosts.length ? Math.round(totalReadTime / blogPosts.length) : 0;
+  // Stats must describe the SAME set the listing renders. They used to
+  // count the bundled blogPosts array while the listing merged in
+  // admin-created posts too, so the header said "6 articles" above a
+  // list reporting "Showing 7 articles".
+  const totalReadTime = overlayedPosts.reduce((a, p) => a + p.readTime, 0);
+  const avgRead = overlayedPosts.length ? Math.round(totalReadTime / overlayedPosts.length) : 0;
   const destinationsCount = new Set(
-    blogPosts.map((p) => p.destination).filter(Boolean),
+    overlayedPosts.map((p) => p.destination).filter(Boolean),
   ).size;
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -209,7 +213,7 @@ export default function Journal() {
               </p>
               <div className="flex gap-10 border-t border-sand pt-5">
                 {[
-                  { num: String(blogPosts.length), label: "Articles" },
+                  { num: String(overlayedPosts.length), label: "Articles" },
                   { num: String(destinationsCount), label: "Destinations" },
                   { num: `~${avgRead}`, label: "Min avg read" },
                 ].map((s) => (

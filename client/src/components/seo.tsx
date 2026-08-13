@@ -1,6 +1,11 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://soleitravel.com";
+// The live origin. This was "https://soleitravel.com", which does not
+// resolve — so every page advertised a canonical URL (and og:url, and
+// og:image) on a dead domain, telling search engines the real content
+// lived somewhere unreachable. xn--soli-dpa.com is the ASCII/punycode
+// form of soléi.com, which is what the site actually serves from.
+const SITE_URL = "https://xn--soli-dpa.com";
 const DEFAULT_IMAGE = "/attached_assets/hero-image.jpg";
 const SITE_NAME = "Soléi";
 
@@ -21,7 +26,11 @@ export function SEO({
   type = "website",
   jsonLd,
 }: SEOProps) {
-  const fullTitle = path === "/" ? title : `${title} | ${SITE_NAME}`;
+  // Several pages already end their title with "| Soléi", which used to
+  // produce "… | Soléi | Soléi". Only append when it isn't there.
+  const alreadyBranded = new RegExp(`\\|\\s*${SITE_NAME}\\s*$`, "i").test(title);
+  const fullTitle =
+    path === "/" || alreadyBranded ? title : `${title} | ${SITE_NAME}`;
   const canonicalUrl = `${SITE_URL}${path}`;
   const imageUrl = image.startsWith("http") ? image : `${SITE_URL}${image}`;
 

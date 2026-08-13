@@ -577,7 +577,7 @@ export default function EnquirePage() {
                   <p className="text-[0.82rem] text-ink-soft leading-[1.75] mb-8 pb-8 border-b border-sand-light">
                     Tell us which destination and property you're interested
                     in, your dates, and how many guests. For Siwa, we'll
-                    confirm in Tab.travel and send a booking link. For
+                    confirm availability and send a secure booking link. For
                     North Coast, we confirm with the hotel directly and
                     send a secure payment link within 24 hours.
                   </p>
@@ -1062,7 +1062,7 @@ export default function EnquirePage() {
                 {
                   num: "0",
                   label: "Automated replies",
-                  desc: "No bots. No auto-responders. Your enquiry goes directly to the team and a person replies.",
+                  desc: "Your enquiry goes directly to the team and a person replies — no auto-responders. (Ask Soléi, in the menu, is our AI planning assistant; this form is not.)",
                 },
                 {
                   num: "100%",

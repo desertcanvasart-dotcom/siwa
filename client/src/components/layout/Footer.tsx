@@ -44,7 +44,13 @@ export function Footer() {
   const col1Title = pickContent(c, "footer.col1.title", "Siwa Oasis");
   const col2Title = pickContent(c, "footer.col2.title", "North Coast");
   const col3Title = pickContent(c, "footer.col3.title", "Soléi");
-  const copyright = pickContent(c, "footer.copyright", "© 2025 Soléi · Siwa Oasis, Egypt");
+  // Default rolls over automatically so the footer can't go stale; the
+  // admin can still override it via site content.
+  const copyright = pickContent(
+    c,
+    "footer.copyright",
+    `© ${new Date().getFullYear()} Soléi · Siwa Oasis, Egypt`,
+  );
   const termsLabel = pickContent(c, "footer.terms_label", "Terms");
   const privacyLabel = pickContent(c, "footer.privacy_label", "Privacy");
   const overlayLinks = (group: string, defaults: { label: string; href: string }[]) =>

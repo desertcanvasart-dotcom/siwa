@@ -320,7 +320,7 @@ export default function NorthCoastTransportationPage() {
               >
                 Private <em className="italic text-gold">transportation.</em>
                 <br />
-                Two hours from Cairo.
+                Two and a half hours from Cairo.
               </h1>
             </div>
 

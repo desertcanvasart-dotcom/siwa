@@ -136,7 +136,7 @@ export default function TermsOfService() {
 
           <h2 className="text-2xl font-bold text-solei-navy mt-8 mb-4">11. Age & Health Requirements</h2>
           <ul>
-            <li><strong>Minimum age:</strong> 14 years (travellers under 14 must travel with a responsible adult).</li>
+            <li><strong>Minimum age to travel unaccompanied:</strong> 14 years. Younger travellers are welcome when accompanied by a parent or responsible adult.</li>
             <li><strong>No fixed upper age limit</strong>, but some itineraries are physically demanding—ensure fitness to travel.</li>
             <li>Health information is your responsibility; seek professional medical advice as needed.</li>
           </ul>

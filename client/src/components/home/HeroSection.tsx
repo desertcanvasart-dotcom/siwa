@@ -84,16 +84,24 @@ export function HeroSection() {
         </p>
       </div>
 
-      {/* Scroll indicator — hidden below md to avoid colliding with content */}
-      <div
-        className="hidden md:flex absolute bottom-12 right-20 flex-col items-center gap-2.5 z-10 animate-fade-up"
+      {/* Scroll indicator — hidden below md to avoid colliding with
+          content. It looked clickable but was an inert <span>, so it's
+          now a real button that scrolls, reachable by keyboard. */}
+      <button
+        type="button"
+        aria-label="Scroll to content"
+        onClick={() =>
+          window.scrollBy({ top: window.innerHeight * 0.9, behavior: "smooth" })
+        }
+        className="hidden md:flex absolute bottom-12 right-20 flex-col items-center gap-2.5 z-10 animate-fade-up
+          p-2 -m-2 cursor-pointer group focus-visible:outline focus-visible:outline-1 focus-visible:outline-gold"
         style={{ animationDelay: "1.8s" }}
       >
-        <div className="w-px h-14 bg-gradient-to-b from-gold/70 to-transparent animate-scroll-pulse" />
-        <span className="text-[0.55rem] tracking-[0.3em] uppercase text-white/35 [writing-mode:vertical-rl]">
+        <span className="block w-px h-14 bg-gradient-to-b from-gold/70 to-transparent animate-scroll-pulse" />
+        <span className="text-[0.55rem] tracking-[0.3em] uppercase text-white/35 group-hover:text-white/70 transition-colors [writing-mode:vertical-rl]">
           Discover
         </span>
-      </div>
+      </button>
     </section>
   );
 }
