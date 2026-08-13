@@ -496,6 +496,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Resolve a Google Maps short link ("Share → Send a link", e.g.
+  // maps.app.goo.gl/…) to its full URL so the hotel wizard can extract
+  // coordinates — short links carry none themselves. Hosts are
+  // whitelisted: this must never become an open URL fetcher.
+  app.post('/api/admin/resolve-map-link', authenticateAdmin, async (req, res) => {
+    try {
+      const raw = String(req.body?.url || '').trim();
+      const input = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+      let host: string;
+      try {
+        host = new URL(input).hostname.toLowerCase();
+      } catch {
+        return res.status(400).json({ message: 'Invalid URL' });
+      }
+      const allowed = ['maps.app.goo.gl', 'goo.gl', 'g.co'];
+      if (!allowed.includes(host)) {
+        return res.status(400).json({ message: 'Not a Google Maps short link' });
+      }
+      const response = await fetch(input, {
+        redirect: 'follow',
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+      });
+      let resolved = response.url;
+      // EU consent interstitial wraps the real URL in ?continue=…
+      if (/consent\.google\./i.test(resolved)) {
+        const cont = new URL(resolved).searchParams.get('continue');
+        if (cont) resolved = cont;
+      }
+      res.json({ url: resolved });
+    } catch (error) {
+      console.error('resolve-map-link failed:', error);
+      res.status(500).json({ message: 'Could not resolve link' });
+    }
+  });
+
   // Delete hotel (admin)
   app.delete('/api/admin/hotels/:id', authenticateAdmin, async (req, res) => {
     try {

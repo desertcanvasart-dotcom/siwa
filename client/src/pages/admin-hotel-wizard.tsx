@@ -33,29 +33,37 @@ const STEPS = [
 
 type Fact = { label: string; value: string };
 
-/** Pull coordinates out of a pasted Google Maps URL or a plain
- *  "lat, lng" pair. Understands place links (!3d..!4d..), map-center
- *  links (@lat,lng) and query links (?q=lat,lng). */
+/** Pull coordinates out of a pasted Google Maps URL, embed iframe
+ *  snippet, or a plain "lat, lng" pair. Understands place links
+ *  (!3d..!4d..), embed links (!2d<lng>!3d<lat> — note the swapped
+ *  order), map-center links (@lat,lng) and query links (?q=lat,lng). */
 function parseLatLng(input: string): { lat: string; lng: string } | null {
   const s = (input || "").trim();
   if (!s) return null;
-  const patterns = [
-    /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/, // place pin — most precise
-    /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/, // map center
-    /[?&](?:q|ll|query)=(-?\d+(?:\.\d+)?)(?:,|%2C)(-?\d+(?:\.\d+)?)/i, // query links
-    /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/, // plain "lat, lng"
+  const patterns: Array<{ re: RegExp; swapped?: boolean }> = [
+    { re: /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/ }, // place pin — most precise
+    { re: /!2d(-?\d+(?:\.\d+)?)!3d(-?\d+(?:\.\d+)?)/, swapped: true }, // "Embed a map" iframe (lng first)
+    { re: /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/ }, // map center
+    { re: /[?&](?:q|ll|query)=(-?\d+(?:\.\d+)?)(?:,|%2C)(-?\d+(?:\.\d+)?)/i }, // query links
+    { re: /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/ }, // plain "lat, lng"
   ];
-  for (const re of patterns) {
+  for (const { re, swapped } of patterns) {
     const m = s.match(re);
     if (!m) continue;
-    const lat = parseFloat(m[1]);
-    const lng = parseFloat(m[2]);
+    const [latStr, lngStr] = swapped ? [m[2], m[1]] : [m[1], m[2]];
+    const lat = parseFloat(latStr);
+    const lng = parseFloat(lngStr);
     if (Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
-      return { lat: m[1], lng: m[2] };
+      return { lat: latStr, lng: lngStr };
     }
   }
   return null;
 }
+
+/** Google short-link hosts ("Share → Send a link"). These carry no
+ *  coordinates in the URL — the server resolves them to the full
+ *  maps URL for us. */
+const SHORT_LINK_RE = /^(?:https?:\/\/)?(?:maps\.app\.goo\.gl|goo\.gl|g\.co)\//i;
 type Room = {
   name: string;
   type: string;
@@ -245,6 +253,32 @@ export default function AdminHotelWizardPage() {
 
   // ── helpers ──
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
+
+  // "Share → Send a link" gives a short URL with no coordinates in it.
+  // When one is pasted, quietly ask the server to follow the redirect
+  // and swap in the full maps URL, which parseLatLng understands.
+  const [resolvingMap, setResolvingMap] = useState(false);
+  useEffect(() => {
+    const input = form.mapInput.trim();
+    if (!input || parseLatLng(input) || !SHORT_LINK_RE.test(input)) return;
+    const t = setTimeout(async () => {
+      setResolvingMap(true);
+      try {
+        const res = await apiRequest("POST", "/api/admin/resolve-map-link", { url: input });
+        const json = await res.json();
+        if (json?.url && parseLatLng(json.url)) {
+          // Only apply if the field still holds the link we resolved.
+          setForm((f) => (f.mapInput.trim() === input ? { ...f, mapInput: json.url } : f));
+        }
+      } catch {
+        // Leave the "couldn't find coordinates" hint to guide them.
+      } finally {
+        setResolvingMap(false);
+      }
+    }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.mapInput]);
   const updateFact = (key: "facts" | "location", i: number, patch: Partial<Fact>) =>
     set({ [key]: form[key].map((f, idx) => (idx === i ? { ...f, ...patch } : f)) } as any);
   const addFact = (key: "facts" | "location") =>
@@ -602,20 +636,23 @@ export default function AdminHotelWizardPage() {
               <div>
                 <h3 className="font-display text-[1rem] text-navy">Map location</h3>
                 <p className="text-xs text-ink-soft/65">
-                  Paste a Google Maps link to the property (or type "latitude, longitude").
+                  Paste any Google Maps link to the property — a share link, the
+                  address-bar URL, or the embed snippet — or type "latitude, longitude".
                   Shown as an embedded map in the Location section.
                 </p>
               </div>
               <Input
                 value={form.mapInput}
                 onChange={(e) => set({ mapInput: e.target.value })}
-                placeholder="https://maps.google.com/… or 29.203, 25.519"
+                placeholder="https://maps.app.goo.gl/… or 29.203, 25.519"
               />
               {form.mapInput.trim() &&
                 (parseLatLng(form.mapInput) ? (
                   <p className="text-xs text-emerald-700">
                     ✓ Coordinates: {parseLatLng(form.mapInput)!.lat}, {parseLatLng(form.mapInput)!.lng}
                   </p>
+                ) : resolvingMap ? (
+                  <p className="text-xs text-ink-soft/65">Resolving link…</p>
                 ) : (
                   <p className="text-xs text-amber-700">
                     Couldn't find coordinates in that — paste the full Google Maps
