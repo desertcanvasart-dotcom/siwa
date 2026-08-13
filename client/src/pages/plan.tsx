@@ -7,7 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { HOTEL_DETAILS } from "@/lib/hotel-data";
 import { useHotelOverlay } from "@/lib/useHotelOverlay";
-import { Clock, ArrowUpRight, Check, ChevronUp } from "lucide-react";
+import { Clock, ArrowUpRight, Check, ChevronUp, Car, CarFront, Bus, Plane } from "lucide-react";
 
 /**
  * /plan — guided booking flow.
@@ -136,6 +136,15 @@ const TRANSFER_PRICES: Record<string, number> = {
 
 const euro = (n: number) => `€${n.toLocaleString()}`;
 
+/** Vehicle options for the private transfer. Flight is arranged and
+ *  quoted separately by the team, so it carries no road price. */
+const VEHICLES = [
+  { id: "Limousine", label: "Limousine", Icon: Car },
+  { id: "Minivan", label: "Minivan", Icon: CarFront },
+  { id: "Van", label: "Van", Icon: Bus },
+  { id: "Flight", label: "Flight", Icon: Plane },
+] as const;
+
 export default function PlanPage() {
   useReveal();
   const search = useSearch();
@@ -166,13 +175,14 @@ export default function PlanPage() {
   const [trTo, setTrTo] = useState(hotelDestination);
   const [trDate, setTrDate] = useState(params.get("checkin") || "");
   const [trPassengers, setTrPassengers] = useState("");
+  const [trVehicle, setTrVehicle] = useState("");
   const [trIncluded, setTrIncluded] = useState(false);
 
-  // Experiences
+  // Experiences — multi-select; every picked tour goes on the enquiry.
   const expOptions = useExperienceOptions(hotelDestination);
-  const [expSlug, setExpSlug] = useState("");
+  const [expSlugs, setExpSlugs] = useState<string[]>([]);
   const [expDate, setExpDate] = useState("");
-  const [expIncluded, setExpIncluded] = useState(false);
+  const expIncluded = expSlugs.length > 0;
 
   // Details
   const [name, setName] = useState("");
@@ -207,13 +217,17 @@ export default function PlanPage() {
     return HOTEL_DETAILS[propertySlug]?.basePrice ?? 0;
   }, [hotelOverlay, propertySlug, room]);
 
-  const selectedExp = useMemo(
-    () => expOptions.find((e) => e.slug === expSlug),
-    [expOptions, expSlug],
+  const selectedExps = useMemo(
+    () => expOptions.filter((e) => expSlugs.includes(e.slug)),
+    [expOptions, expSlugs],
   );
 
+  // Flights are quoted by the team, so the road price only applies to
+  // road vehicles (or when no vehicle preference was picked).
   const transferPrice =
-    trIncluded ? TRANSFER_PRICES[`${trFrom}|${trTo}`] ?? 0 : 0;
+    trIncluded && trVehicle !== "Flight"
+      ? TRANSFER_PRICES[`${trFrom}|${trTo}`] ?? 0
+      : 0;
 
   const estimate = useMemo(() => {
     const items: { label: string; detail: string; amount: number }[] = [];
@@ -227,25 +241,31 @@ export default function PlanPage() {
         amount: nights > 0 ? nights * perNight : 0,
       });
     }
-    if (trIncluded && transferPrice) {
+    if (trIncluded && trVehicle === "Flight") {
       items.push({
-        label: "Private transfer",
+        label: "Flight",
+        detail: `${destLabel(trFrom)} → ${destLabel(trTo)} · quoted by our team`,
+        amount: 0,
+      });
+    } else if (trIncluded && transferPrice) {
+      items.push({
+        label: trVehicle ? `Private transfer · ${trVehicle}` : "Private transfer",
         detail: `${destLabel(trFrom)} → ${destLabel(trTo)} · per vehicle`,
         amount: transferPrice,
       });
     }
-    if (expIncluded && selectedExp) {
+    for (const exp of selectedExps) {
       items.push({
-        label: selectedExp.name,
-        detail: `${euro(selectedExp.pricePerPerson)} pp × ${pax} guest${pax === 1 ? "" : "s"}`,
-        amount: selectedExp.pricePerPerson * pax,
+        label: exp.name,
+        detail: `${euro(exp.pricePerPerson)} pp × ${pax} guest${pax === 1 ? "" : "s"}`,
+        amount: exp.pricePerPerson * pax,
       });
     }
     const total = items.reduce((s, i) => s + i.amount, 0);
     return { items, total };
   }, [
     perNight, nights, hotelName, trIncluded, transferPrice, trFrom, trTo,
-    expIncluded, selectedExp, pax,
+    trVehicle, selectedExps, pax,
   ]);
 
   /* If they somehow reach /plan with no property, send them to the
@@ -280,11 +300,15 @@ export default function PlanPage() {
 
     if (trIncluded && (trFrom || trTo)) {
       lines.push({ label: "Transfer", value: `${destLabel(trFrom)} → ${destLabel(trTo)}` });
+      if (trVehicle) lines.push({ label: "Vehicle", value: trVehicle });
       if (trDate) lines.push({ label: "Transfer date", value: fmtDate(trDate) });
       if (trPassengers) lines.push({ label: "Passengers", value: trPassengers });
     }
-    if (expIncluded && expSlug) {
-      lines.push({ label: "Experience", value: expName(expSlug) });
+    if (expIncluded) {
+      lines.push({
+        label: expSlugs.length === 1 ? "Experience" : "Experiences",
+        value: expSlugs.map(expName).join(", "),
+      });
       if (expDate) lines.push({ label: "Experience date", value: fmtDate(expDate) });
     }
     if (estimate.total > 0) {
@@ -447,7 +471,36 @@ export default function PlanPage() {
                 desc={`How would you like to reach ${destLabel(hotelDestination)}? We arrange private transfers — or skip this if you've got it covered.`}
               >
                 <div className="bg-white border border-sand p-6 md:p-7">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Vehicle preference — compact chip row; 2×2 on
+                      mobile, one row on larger screens. */}
+                  <Field label="How would you like to travel?">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {VEHICLES.map(({ id, label, Icon }) => {
+                        const active = trVehicle === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => {
+                              const nextVehicle = active ? "" : id;
+                              setTrVehicle(nextVehicle);
+                              if (nextVehicle) setTrIncluded(true);
+                            }}
+                            className={`flex items-center justify-center gap-1.5 px-2 py-2.5 border text-[0.6rem] tracking-[0.14em] uppercase transition-colors ${
+                              active
+                                ? "border-gold bg-gold/10 text-navy"
+                                : "border-sand text-ink-soft hover:border-gold/50"
+                            }`}
+                          >
+                            <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? "text-gold" : "text-ink-soft/50"}`} strokeWidth={2} />
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </Field>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
                     <Field label="From">
                       <select value={trFrom} onChange={(e) => { setTrFrom(e.target.value); setTrIncluded(true); }} className={inputCls}>
                         <option value="cairo">Cairo</option>
@@ -493,7 +546,7 @@ export default function PlanPage() {
               <StepShell
                 eyebrow="Step 03"
                 title="Things to do"
-                desc="Add an experience to your stay — desert nights, salt lakes, sunset sailing. Optional, and never required."
+                desc="Add as many experiences as you like — desert nights, salt lakes, sunset sailing. Optional, and never required."
               >
                 {expOptions.length === 0 ? (
                   <div className="bg-white border border-sand p-6 md:p-7">
@@ -508,24 +561,31 @@ export default function PlanPage() {
                         <TourCard
                           key={x.slug}
                           exp={x}
-                          selected={expSlug === x.slug}
+                          selected={expSlugs.includes(x.slug)}
                           hubPath={hotelDestination === "north-coast" ? "north-coast" : "siwa-oasis"}
                           onSelect={() => {
-                            const next = expSlug === x.slug ? "" : x.slug;
-                            setExpSlug(next);
-                            setExpIncluded(!!next);
+                            // Multi-select: clicking toggles this tour
+                            // without touching the others.
+                            setExpSlugs((prev) =>
+                              prev.includes(x.slug)
+                                ? prev.filter((s) => s !== x.slug)
+                                : [...prev, x.slug],
+                            );
                           }}
                         />
                       ))}
                     </div>
-                    {expSlug && (
+                    {expIncluded && (
                       <div className="bg-white border border-sand p-5 md:p-6 mt-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                           <Field label="Preferred date">
                             <input type="date" value={expDate} onChange={(e) => { setExpDate(e.target.value); }} className={inputCls} />
                           </Field>
                           <p className="text-[0.72rem] text-ink-soft/60 leading-[1.6] pb-1">
-                            Added to your enquiry — {euro(selectedExp?.pricePerPerson ?? 0)} per person, for {pax} guest{pax === 1 ? "" : "s"}. Final pricing confirmed by our team.
+                            {expSlugs.length === 1
+                              ? `Added to your enquiry — ${euro(selectedExps[0]?.pricePerPerson ?? 0)} per person, for ${pax} guest${pax === 1 ? "" : "s"}.`
+                              : `${expSlugs.length} experiences added — ${euro(selectedExps.reduce((s, e) => s + e.pricePerPerson, 0))} per person combined, for ${pax} guest${pax === 1 ? "" : "s"}.`}{" "}
+                            Final pricing confirmed by our team.
                           </p>
                         </div>
                       </div>
@@ -535,7 +595,7 @@ export default function PlanPage() {
                 <StepNav
                   onBack={back}
                   onContinue={next}
-                  onSkip={() => { setExpIncluded(false); setExpSlug(""); next(); }}
+                  onSkip={() => { setExpSlugs([]); next(); }}
                   continueLabel="Continue to your details"
                 />
               </StepShell>
