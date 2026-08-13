@@ -35,7 +35,7 @@ export function Journal() {
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-[2px] mt-12">
           {/* Lead article */}
           <Link
-            href="/journal/siwa-salt-lakes"
+            href="/journal/healing-waters-of-siwa-salt-lake-therapy"
             className="reveal bg-white border border-sand hover:border-gold transition-colors overflow-hidden block group"
           >
             <div className="relative h-[240px] overflow-hidden bg-[linear-gradient(150deg,#0F2436_0%,#1a3a52_100%)]">
@@ -69,7 +69,7 @@ export function Journal() {
           {/* Side articles */}
           <div className="flex flex-col gap-[2px]">
             <Link
-              href="/journal/north-coast-quiet"
+              href="/journal/ultimate-guide-to-egypts-north-coast"
               className="reveal reveal-d1 bg-white border border-sand hover:border-gold transition-colors overflow-hidden block"
             >
               <div className="relative h-[130px] overflow-hidden bg-[linear-gradient(150deg,#1a3a52_0%,#2F6F8F_100%)]">
@@ -93,7 +93,7 @@ export function Journal() {
           </div>
           <div className="flex flex-col gap-[2px]">
             <Link
-              href="/journal/desert-evening"
+              href="/journal/stargazing-in-siwa-guide-to-desert-night-sky"
               className="reveal reveal-d2 bg-white border border-sand hover:border-gold transition-colors overflow-hidden block"
             >
               <div className="relative h-[130px] overflow-hidden bg-[linear-gradient(150deg,#2F6F8F_0%,#0F2436_100%)]">

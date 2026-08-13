@@ -6,19 +6,19 @@ const moments = [
     n: "I.",
     title: "The salt lakes at sunset",
     body: "When the light softens and the water turns the colour of the sky. You stop being a tourist.",
-    href: "/siwa-oasis/experiences/salt-lakes",
+    href: "/siwa-oasis/experiences/salt-and-spring-escape",
   },
   {
     n: "II.",
     title: "An evening without a schedule",
     body: "Nothing planned, nothing guided. Something unexpected becomes the best part of the trip.",
-    href: "/siwa-oasis/experiences/desert-evening",
+    href: "/siwa-oasis/experiences/desert-night-experience",
   },
   {
     n: "III.",
     title: "The stillness of the oasis",
     body: "Waking up in Siwa with nowhere to be. The quiet that belongs only to this place.",
-    href: "/siwa-oasis/experiences/oasis-morning",
+    href: "/siwa-oasis/experiences/siwa-essential-experience",
   },
 ];
 

@@ -5,31 +5,31 @@ const routes = [
     name: "Cairo → Siwa Oasis",
     detail: "~8 hours · Private vehicle · Desert road",
     type: "Private →",
-    href: "/siwa-oasis/transportation/cairo-siwa",
+    href: "/siwa-oasis/transportation",
   },
   {
     name: "Marsa Matrouh → Siwa",
     detail: "~3 hours · Private 4×4 · Sand road",
     type: "Private →",
-    href: "/siwa-oasis/transportation/marsa-siwa",
+    href: "/siwa-oasis/transportation",
   },
   {
     name: "Cairo → North Coast",
     detail: "~2.5 hours · Private vehicle",
     type: "Private →",
-    href: "/north-coast/transportation/cairo-north-coast",
+    href: "/north-coast/transportation",
   },
   {
     name: "Alexandria → North Coast",
     detail: "~1 hour · Private vehicle",
     type: "Private →",
-    href: "/north-coast/transportation/alex-north-coast",
+    href: "/north-coast/transportation",
   },
   {
     name: "In-oasis desert drives",
     detail: "Siwa · 4×4 · Dunes, salt flats, spring pools",
     type: "Experience →",
-    href: "/siwa-oasis/transportation/desert-drives",
+    href: "/siwa-oasis/transportation",
   },
 ];
 

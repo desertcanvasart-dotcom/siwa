@@ -322,14 +322,11 @@ function Router() {
           <Route path="/siwa-oasis/experiences/:slug" component={TourDetail} />
 
           <Route path="/siwa-oasis/transportation" component={SiwaTransportation} />
+          {/* No per-route detail pages exist; every route's information
+              lives on the index. Redirect stale/bookmarked slug URLs
+              there instead of 404ing or showing a dead-end stub. */}
           <Route path="/siwa-oasis/transportation/:slug">
-            <HubStub
-              title="Siwa Transportation Route"
-              subtitle="This transportation route page is being prepared."
-              path="/siwa-oasis/transportation"
-              backHref="/siwa-oasis/transportation"
-              backLabel="Back to routes"
-            />
+            <ReplaceRedirect to="/siwa-oasis/transportation" />
           </Route>
 
           {/* Siwa FAQ / Travel Tips — keep existing paths */}
@@ -361,6 +358,11 @@ function Router() {
           <Route path="/chat" component={ChatPage} />
 
           <Route path="/north-coast/transportation" component={NorthCoastTransportation} />
+          {/* Was a 404: these slug URLs were linked from the homepage
+              and the North Coast hub but never had pages. */}
+          <Route path="/north-coast/transportation/:slug">
+            <ReplaceRedirect to="/north-coast/transportation" />
+          </Route>
 
           {/* North Coast FAQ / Travel Tips — keep existing paths */}
           <Route path="/north-coast-travel-tips" component={NorthCoastTravelTips} />

@@ -725,7 +725,7 @@ export default function SiwaOasis() {
               {routes.map((r) => (
                 <Link
                   key={r.slug}
-                  href={`/siwa-oasis/transportation/${r.slug}`}
+                  href="/siwa-oasis/transportation"
                   className="flex justify-between items-center py-5 border-b border-sand-light hover:opacity-60 transition-opacity gap-4"
                 >
                   <div>

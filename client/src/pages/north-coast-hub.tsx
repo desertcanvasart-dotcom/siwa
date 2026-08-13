@@ -753,7 +753,7 @@ export default function NorthCoastHub() {
               {routes.map((r) => (
                 <Link
                   key={r.slug}
-                  href={`/north-coast/transportation/${r.slug}`}
+                  href="/north-coast/transportation"
                   className="flex justify-between items-center py-5 border-b border-sand-light hover:opacity-60 transition-opacity gap-4"
                 >
                   <div>
