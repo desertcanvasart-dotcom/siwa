@@ -339,6 +339,11 @@ export default function HotelDetailPage() {
               {hotel.name}
             </div>
             <div className="text-[0.82rem] text-ink-soft">
+              {/* The amount is the lowest room rate, so say "From" —
+                  otherwise the cheapest room reads as THE price. */}
+              {hotel.rooms.length > 1 && (
+                <span className="text-[0.68rem] text-ink-soft/60">From </span>
+              )}
               <strong className="font-display text-[1.1rem] text-navy font-normal">
                 €{hotel.basePrice}
               </strong>{" "}
