@@ -75,7 +75,14 @@ export default function HotelDetailPage() {
       gallerySize: 0,
       related: [],
       basePrice: 0,
-      priceLabel: overlay.pricePerNight || "On request",
+      // Same rule as the merge below: a price-looking string can't be
+      // the label (the € amount is rendered separately).
+      priceLabel:
+        overlay.pricePerNight && !/\d/.test(overlay.pricePerNight)
+          ? overlay.pricePerNight
+          : overlay.pricePerNight
+            ? "/ night"
+            : "On request",
       breadcrumbLabel: overlay.name || slug,
     };
   }, [baseFromTs, overlay, slug]);
@@ -88,25 +95,59 @@ export default function HotelDetailPage() {
     const d = overlay.details ?? {};
     const nonEmpty = <T,>(v: T[] | undefined): T[] | undefined =>
       v && v.length > 0 ? v : undefined;
+
+    // The displayed "from" price is dynamic, never a stale hardcoded
+    // number: lowest room rate first (rooms are admin-edited in the
+    // hotel wizard), then the admin's pricePerNight field, then the
+    // inline TS fallback. Keeps the sticky bar consistent with the
+    // room-rate table when the admin changes rates.
+    const rooms = nonEmpty(d.rooms) ?? baseHotel.rooms;
+    const roomPrices = rooms
+      .map((r) => r.price)
+      .filter((p): p is number => typeof p === "number" && p > 0);
+    const overlayPrice = parseFloat(
+      String(overlay.pricePerNight ?? "").replace(/[^\d.]/g, ""),
+    );
+    const basePrice =
+      roomPrices.length > 0
+        ? Math.min(...roomPrices)
+        : Number.isFinite(overlayPrice) && overlayPrice > 0
+          ? overlayPrice
+          : baseHotel.basePrice;
+
+    // Hero meta can carry a price string too ("From €145 / night") —
+    // keep any € amount in it in sync with the dynamic price.
+    const heroMeta = (nonEmpty(d.heroMeta) ?? baseHotel.heroMeta).map((m) =>
+      basePrice > 0 ? m.replace(/€\s?\d+(?:[.,]\d+)?/, `€${basePrice}`) : m,
+    );
+
     return {
       ...baseHotel,
+      basePrice,
       name: overlay.name || baseHotel.name,
       tagLine: d.tagLine || overlay.blurb || baseHotel.tagLine,
       heroTag: d.heroTag || overlay.blurb || baseHotel.heroTag,
-      heroMeta: nonEmpty(d.heroMeta) ?? baseHotel.heroMeta,
+      heroMeta,
       eyebrow: d.eyebrow || baseHotel.eyebrow,
       headline: d.headline || baseHotel.headline,
       headlineItalic: d.headlineItalic || baseHotel.headlineItalic,
       intro: nonEmpty(d.intro) ?? baseHotel.intro,
       facts: nonEmpty(d.facts) ?? baseHotel.facts,
-      rooms: nonEmpty(d.rooms) ?? baseHotel.rooms,
+      rooms,
       location: nonEmpty(d.location) ?? baseHotel.location,
       reviews: nonEmpty(d.reviews) ?? baseHotel.reviews,
       amenities:
         overlay.amenities && overlay.amenities.length > 0
           ? overlay.amenities
           : baseHotel.amenities,
-      priceLabel: d.priceLabel || overlay.pricePerNight || baseHotel.priceLabel,
+      // overlay.pricePerNight is a price string ("€145 / night") — only
+      // usable as a label when it doesn't itself contain a number, or
+      // the bar would read "€199 €145 / night".
+      priceLabel:
+        d.priceLabel ||
+        (overlay.pricePerNight && !/\d/.test(overlay.pricePerNight)
+          ? overlay.pricePerNight
+          : baseHotel.priceLabel),
       coverImage: overlay.imageUrl || baseHotel.coverImage,
       gallery: nonEmpty(d.gallery) ?? baseHotel.gallery,
     };
