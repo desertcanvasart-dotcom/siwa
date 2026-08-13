@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "wouter";
 import { Menu, X } from "lucide-react";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 
@@ -19,6 +19,9 @@ interface NavProps {
 export function Nav({ darkHero = true }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [location] = useLocation();
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const openRef = useRef<HTMLButtonElement>(null);
   const c = useSiteContent();
   const brand = pickContent(c, "nav.brand", "Soléi");
   const linkSiwa = pickContent(c, "nav.link_siwa", "Siwa Oasis");
@@ -40,15 +43,39 @@ export function Nav({ darkHero = true }: NavProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, [darkHero]);
 
-  // Lock body scroll while the mobile drawer is open
+  // Lock body scroll while the mobile drawer is open, close on Escape,
+  // and move focus into the drawer (returning it to the hamburger on
+  // close) so keyboard and screen-reader users aren't left behind.
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    closeRef.current?.focus();
+
     return () => {
       document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKeyDown);
+      openRef.current?.focus();
     };
   }, [open]);
+
+  // Close the drawer whenever the route changes — otherwise it can stay
+  // mounted over the new page with body scroll still locked.
+  useEffect(() => {
+    setOpen(false);
+  }, [location]);
+
+  /** Marks the link for the page you're on (exact match, or a section
+   *  parent like /siwa-oasis for /siwa-oasis/accommodation). */
+  const isCurrent = (href: string) =>
+    href === "/"
+      ? location === "/"
+      : location === href || location.startsWith(`${href}/`);
 
   const light = !darkHero || scrolled;
 
@@ -92,7 +119,10 @@ export function Nav({ darkHero = true }: NavProps) {
             <Link
               key={l.href + l.label}
               href={l.href}
-              className={`${linkBase} ${light ? linkLight : linkTransparent}`}
+              aria-current={isCurrent(l.href) ? "page" : undefined}
+              className={`${linkBase} ${light ? linkLight : linkTransparent} ${
+                isCurrent(l.href) ? "text-coastal" : ""
+              }`}
             >
               {l.label}
             </Link>
@@ -108,11 +138,12 @@ export function Nav({ darkHero = true }: NavProps) {
 
         {/* Mobile hamburger */}
         <button
+          ref={openRef}
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open menu"
           aria-expanded={open}
-          className={`md:hidden -mr-1 p-2 transition-colors ${
+          className={`md:hidden -mr-2 w-11 h-11 inline-flex items-center justify-center transition-colors ${
             light ? "text-navy" : "text-white"
           }`}
         >
@@ -144,10 +175,11 @@ export function Nav({ darkHero = true }: NavProps) {
               {brand}
             </span>
             <button
+              ref={closeRef}
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close menu"
-              className="-mr-1 p-2 text-cream/70 hover:text-gold transition-colors"
+              className="-mr-2 w-11 h-11 inline-flex items-center justify-center text-cream/70 hover:text-gold transition-colors"
             >
               <X className="w-5 h-5" strokeWidth={1.5} />
             </button>
