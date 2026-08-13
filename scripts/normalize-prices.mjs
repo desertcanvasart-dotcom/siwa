@@ -12,10 +12,11 @@
  *   • normalises the symbol to USD     "€650 / night"       → "$650 / night"
  *   • collapses whitespace
  *
- * What it deliberately does NOT change:
- *   • the AMOUNT — never converted, never recalculated. Where the text
- *     amount disagrees with the room rates (the pages show the lowest
- *     room rate), that's a business decision and is only reported.
+ * The AMOUNT is left alone by default — never converted, never
+ * recalculated. Pass --sync-amounts to also rewrite a text amount that
+ * disagrees with the property's room rates, matching what the pages
+ * already display (the lowest room rate). That is a pricing decision,
+ * which is why it is opt-in rather than automatic.
  *
  * Dry run by default — prints the exact before/after and writes nothing.
  * Re-run with --apply to save. Idempotent: running twice changes
@@ -23,8 +24,9 @@
  * your undo.
  *
  * Usage:
- *   node scripts/normalize-prices.mjs [baseUrl]            # preview
- *   node scripts/normalize-prices.mjs [baseUrl] --apply    # write
+ *   node scripts/normalize-prices.mjs [baseUrl]                          # preview
+ *   node scripts/normalize-prices.mjs [baseUrl] --sync-amounts           # preview incl. amounts
+ *   node scripts/normalize-prices.mjs [baseUrl] --sync-amounts --apply   # write
  *
  * Auth (only needed with --apply) — set in your shell, not in a file:
  *   ADMIN_USERNAME=... ADMIN_PASSWORD=... node scripts/normalize-prices.mjs https://xn--soli-dpa.com --apply
@@ -32,6 +34,7 @@
 
 const args = process.argv.slice(2);
 const APPLY = args.includes("--apply");
+const SYNC_AMOUNTS = args.includes("--sync-amounts");
 const BASE = args.find((a) => !a.startsWith("--")) || "http://localhost:5001";
 const CURRENCY = "$";
 
@@ -55,19 +58,26 @@ const changes = [];
 const amountNotes = [];
 for (const h of hotels) {
   const before = h.pricePerNight ?? "";
-  const after = normalize(before);
-  if (after !== before) changes.push({ id: h.id, slug: h.slug, before, after });
+  let after = normalize(before);
 
   const rooms = (h.details?.rooms ?? [])
     .map((r) => r?.price)
     .filter((p) => typeof p === "number" && p > 0);
   const lowest = rooms.length ? Math.min(...rooms) : undefined;
   const textAmount = (after.match(/\d+(\.\d+)?/) || [])[0];
+
   if (lowest !== undefined && textAmount !== undefined && Number(textAmount) !== lowest) {
-    amountNotes.push(
-      `${h.slug}: text says ${textAmount} but the lowest room rate is ${lowest} (pages show ${lowest}). Left alone — your call.`,
-    );
+    if (SYNC_AMOUNTS) {
+      // Replace only the first number, preserving the rest of the label.
+      after = after.replace(/\d+(\.\d+)?/, String(lowest));
+    } else {
+      amountNotes.push(
+        `${h.slug}: text says ${textAmount} but the lowest room rate is ${lowest} (pages show ${lowest}). Left alone — pass --sync-amounts to align it.`,
+      );
+    }
   }
+
+  if (after !== before) changes.push({ id: h.id, slug: h.slug, before, after });
 }
 
 console.log(`${hotels.length} properties at ${BASE}\n`);
