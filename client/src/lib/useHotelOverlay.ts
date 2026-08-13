@@ -24,6 +24,10 @@ export interface HotelOverlay {
   amenities?: string[];
   destination?: string;
   category?: string;
+  /** Map coordinates (decimal strings from Postgres) — drive the
+   *  embedded map on the hotel detail page. */
+  latitude?: string | null;
+  longitude?: string | null;
   /** Rich detail-page content edited via the admin form. Mirrors
    *  the HotelDetail shape but with all fields optional. */
   details?: {
@@ -69,6 +73,8 @@ export function useHotelOverlayQuery(slug: string | undefined) {
         amenities: Array.isArray(json.amenities) ? json.amenities : undefined,
         destination: json.destination ?? undefined,
         category: json.category ?? undefined,
+        latitude: json.latitude ?? null,
+        longitude: json.longitude ?? null,
         details: json.details ?? undefined,
       };
     },
@@ -95,6 +101,8 @@ export function useHotelOverlay(slug: string | undefined): HotelOverlay | null {
         amenities: Array.isArray(json.amenities) ? json.amenities : undefined,
         destination: json.destination ?? undefined,
         category: json.category ?? undefined,
+        latitude: json.latitude ?? null,
+        longitude: json.longitude ?? null,
         details: json.details ?? undefined,
       };
     },

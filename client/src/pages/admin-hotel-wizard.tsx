@@ -32,6 +32,30 @@ const STEPS = [
 ];
 
 type Fact = { label: string; value: string };
+
+/** Pull coordinates out of a pasted Google Maps URL or a plain
+ *  "lat, lng" pair. Understands place links (!3d..!4d..), map-center
+ *  links (@lat,lng) and query links (?q=lat,lng). */
+function parseLatLng(input: string): { lat: string; lng: string } | null {
+  const s = (input || "").trim();
+  if (!s) return null;
+  const patterns = [
+    /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/, // place pin — most precise
+    /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/, // map center
+    /[?&](?:q|ll|query)=(-?\d+(?:\.\d+)?)(?:,|%2C)(-?\d+(?:\.\d+)?)/i, // query links
+    /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/, // plain "lat, lng"
+  ];
+  for (const re of patterns) {
+    const m = s.match(re);
+    if (!m) continue;
+    const lat = parseFloat(m[1]);
+    const lng = parseFloat(m[2]);
+    if (Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+      return { lat: m[1], lng: m[2] };
+    }
+  }
+  return null;
+}
 type Room = {
   name: string;
   type: string;
@@ -71,6 +95,9 @@ const emptyForm = {
   rooms: [] as Room[],
   location: [] as Fact[],
   reviews: [] as Review[],
+  // Google Maps link or "lat, lng" — parsed into latitude/longitude
+  // on save; powers the embedded map on the public page.
+  mapInput: "",
 };
 
 export default function AdminHotelWizardPage() {
@@ -133,6 +160,10 @@ export default function AdminHotelWizardPage() {
       rooms: Array.isArray(d.rooms) ? d.rooms : [],
       location: Array.isArray(d.location) ? d.location : [],
       reviews: Array.isArray(d.reviews) ? d.reviews : [],
+      mapInput:
+        existing.latitude && existing.longitude
+          ? `${existing.latitude}, ${existing.longitude}`
+          : "",
     });
     setHydrated(true);
   }, [existing, isEditing, hydrated]);
@@ -183,6 +214,8 @@ export default function AdminHotelWizardPage() {
       eco: form.eco,
       luxury: form.luxury,
       isActive: form.isActive,
+      latitude: parseLatLng(form.mapInput)?.lat ?? null,
+      longitude: parseLatLng(form.mapInput)?.lng ?? null,
       details,
     };
   };
@@ -563,6 +596,33 @@ export default function AdminHotelWizardPage() {
               labelPlaceholder="Property type"
               valuePlaceholder="Eco Lodge"
             />
+            {/* Map coordinates — paste a Google Maps link, we extract
+                the lat/lng. Powers the embedded map on the hotel page. */}
+            <div className="space-y-2 pt-3 border-t border-sand-light">
+              <div>
+                <h3 className="font-display text-[1rem] text-navy">Map location</h3>
+                <p className="text-xs text-ink-soft/65">
+                  Paste a Google Maps link to the property (or type "latitude, longitude").
+                  Shown as an embedded map in the Location section.
+                </p>
+              </div>
+              <Input
+                value={form.mapInput}
+                onChange={(e) => set({ mapInput: e.target.value })}
+                placeholder="https://maps.google.com/… or 29.203, 25.519"
+              />
+              {form.mapInput.trim() &&
+                (parseLatLng(form.mapInput) ? (
+                  <p className="text-xs text-emerald-700">
+                    ✓ Coordinates: {parseLatLng(form.mapInput)!.lat}, {parseLatLng(form.mapInput)!.lng}
+                  </p>
+                ) : (
+                  <p className="text-xs text-amber-700">
+                    Couldn't find coordinates in that — paste the full Google Maps
+                    link from the browser address bar, or "latitude, longitude".
+                  </p>
+                ))}
+            </div>
             <FactRepeater
               title="Location & transfers"
               hint="How guests reach the property."

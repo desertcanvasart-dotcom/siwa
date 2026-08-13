@@ -519,14 +519,38 @@ export default function HotelDetailPage() {
               headline="Location &"
               headlineItalic="access."
             >
-              <div className="relative h-[220px] bg-navy overflow-hidden flex items-center justify-center mb-6">
-                <div className="absolute inset-0 textile-bg pointer-events-none" />
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gold/80 shadow-[0_0_0_4px_rgba(184,154,91,0.25)]" />
-                <span className="relative z-[2] text-[0.6rem] tracking-[0.2em] uppercase text-white/25">
-                  {hotel.facts.find((f) => f.label === "Location")?.value ??
-                    hotel.name}
-                </span>
-              </div>
+              {overlay?.latitude && overlay?.longitude ? (
+                <div className="mb-6">
+                  {/* Real map — coordinates set in the hotel wizard.
+                      Google's embed endpoint needs no API key. */}
+                  <div className="relative h-[260px] overflow-hidden border border-sand">
+                    <iframe
+                      title={`Map — ${hotel.name}`}
+                      src={`https://maps.google.com/maps?q=${overlay.latitude},${overlay.longitude}&z=13&output=embed`}
+                      className="absolute inset-0 w-full h-full border-0"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps?q=${overlay.latitude},${overlay.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-3 text-[0.62rem] tracking-[0.18em] uppercase text-coastal border-b border-coastal/30 pb-[3px] hover:text-navy hover:border-navy transition-colors"
+                  >
+                    Open in Google Maps →
+                  </a>
+                </div>
+              ) : (
+                <div className="relative h-[220px] bg-navy overflow-hidden flex items-center justify-center mb-6">
+                  <div className="absolute inset-0 textile-bg pointer-events-none" />
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gold/80 shadow-[0_0_0_4px_rgba(184,154,91,0.25)]" />
+                  <span className="relative z-[2] text-[0.6rem] tracking-[0.2em] uppercase text-white/25">
+                    {hotel.facts.find((f) => f.label === "Location")?.value ??
+                      hotel.name}
+                  </span>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {hotel.location.map((l) => (
                   <div
