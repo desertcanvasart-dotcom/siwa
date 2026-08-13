@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useEffect, lazy, Suspense, Component, type ReactNode, type ComponentType } from "react";
+import { useEffect, useRef, lazy, Suspense, Component, type ReactNode, type ComponentType } from "react";
 import {
   HOTELS,
   canonicalHotelSlug,
@@ -219,6 +219,34 @@ function ScrollRestoration() {
 }
 
 /**
+ * Google Analytics page views for client-side navigation. The gtag
+ * snippet in index.html only records the initial full-page load; in
+ * an SPA every route change after that would go uncounted without
+ * this. The first location is skipped — gtag('config') already
+ * reported it.
+ */
+function AnalyticsPageViews() {
+  const [location] = useLocation();
+  const firstRef = useRef(true);
+  useEffect(() => {
+    if (firstRef.current) {
+      firstRef.current = false;
+      return;
+    }
+    const g = (window as any).gtag;
+    if (typeof g === "function") {
+      g("event", "page_view", {
+        page_path: location,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
+  return null;
+}
+
+/**
  * Intercept clicks on in-page hash anchors so they smooth-scroll
  * without pushing a new history entry. Without this, every "Book
  * now" / "Enquire" / etc. button that points at `#section` adds a
@@ -256,6 +284,7 @@ function Router() {
   return (
     <>
       <ScrollRestoration />
+      <AnalyticsPageViews />
       <AnchorClickHandler />
       <RouteErrorBoundary>
       <Suspense fallback={<PageLoader />}>
