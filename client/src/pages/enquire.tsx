@@ -9,6 +9,7 @@ import { Arch } from "@/components/ui/Arch";
 import { HOTEL_DETAILS } from "@/lib/hotel-data";
 import { EXPERIENCE_DETAILS } from "@/lib/experience-data";
 import { useExperiencesBySlug } from "@/lib/useExperiencesBySlug";
+import { useContact } from "@/lib/useContact";
 
 /** Slugs the public API still publishes (drafts are filtered server-side). */
 function useActiveSlugs(endpoint: string): Set<string> {
@@ -171,6 +172,7 @@ export default function EnquirePage() {
   // one) isn't in it — looking names up here is what stops the form
   // showing a raw slug like "honeymoon-escape".
   const liveBySlug = useExperiencesBySlug();
+  const contact = useContact();
   /** Display name for any experience/journey slug, live data first. */
   const nameForSlug = (slug: string | null): string =>
     !slug
@@ -996,12 +998,14 @@ export default function EnquirePage() {
                 Send us a WhatsApp — same team, faster response for
                 time-sensitive requests.
                 <a
-                  href="https://wa.me/201000000000"
+                  href={contact.whatsappHref(
+                    "Hello Soléi — I'd like help planning a trip.",
+                  )}
                   target="_blank"
                   rel="noreferrer"
                   className="block mt-2 text-[0.6rem] tracking-[0.15em] uppercase text-coastal"
                 >
-                  Open WhatsApp →
+                  Open WhatsApp — {contact.whatsappLabel} →
                 </a>
               </div>
             </div>

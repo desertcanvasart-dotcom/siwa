@@ -4,6 +4,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { Arch } from "@/components/ui/Arch";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
+import { useContact } from "@/lib/useContact";
 
 /**
  * /chat — Soléi AI concierge. Editorial full-page chat. Posts the
@@ -34,9 +35,11 @@ const STARTERS = [
 
 export default function ChatPage() {
   const content = useSiteContent();
-  const waNumber = pickContent<string>(content, "contact.whatsapp", "");
-  const waLabel = pickContent(content, "contact.whatsapp_label", "");
-  const contactEmail = pickContent(content, "contact.email", "");
+  // Shared with /enquire so the number can never drift between pages.
+  const contact = useContact();
+  const waNumber = contact.whatsappDigits;
+  const waLabel = contact.whatsappLabel;
+  const contactEmail = contact.email;
   const fallbackMessage = pickContent(
     content,
     "contact.fallback_message",
