@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useId, isValidElement, cloneElement, Children } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/seo";
@@ -327,6 +327,21 @@ export default function EnquirePage() {
   /* ── Success state ─────────────────────────────────────── */
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
+  // Contact details live here, not inside ContactFields, so switching
+  // tabs (which unmounts that block) can't wipe what's been typed.
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactReply, setContactReply] = useState("WhatsApp (faster)");
+  const [contactNotes, setContactNotes] = useState(paramNotes);
+  const contactProps = {
+    name: contactName, setName: setContactName,
+    email: contactEmail, setEmail: setContactEmail,
+    phone: contactPhone, setPhone: setContactPhone,
+    reply: contactReply, setReply: setContactReply,
+    notes: contactNotes, setNotes: setContactNotes,
+  };
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [ref, setRef] = useState("");
 
@@ -378,8 +393,23 @@ export default function EnquirePage() {
     const replyMethod = String(fd.get("replyMethod") || "").trim();
     const notes = String(fd.get("contactNotes") || "").trim();
 
-    if (!name || !email) {
-      setErrorMsg("Please add your name and email.");
+    // Name each missing field rather than one generic message, and move
+    // focus to the first problem so keyboard and screen-reader users
+    // aren't left hunting for it.
+    const missing: Array<{ field: string; label: string }> = [];
+    if (!name) missing.push({ field: "contactName", label: "your name" });
+    if (!email) missing.push({ field: "contactEmail", label: "your email address" });
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      missing.push({ field: "contactEmail", label: "a valid email address" });
+    }
+
+    if (missing.length > 0) {
+      setErrorMsg(
+        `Please add ${missing.map((m) => m.label).join(" and ")} so we can reply.`,
+      );
+      const first = form.querySelector<HTMLElement>(`[name="${missing[0].field}"]`);
+      first?.focus();
+      first?.scrollIntoView({ block: "center", behavior: "smooth" });
       return;
     }
 
@@ -567,7 +597,12 @@ export default function EnquirePage() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            {/* noValidate so our own check always runs: the native
+                bubble is transient, mouse-only and not exposed as a
+                summary. Fields keep required/aria-required for
+                semantics; handleSubmit produces the visible, announced
+                message and moves focus to the first problem. */}
+            <form onSubmit={handleSubmit} noValidate>
               {tab === "accommodation" && (
                 <div>
                   <h2 className="font-display text-[1.4rem] font-normal text-navy mb-2">
@@ -665,7 +700,7 @@ export default function EnquirePage() {
                         <option>5+ adults</option>
                       </select>
                     </Field>
-                    <Field label="Children (optional)" optional>
+                    <Field label="Children" optional>
                       <select className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer">
                         <option>No children</option>
                         <option>1 child</option>
@@ -675,7 +710,7 @@ export default function EnquirePage() {
                     </Field>
                   </div>
 
-                  <Field label="Room preference (optional)" optional>
+                  <Field label="Room preference" optional>
                     <input
                       type="text"
                       value={accomRoom}
@@ -689,7 +724,7 @@ export default function EnquirePage() {
                     />
                   </Field>
 
-                  <ContactFields />
+                  <ContactFields contact={contactProps} />
 
                   <Submit label="Send accommodation enquiry" sending={sending} error={errorMsg} />
                 </div>
@@ -779,7 +814,7 @@ export default function EnquirePage() {
                     </Field>
                   </div>
 
-                  <Field label="Private experience? (optional)" optional>
+                  <Field label="Private experience?" optional>
                     <select
                       value={expPrivate}
                       onChange={(e) => setExpPrivate(e.target.value)}
@@ -791,7 +826,7 @@ export default function EnquirePage() {
                     </select>
                   </Field>
 
-                  <Field label="Staying at (optional)" optional>
+                  <Field label="Staying at" optional>
                     <input
                       type="text"
                       value={expStaying}
@@ -801,7 +836,7 @@ export default function EnquirePage() {
                     />
                   </Field>
 
-                  <ContactFields notesPlaceholder="Accessibility needs, dietary requirements, questions about the experience, alternative dates…" initialNotes={expNotes} />
+                  <ContactFields notesPlaceholder="Accessibility needs, dietary requirements, questions about the experience, alternative dates…" contact={contactProps} />
 
                   <Submit label="Send experience enquiry" sending={sending} error={errorMsg} />
                 </div>
@@ -906,7 +941,7 @@ export default function EnquirePage() {
                     />
                   </Field>
 
-                  <ContactFields notesPlaceholder="Flight number for airport pickups, child seats, luggage details, accessibility needs…" />
+                  <ContactFields notesPlaceholder="Flight number for airport pickups, child seats, luggage details, accessibility needs…" contact={contactProps} />
 
                   <Submit label="Send transportation request" sending={sending} error={errorMsg} />
                 </div>
@@ -1159,25 +1194,72 @@ export default function EnquirePage() {
  *  Helpers
  * ────────────────────────────────────────────────────────────── */
 
+/** "Preferred reply method" → "preferredReplyMethod" */
+function labelToName(label: string): string {
+  const words = label
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+  return words
+    .map((w, i) => (i === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join("");
+}
+
+/**
+ * Labelled form row.
+ *
+ * The <label> used to have no `htmlFor`, so not one control on this page
+ * had an accessible name — screen readers announced the date inputs as
+ * bare textboxes, and several fields had no `name` either. Field now
+ * generates an id, binds the label to it, and injects the id/name onto
+ * its child control, so every call site is fixed at once.
+ */
 function Field({
   label,
   children,
   optional,
+  required,
 }: {
   label: string;
   children: React.ReactNode;
   optional?: boolean;
+  required?: boolean;
 }) {
+  const generatedId = useId();
+  // Some rows render the control plus a hint, so children can be an
+  // array — bind the label to the FIRST element and leave the rest.
+  const items = Children.toArray(children);
+  const firstElementIndex = items.findIndex((c) => isValidElement(c));
+  const firstElement =
+    firstElementIndex >= 0 ? (items[firstElementIndex] as React.ReactElement<any>) : null;
+  const controlId = firstElement ? (firstElement.props.id ?? generatedId) : undefined;
+  const child = firstElement
+    ? items.map((c, i) =>
+        i === firstElementIndex
+          ? cloneElement(firstElement, {
+              id: controlId,
+              name: firstElement.props.name ?? labelToName(label),
+              required: firstElement.props.required ?? required,
+              "aria-required": required || undefined,
+            })
+          : c,
+      )
+    : children;
+
   return (
     <div className="mb-4">
       <label
+        htmlFor={controlId}
         className={`block text-[0.56rem] tracking-[0.22em] uppercase mb-2 ${
           optional ? "text-ink-soft/35" : "text-ink-soft/55"
         }`}
       >
         {label}
+        {required && <span aria-hidden className="text-gold ml-1">*</span>}
+        {optional && <span className="normal-case tracking-normal ml-1.5">(optional)</span>}
       </label>
-      {children}
+      {child}
     </div>
   );
 }
@@ -1191,33 +1273,48 @@ function PrefillHint({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Contact block. Rendered inside each tab's branch, so it unmounts on
+ * every tab switch — which is why these values used to vanish when the
+ * visitor moved between Accommodation / Experiences / Transportation.
+ * The values now live in the parent and are passed in, so they survive.
+ */
 function ContactFields({
   notesPlaceholder,
-  initialNotes,
+  contact,
 }: {
   notesPlaceholder?: string;
-  initialNotes?: string;
+  contact: {
+    name: string; setName: (v: string) => void;
+    email: string; setEmail: (v: string) => void;
+    phone: string; setPhone: (v: string) => void;
+    reply: string; setReply: (v: string) => void;
+    notes: string; setNotes: (v: string) => void;
+  };
 }) {
-  const [notes, setNotes] = useState(initialNotes ?? "");
   return (
     <>
       <hr className="my-8 border-sand-light" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
-        <Field label="Your name">
+        <Field label="Your name" required>
           <input
             type="text"
             name="contactName"
             required
+            value={contact.name}
+            onChange={(e) => contact.setName(e.target.value)}
             placeholder="Full name"
             className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
           />
         </Field>
-        <Field label="Email address">
+        <Field label="Email address" required>
           <input
             type="email"
             name="contactEmail"
             required
+            value={contact.email}
+            onChange={(e) => contact.setEmail(e.target.value)}
             placeholder="you@example.com"
             className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
           />
@@ -1225,10 +1322,12 @@ function ContactFields({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
-        <Field label="WhatsApp number (optional)" optional>
+        <Field label="WhatsApp number" optional>
           <input
             type="tel"
             name="contactPhone"
+            value={contact.phone}
+            onChange={(e) => contact.setPhone(e.target.value)}
             placeholder="+20 or country code"
             className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
           />
@@ -1236,7 +1335,8 @@ function ContactFields({
         <Field label="Preferred reply method">
           <select
             name="replyMethod"
-            defaultValue="WhatsApp (faster)"
+            value={contact.reply}
+            onChange={(e) => contact.setReply(e.target.value)}
             className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
           >
             <option>WhatsApp (faster)</option>
@@ -1246,12 +1346,12 @@ function ContactFields({
         </Field>
       </div>
 
-      <Field label="Anything else we should know (optional)" optional>
+      <Field label="Anything else we should know" optional>
         <textarea
           rows={4}
           name="contactNotes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          value={contact.notes}
+          onChange={(e) => contact.setNotes(e.target.value)}
           placeholder={
             notesPlaceholder ??
             "Special occasions, accessibility needs, dietary requirements, questions about the property…"
@@ -1274,11 +1374,18 @@ function Submit({
 }) {
   return (
     <div className="mt-8">
-      {error && (
-        <p className="mb-3 text-[0.78rem] text-rose-600 border border-rose-200 bg-rose-50 px-3 py-2">
-          {error}
-        </p>
-      )}
+      {/* role=alert so the message is announced, not just shown. */}
+      <p
+        role="alert"
+        aria-live="polite"
+        className={
+          error
+            ? "mb-3 text-[0.78rem] text-rose-600 border border-rose-200 bg-rose-50 px-3 py-2"
+            : "sr-only"
+        }
+      >
+        {error ?? ""}
+      </p>
       <button
         type="submit"
         disabled={sending}
