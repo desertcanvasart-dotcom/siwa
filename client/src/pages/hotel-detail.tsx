@@ -254,7 +254,8 @@ export default function HotelDetailPage() {
               alt={hotel.name}
               className="absolute inset-0 w-full h-full object-cover"
               // @ts-ignore — valid HTML attribute, React types lag behind
-              fetchPriority="high"
+              // React 18 forwards this to the DOM only in lowercase.
+              fetchpriority="high"
             />
           )}
           {/* Texture + scrim */}

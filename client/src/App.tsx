@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, Component, type ReactNode, type ComponentType } from "react";
 import {
   HOTELS,
   canonicalHotelSlug,
@@ -16,70 +16,100 @@ import {
 //  Page imports (lazy for code-splitting)
 // ──────────────────────────────────────────────────────────────────────
 
+/**
+ * Dynamic import that survives redeploys. Every deploy renames the
+ * hashed chunk files, so a tab opened before a deploy requests chunks
+ * that no longer exist when it navigates — the import rejects and the
+ * page went blank. On such a failure we do one full reload (rate-
+ * limited so a genuinely broken build can't loop) which picks up the
+ * fresh index.html and chunk names.
+ */
+const RELOAD_FLAG = "chunk-reload-at";
+function lazyRetry(importer: () => Promise<{ default: ComponentType<any> }>) {
+  return lazy(() =>
+    importer()
+      .then((m) => {
+        sessionStorage.removeItem(RELOAD_FLAG);
+        return m;
+      })
+      .catch((err) => {
+        const last = Number(sessionStorage.getItem(RELOAD_FLAG) || 0);
+        if (Date.now() - last > 30_000) {
+          sessionStorage.setItem(RELOAD_FLAG, String(Date.now()));
+          window.location.reload();
+          // Never resolves — the reload takes over while Suspense
+          // keeps showing the loader instead of a flash of error.
+          return new Promise<never>(() => {});
+        }
+        throw err;
+      }),
+  );
+}
+
 // Core
-const Home = lazy(() => import("@/pages/home"));
-const OurStory = lazy(() => import("@/pages/our-story"));
-const TermsOfService = lazy(() => import("@/pages/terms-of-service"));
-const Privacy = lazy(() => import("@/pages/privacy"));
-const NotFound = lazy(() => import("@/pages/not-found"));
+const Home = lazyRetry(() => import("@/pages/home"));
+const OurStory = lazyRetry(() => import("@/pages/our-story"));
+const TermsOfService = lazyRetry(() => import("@/pages/terms-of-service"));
+const Privacy = lazyRetry(() => import("@/pages/privacy"));
+const NotFound = lazyRetry(() => import("@/pages/not-found"));
 
 // Destination hubs
-const SiwaHub = lazy(() => import("@/pages/siwa-oasis"));
-const SiwaAccommodation = lazy(
+const SiwaHub = lazyRetry(() => import("@/pages/siwa-oasis"));
+const SiwaAccommodation = lazyRetry(
   () => import("@/pages/siwa-oasis-accommodation"),
 );
-const NorthCoastHub = lazy(() => import("@/pages/north-coast-hub"));
-const NorthCoastAccommodation = lazy(
+const NorthCoastHub = lazyRetry(() => import("@/pages/north-coast-hub"));
+const NorthCoastAccommodation = lazyRetry(
   () => import("@/pages/north-coast-accommodation"),
 );
-const HotelDetail = lazy(() => import("@/pages/hotel-detail"));
+const HotelDetail = lazyRetry(() => import("@/pages/hotel-detail"));
 
 // Experience detail — unified template
-const ExperienceDetail = lazy(() => import("@/pages/experience-detail"));
-const TourDetail = lazy(() => import("@/pages/tour-detail"));
-const JourneysPage = lazy(() => import("@/pages/journeys"));
-const ReviewPage = lazy(() => import("@/pages/review"));
-const PlanPage = lazy(() => import("@/pages/plan"));
-const ChatPage = lazy(() => import("@/pages/chat"));
+const ExperienceDetail = lazyRetry(() => import("@/pages/experience-detail"));
+const TourDetail = lazyRetry(() => import("@/pages/tour-detail"));
+const JourneysPage = lazyRetry(() => import("@/pages/journeys"));
+const ReviewPage = lazyRetry(() => import("@/pages/review"));
+const PlanPage = lazyRetry(() => import("@/pages/plan"));
+const ChatPage = lazyRetry(() => import("@/pages/chat"));
 
 // Transportation
-const SiwaTransportation = lazy(() => import("@/pages/siwa-transportation"));
+const SiwaTransportation = lazyRetry(() => import("@/pages/siwa-transportation"));
 
 // North Coast experiences archive
-const NorthCoastExperiences = lazy(() => import("@/pages/north-coast-experiences"));
+const NorthCoastExperiences = lazyRetry(() => import("@/pages/north-coast-experiences"));
 
 // North Coast transportation
-const NorthCoastTransportation = lazy(() => import("@/pages/north-coast-transportation"));
+const NorthCoastTransportation = lazyRetry(() => import("@/pages/north-coast-transportation"));
 
 // Experience archive
-const NewExperiencesArchive = lazy(() => import("@/pages/NewExperiencesArchive"));
+const NewExperiencesArchive = lazyRetry(() => import("@/pages/NewExperiencesArchive"));
 
 // Journal (new canonical) — reuses existing Blog page + post
-const Blog = lazy(() => import("@/pages/blog"));
-const BlogPostPage = lazy(() => import("@/pages/blog-post"));
+const Blog = lazyRetry(() => import("@/pages/blog"));
+const BlogPostPage = lazyRetry(() => import("@/pages/blog-post"));
 
 // Contact / enquiry
-const GetQuote = lazy(() => import("@/pages/get-quote"));
-const Enquire = lazy(() => import("@/pages/enquire"));
+const GetQuote = lazyRetry(() => import("@/pages/get-quote"));
+const Enquire = lazyRetry(() => import("@/pages/enquire"));
 
 // Admin + misc
-const AdminLogin = lazy(() => import("@/pages/admin-login"));
-const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
-const AdminHotelWizard = lazy(() => import("@/pages/admin-hotel-wizard"));
-const AdminTourWizard = lazy(() => import("@/pages/admin-tour-wizard"));
-const AdminBlogWizard = lazy(() => import("@/pages/admin-blog-wizard"));
-const PageBuilderPage = lazy(() => import("@/pages/page-builder"));
-const PremiumExperienceSingle = lazy(
+const AdminLogin = lazyRetry(() => import("@/pages/admin-login"));
+const AdminDashboard = lazyRetry(() => import("@/pages/admin-dashboard"));
+const AdminHotelWizard = lazyRetry(() => import("@/pages/admin-hotel-wizard"));
+const AdminTourWizard = lazyRetry(() => import("@/pages/admin-tour-wizard"));
+const AdminBlogWizard = lazyRetry(() => import("@/pages/admin-blog-wizard"));
+const PageBuilderPage = lazyRetry(() => import("@/pages/page-builder"));
+const PremiumExperienceSingle = lazyRetry(
   () => import("@/pages/premium-experience-single"),
 );
-const SiwaTravelTips = lazy(() => import("@/pages/siwa-travel-tips"));
-const NorthCoastTravelTips = lazy(() => import("@/pages/north-coast-travel-tips"));
-const SiwaFAQ = lazy(() => import("@/pages/siwa-faq"));
-const NorthCoastFAQ = lazy(() => import("@/pages/north-coast-faq"));
-const PreviewLayout = lazy(() => import("@/pages/__preview-layout"));
+const SiwaTravelTips = lazyRetry(() => import("@/pages/siwa-travel-tips"));
+const NorthCoastTravelTips = lazyRetry(() => import("@/pages/north-coast-travel-tips"));
+const SiwaFAQ = lazyRetry(() => import("@/pages/siwa-faq"));
+const NorthCoastFAQ = lazyRetry(() => import("@/pages/north-coast-faq"));
+const PreviewLayout = lazyRetry(() => import("@/pages/__preview-layout"));
 
 // Branded hub placeholder (used for sections not yet built)
-const HubStub = lazy(() => import("@/pages/stubs/HubStub"));
+const HubStub = lazyRetry(() => import("@/pages/stubs/HubStub"));
 
 // ──────────────────────────────────────────────────────────────────────
 //  Redirect helpers (client-side; for production true 301s configure
@@ -140,6 +170,46 @@ function PageLoader() {
   );
 }
 
+/**
+ * Last line of defense: without a boundary, any render/chunk error
+ * unmounts the entire tree and the visitor sees only the page
+ * background. This shows a branded recovery screen instead.
+ */
+class RouteErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error("Page failed to render:", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center gap-5 bg-cream px-6 text-center">
+          <p className="font-display text-[1.4rem] text-navy">
+            Something went wrong loading this page.
+          </p>
+          <p className="text-[0.85rem] text-ink-soft max-w-[40ch]">
+            This usually clears with a quick refresh.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="bg-gold text-navy px-7 py-3 text-[0.62rem] tracking-[0.22em] uppercase hover:bg-gold-light transition-colors"
+          >
+            Reload page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function ScrollRestoration() {
   const [location] = useLocation();
   useEffect(() => {
@@ -187,6 +257,7 @@ function Router() {
     <>
       <ScrollRestoration />
       <AnchorClickHandler />
+      <RouteErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Switch>
           {/* ───── Core ───── */}
@@ -333,6 +404,7 @@ function Router() {
           <Route component={NotFound} />
         </Switch>
       </Suspense>
+      </RouteErrorBoundary>
     </>
   );
 }
