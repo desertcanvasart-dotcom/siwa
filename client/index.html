@@ -16,6 +16,19 @@
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+
+      // Consent Mode v2 — everything denied until the visitor accepts
+      // via the cookie banner. A returning visitor's stored choice is
+      // applied synchronously so their first page view is measured.
+      var soleiConsent = null;
+      try { soleiConsent = localStorage.getItem('solei-consent'); } catch (e) {}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: soleiConsent === 'granted' ? 'granted' : 'denied',
+      });
+
       gtag('js', new Date());
 
       gtag('config', 'G-PBSX5VDXEQ');
