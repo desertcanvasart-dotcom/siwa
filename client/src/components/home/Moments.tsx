@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { SmartLink } from "@/components/ui/SmartLink";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 
 const moments = [
@@ -37,6 +37,17 @@ export function Moments() {
     "home.moments.subhead",
     "These aren't activities. They're what happens when you stop trying to see everything — and start letting a place find you.",
   );
+  // Cards: home.moments.cards.<i>.{n,title,body,href,cta}
+  const cards = moments.map((m, i) => {
+    const k = `home.moments.cards.${i}`;
+    return {
+      n: pickContent(c, `${k}.n`, m.n),
+      title: pickContent(c, `${k}.title`, m.title),
+      body: pickContent(c, `${k}.body`, m.body),
+      href: pickContent(c, `${k}.href`, m.href),
+      cta: pickContent(c, `${k}.cta`, "Experience this →"),
+    };
+  });
   return (
     <section className="bg-white px-6 md:px-12 lg:px-20 py-32">
       <div className="max-w-6xl mx-auto">
@@ -61,9 +72,9 @@ export function Moments() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[2px]">
-          {moments.map((m, i) => (
-            <Link
-              key={m.n}
+          {cards.map((m, i) => (
+            <SmartLink
+              key={i}
               href={m.href}
               className={`reveal reveal-d${i + 1} group border border-sand p-10 md:p-11 bg-white hover:border-gold hover:bg-cream transition-[border-color,background-color] duration-500 block`}
             >
@@ -77,9 +88,9 @@ export function Moments() {
                 {m.body}
               </p>
               <span className="inline-flex items-center gap-2 group-hover:gap-3 text-[0.58rem] tracking-[0.2em] uppercase text-gold opacity-60 group-hover:opacity-100 transition-all duration-300">
-                Experience this →
+                {m.cta}
               </span>
-            </Link>
+            </SmartLink>
           ))}
         </div>
       </div>
