@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { SmartLink } from "@/components/ui/SmartLink";
 import { Arch } from "@/components/ui/Arch";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 
@@ -17,6 +17,8 @@ export function ClosingCTA() {
   );
   const primaryCta = pickContent(c, "home.closing.primary_cta", "Begin your stay");
   const secondaryCta = pickContent(c, "home.closing.secondary_cta", "Our story");
+  const primaryHref = pickContent(c, "home.closing.primary_href", "/enquire");
+  const secondaryHref = pickContent(c, "home.closing.secondary_href", "/our-story");
   return (
     <section className="relative bg-navy px-6 md:px-12 lg:px-20 py-36 text-center overflow-hidden">
       <div className="absolute inset-0 textile-bg pointer-events-none" />
@@ -36,18 +38,18 @@ export function ClosingCTA() {
           {body}
         </p>
         <div className="reveal flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link
-            href="/enquire"
+          <SmartLink
+            href={primaryHref}
             className="text-[0.65rem] tracking-[0.2em] uppercase text-navy bg-gold px-10 py-4 hover:bg-gold-light transition-colors"
           >
             {primaryCta}
-          </Link>
-          <Link
-            href="/our-story"
+          </SmartLink>
+          <SmartLink
+            href={secondaryHref}
             className="text-[0.65rem] tracking-[0.2em] uppercase text-white border border-white/20 px-10 py-4 hover:border-gold hover:text-gold transition-colors"
           >
             {secondaryCta}
-          </Link>
+          </SmartLink>
         </div>
       </div>
     </section>
