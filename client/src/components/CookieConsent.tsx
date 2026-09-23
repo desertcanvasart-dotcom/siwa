@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 /**
  * Cookie consent banner — Google Consent Mode v2.
@@ -28,6 +28,7 @@ function updateGtagConsent(granted: boolean) {
 }
 
 export function CookieConsent() {
+  const [location] = useLocation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -51,7 +52,10 @@ export function CookieConsent() {
     setVisible(false);
   };
 
-  if (!visible) return null;
+  // Never over the admin: the wizards' Save/Next bar is pinned to the
+  // bottom of the screen, and the banner sat on top of it — clicks hit
+  // the banner and tours/hotels silently never saved.
+  if (!visible || location.startsWith("/admin")) return null;
 
   return (
     <div
