@@ -37,6 +37,36 @@ const rateLimitStore = new Map<string, RateLimit>();
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
 const RATE_LIMIT_MAX_REQUESTS = 3; // Max 3 requests per IP per window
 
+// Admin save errors. Validation problems are the editor's to fix, so
+// they come back as 400 with the offending fields named; a duplicate
+// title/slug is a 409. Only genuine server faults stay 500 — before
+// this every failure read "Failed to save" and the admin had no idea why.
+const FIELD_LABELS: Record<string, string> = {
+  pricePerPerson: 'Price per person',
+  pricePerNight: 'Price per night',
+  maxGuests: 'Max guests',
+  minAge: 'Min age',
+  imageUrl: 'Image',
+  slug: 'URL slug',
+};
+function fieldLabel(path: (string | number)[]): string {
+  const key = String(path[0] ?? '');
+  const label = FIELD_LABELS[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
+  return path.length > 1 ? `${label} (${path.slice(1).join('.')})` : label;
+}
+function sendSaveError(res: any, error: any, fallback: string) {
+  if (error?.name === 'ZodError' && Array.isArray(error.issues)) {
+    const problems = error.issues.map((i: any) => `${fieldLabel(i.path)}: ${i.message}`);
+    return res.status(400).json({ message: `Please fix: ${problems.join('; ')}`, issues: error.issues });
+  }
+  if (error?.code === '23505') {
+    const field = /Key \(([^)]+)\)/.exec(error.detail || '')?.[1];
+    const what = field ? fieldLabel([field.replace(/_(\w)/g, (_: string, c: string) => c.toUpperCase())]) : 'A field';
+    return res.status(409).json({ message: `${what} is already used by another item — choose a different one.` });
+  }
+  return res.status(500).json({ message: fallback });
+}
+
 // Evict expired entries so the store doesn't grow forever — one IP per
 // visitor, kept only for the duration of its window.
 setInterval(() => {
@@ -410,11 +440,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create experience (admin)
   app.post('/api/admin/experiences', authenticateAdmin, async (req, res) => {
     try {
-      const experience = await storage.createExperience(req.body);
+      const validatedData = insertExperienceSchema.parse(req.body);
+      const experience = await storage.createExperience(validatedData);
       res.json(experience);
     } catch (error) {
       console.error('Error creating experience:', error);
-      res.status(500).json({ message: 'Failed to create experience' });
+      sendSaveError(res, error, 'Failed to create experience');
     }
   });
 
@@ -448,7 +479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedExperience);
     } catch (error) {
       console.error('Error updating experience:', error);
-      res.status(500).json({ message: 'Failed to update experience' });
+      sendSaveError(res, error, 'Failed to update experience');
     }
   });
 
@@ -473,7 +504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(hotel);
     } catch (error) {
       console.error('Error creating hotel:', error);
-      res.status(500).json({ message: 'Failed to create hotel' });
+      sendSaveError(res, error, 'Failed to create hotel');
     }
   });
 
@@ -492,7 +523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedHotel);
     } catch (error) {
       console.error('Error updating hotel:', error);
-      res.status(500).json({ message: 'Failed to update hotel' });
+      sendSaveError(res, error, 'Failed to update hotel');
     }
   });
 
@@ -588,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(post);
     } catch (error) {
       console.error('Error creating blog post:', error);
-      res.status(500).json({ message: 'Failed to create blog post' });
+      sendSaveError(res, error, 'Failed to create blog post');
     }
   });
 
@@ -603,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updated);
     } catch (error) {
       console.error('Error updating blog post:', error);
-      res.status(500).json({ message: 'Failed to update blog post' });
+      sendSaveError(res, error, 'Failed to update blog post');
     }
   });
 
@@ -881,7 +912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(page);
     } catch (error) {
       console.error('Error creating page:', error);
-      res.status(500).json({ message: 'Failed to create page' });
+      sendSaveError(res, error, 'Failed to create page');
     }
   });
 
@@ -897,7 +928,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(page);
     } catch (error) {
       console.error('Error updating page:', error);
-      res.status(500).json({ message: 'Failed to update page' });
+      sendSaveError(res, error, 'Failed to update page');
     }
   });
 
@@ -936,7 +967,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(block);
     } catch (error) {
       console.error('Error creating page block:', error);
-      res.status(500).json({ message: 'Failed to create page block' });
+      sendSaveError(res, error, 'Failed to create page block');
     }
   });
 
@@ -952,7 +983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(block);
     } catch (error) {
       console.error('Error updating page block:', error);
-      res.status(500).json({ message: 'Failed to update page block' });
+      sendSaveError(res, error, 'Failed to update page block');
     }
   });
 
@@ -1001,7 +1032,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(template);
     } catch (error) {
       console.error('Error creating block template:', error);
-      res.status(500).json({ message: 'Failed to create block template' });
+      sendSaveError(res, error, 'Failed to create block template');
     }
   });
 

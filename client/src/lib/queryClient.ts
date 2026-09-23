@@ -3,7 +3,19 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    // Surface the server's own message ("Please fix: Price per person…")
+    // instead of a raw "400: {json}" string in the toast.
+    let message = text;
+    try {
+      const json = JSON.parse(text);
+      if (json && typeof json.message === "string") message = json.message;
+    } catch {}
+    if (res.status === 401 && res.url.includes("/api/admin/")) {
+      message = "Your admin session has expired. Log in again in a new tab, then save here again — your edits are still on this page.";
+    }
+    const err = new Error(message) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
   }
 }
 

@@ -371,6 +371,7 @@ function PageBuilderManagement() {
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
+  const [convertDestination, setConvertDestination] = useState<'siwa' | 'north-coast'>('siwa');
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [newHotelDialogOpen, setNewHotelDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -474,13 +475,49 @@ export default function AdminDashboard() {
         description: "Experience has been successfully updated",
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Update Failed",
-        description: "Failed to update experience",
+        description: error.message || "Failed to update experience",
         variant: "destructive"
       });
     }
+  });
+
+  // Legacy pricing records have no slug, so no public page shows them.
+  // Giving one a slug + destination turns it into a regular tour, which
+  // then opens in the tour wizard (image, gallery, full details).
+  const convertToTourMutation = useMutation({
+    mutationFn: async (exp: Experience) => {
+      const slug = exp.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      const response = await apiRequest('PUT', `/api/admin/experiences/${exp.id}`, {
+        slug,
+        destination: convertDestination,
+      });
+      return response.json();
+    },
+    onSuccess: (updated: Experience) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/experiences'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/experiences'] });
+      setEditingExperience(null);
+      toast({
+        title: 'Converted to a tour',
+        description: 'Add a photo and details, then save to publish it.',
+      });
+      setLocation(`/admin/tours/${updated.id}/edit`);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Could not convert',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
   });
 
   // Upload images mutation
@@ -1661,11 +1698,40 @@ export default function AdminDashboard() {
       {/* Edit Experience Dialog (legacy pricing — old form) */}
       {editingExperience && !(editingExperience as any).slug && (
         <Dialog open={!!editingExperience} onOpenChange={() => setEditingExperience(null)}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Experience</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div className="border border-gold/40 bg-cream/60 p-4 space-y-3">
+                <p className="text-sm text-ink-soft">
+                  <strong className="text-navy">Not shown on the website.</strong>{' '}
+                  This is an older pricing record with no page of its own, so it
+                  has no photo. Convert it to a tour to give it a page, a photo
+                  and full details.
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Select
+                    value={convertDestination}
+                    onValueChange={(v) => setConvertDestination(v as 'siwa' | 'north-coast')}
+                  >
+                    <SelectTrigger className="w-44">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="siwa">Siwa Oasis</SelectItem>
+                      <SelectItem value="north-coast">North Coast</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    onClick={() => convertToTourMutation.mutate(editingExperience)}
+                    disabled={convertToTourMutation.isPending}
+                  >
+                    {convertToTourMutation.isPending ? 'Converting…' : 'Convert to tour'}
+                  </Button>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Base Price Per Person ($)</Label>

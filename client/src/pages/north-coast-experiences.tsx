@@ -5,6 +5,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { useExperiencesBySlug } from "@/lib/useExperiencesBySlug";
+import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
 import { Arch } from "@/components/ui/Arch";
 import yachtSunsetImg from "@assets/Pristine Beaches_1764585387661.jpg";
 import beachClubImg from "@assets/water sports_1758262774773.jpg";
@@ -284,9 +285,42 @@ export default function NorthCoastExperiencesPage() {
     [overlays],
   );
 
+  // Tours added in the admin (or converted from legacy records) aren't
+  // in the inline list above, so append the live ones for this
+  // destination. Curated journeys have their own page.
+  const { data: rawExperiences } = useExperiencesRaw();
+  const withAdminTours = useMemo(() => {
+    const known = new Set(EXPERIENCES.map((e) => e.slug));
+    const extras: Experience[] = rawExperiences
+      .filter(
+        (r) =>
+          r.slug &&
+          r.destination === "north-coast" &&
+          r.isActive !== false &&
+          r.category !== "Curated Journey" &&
+          !known.has(r.slug),
+      )
+      .map((r, i) => ({
+        slug: r.slug!,
+              enquirySlug: r.slug!,
+              priceSuffix: "per person",
+        num: String(EXPERIENCES.length + i + 1).padStart(2, "0"),
+        title: r.title ?? "",
+        desc: r.summary || r.description || "",
+        timeTag: r.duration ?? "",
+        catTag: r.category ?? "",
+        meta: [],
+        price: Number(r.pricePerPerson) || 0,
+        cats: [],
+        gradient: "bg-[linear-gradient(155deg,#2F6F8F_0%,#1a4a6a_100%)]",
+        image: r.imageUrl || undefined,
+      }));
+    return [...overlayed, ...extras];
+  }, [overlayed, rawExperiences]);
+
   const visible = useMemo(
-    () => overlayed.filter((e) => cat === "all" || e.cats.includes(cat)),
-    [cat, overlayed],
+    () => withAdminTours.filter((e) => cat === "all" || e.cats.includes(cat)),
+    [cat, withAdminTours],
   );
   const featured = visible.find((e) => e.featured);
   const rest = visible.filter((e) => !e.featured);
