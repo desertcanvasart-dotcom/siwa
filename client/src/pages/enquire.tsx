@@ -9,6 +9,8 @@ import { Arch } from "@/components/ui/Arch";
 import { HOTEL_DETAILS } from "@/lib/hotel-data";
 import { EXPERIENCE_DETAILS } from "@/lib/experience-data";
 import { useExperiencesBySlug } from "@/lib/useExperiencesBySlug";
+import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
+import { ChoiceButtons, ExperiencePicker, type ExperienceOption } from "@/components/enquire/ChoiceFields";
 import { useContact } from "@/lib/useContact";
 
 /** Slugs the public API still publishes (drafts are filtered server-side). */
@@ -166,7 +168,6 @@ export default function EnquirePage() {
   // experiences are filtered out server-side, so they drop from these
   // dropdowns automatically.
   const activeHotelSlugs = useActiveSlugs("/api/hotels");
-  const activeExpSlugs = useActiveSlugs("/api/experiences");
   // Live records keyed by slug. EXPERIENCE_DETAILS is a static bundled
   // list, so anything created in the admin (every curated journey, for
   // one) isn't in it — looking names up here is what stops the form
@@ -190,14 +191,27 @@ export default function EnquirePage() {
     () => allHotels.filter((h) => h.destination === "north-coast" && activeHotelSlugs.has(h.slug)),
     [allHotels, activeHotelSlugs],
   );
-  const siwaExps = useMemo(
-    () => EXPERIENCE_DETAILS.filter((e) => e.destination === "siwa-oasis" && activeExpSlugs.has(e.slug)),
-    [activeExpSlugs],
-  );
-  const ncExps = useMemo(
-    () => EXPERIENCE_DETAILS.filter((e) => e.destination === "north-coast" && activeExpSlugs.has(e.slug)),
-    [activeExpSlugs],
-  );
+  // Every published experience and curated journey, straight from the
+  // API — so anything added in the dashboard is selectable here. The
+  // bundled list only stands in until the API answers (or if it fails).
+  const { data: liveExps } = useExperiencesRaw();
+  const expOptions = useMemo<ExperienceOption[]>(() => {
+    const live = liveExps
+      .filter((e) => e.slug && e.title)
+      .map((e): ExperienceOption => ({
+        slug: e.slug!,
+        name: e.title!,
+        dest: e.destination === "siwa" || e.destination === "north-coast" ? e.destination : null,
+        journey: e.category === "Curated Journey",
+      }));
+    if (live.length > 0) return live;
+    return EXPERIENCE_DETAILS.map((e) => ({
+      slug: e.slug,
+      name: e.name,
+      dest: e.destination === "north-coast" ? ("north-coast" as const) : ("siwa" as const),
+      journey: false,
+    }));
+  }, [liveExps]);
 
   /* ── Accommodation form state ──────────────────────────── */
   const initialAccomDest =
@@ -221,20 +235,32 @@ export default function EnquirePage() {
   const [accomRoom, setAccomRoom] = useState(paramRoom);
 
   /* ── Experience form state ─────────────────────────────── */
-  // A journey with no single destination spans both regions — leave
-  // the destination unset rather than silently claiming one of them.
+  // Destinations and experiences are multi-select: a visitor can plan
+  // both regions and several experiences in one enquiry. A journey with
+  // no single destination spans both regions.
   const journeyDest = paramJourney ? liveBySlug.get(paramJourney)?.destination : undefined;
-  const derivedExpDest = paramDest === "north-coast" || paramDest === "siwa"
-    ? paramDest
-    : paramJourney
-      ? (journeyDest === "north-coast" || journeyDest === "siwa" ? journeyDest : "")
-      : paramExp
-        ? (ncExps.some((e) => e.slug === paramExp) ? "north-coast" : "siwa")
-        : "";
-  const [expDest, setExpDest] = useState(derivedExpDest);
-  const initialExpName = nameForSlug(paramJourney ?? paramExp);
-  const [expName, setExpName] = useState(initialExpName);
+  const staticExpDest = paramExp
+    ? EXPERIENCE_DETAILS.find((e) => e.slug === paramExp)?.destination
+    : undefined;
+  const initialExpDests: string[] =
+    paramDest === "north-coast" || paramDest === "siwa"
+      ? [paramDest]
+      : paramJourney
+        ? journeyDest === "north-coast" || journeyDest === "siwa"
+          ? [journeyDest]
+          : []
+        : staticExpDest
+          ? [staticExpDest === "north-coast" ? "north-coast" : "siwa"]
+          : [];
+  const [expDests, setExpDests] = useState<string[]>(initialExpDests);
+  const initialExpSlug = paramJourney ?? paramExp;
+  const [expPicks, setExpPicks] = useState<string[]>(initialExpSlug ? [initialExpSlug] : []);
+  const [expSuggest, setExpSuggest] = useState(false);
+  const [travelStyle, setTravelStyle] = useState("");
+  const [childAges, setChildAges] = useState("");
   const [expDate, setExpDate] = useState(paramDate);
+  const [expDateTo, setExpDateTo] = useState("");
+  const [expFlexible, setExpFlexible] = useState(false);
   // Convert numeric guests param to the dropdown option string
   const initialExpGuests = (() => {
     if (!paramGuests) return "2 people";
@@ -267,19 +293,61 @@ export default function EnquirePage() {
   const accomRoomPrefilled = !!paramRoom;
   const expNamePrefilled = !!(paramExp || paramJourney);
 
-  // liveBySlug arrives after the first render, so backfill the name and
+  // liveBySlug arrives after the first render, so backfill the
   // destination once it lands — but never overwrite what the visitor
-  // has already chosen themselves.
+  // has already chosen themselves. A journey spanning both regions
+  // selects both.
   useEffect(() => {
     const slug = paramJourney ?? paramExp;
     if (!slug) return;
     const live = liveBySlug.get(slug);
     if (!live) return;
-    setExpName((prev) => prev || live.title || "");
-    if (live.destination === "north-coast" || live.destination === "siwa") {
-      setExpDest((prev) => prev || live.destination!);
-    }
+    const dest = live.destination;
+    setExpDests((prev) =>
+      prev.length > 0
+        ? prev
+        : dest === "north-coast" || dest === "siwa"
+          ? [dest]
+          : paramJourney
+            ? ["siwa", "north-coast"]
+            : prev,
+    );
   }, [liveBySlug, paramExp, paramJourney]);
+
+  // Only list experiences for the chosen destination(s); with none
+  // chosen, list everything. Journeys covering both always show.
+  const visibleExpOptions = useMemo(
+    () =>
+      expDests.length === 0
+        ? expOptions
+        : expOptions.filter((o) => o.dest === null || expDests.includes(o.dest)),
+    [expOptions, expDests],
+  );
+  const expNameOf = (slug: string) =>
+    expOptions.find((o) => o.slug === slug)?.name || nameForSlug(slug) || prettifySlug(slug);
+  const isJourneySlug = (slug: string) =>
+    slug === paramJourney || !!expOptions.find((o) => o.slug === slug)?.journey;
+
+  // Unticking a destination drops the experiences that belong only to it.
+  const changeExpDests = (next: string[]) => {
+    setExpDests(next);
+    if (next.length > 0) {
+      setExpPicks((picks) =>
+        picks.filter((slug) => {
+          const d = expOptions.find((o) => o.slug === slug)?.dest;
+          return !d || next.includes(d);
+        }),
+      );
+    }
+  };
+
+  // Solo / couple set the head count; the visitor can still change it.
+  const changeTravelStyle = (next: string[]) => {
+    const style = next[0] ?? "";
+    setTravelStyle(style);
+    if (style === "Solo") setExpGuests("1 person");
+    if (style === "Couple") setExpGuests("2 people");
+  };
   const expDatePrefilled = !!paramDate;
   const transportRoutePrefilled = !!paramRoute;
 
@@ -360,18 +428,42 @@ export default function EnquirePage() {
       // A journey must not reach the team labelled as a one-off
       // experience — it's a multi-night itinerary, and when it has no
       // single destination it covers both regions.
-      const isJourneyEnquiry = !!paramJourney;
-      lines.push({ label: "Type", value: isJourneyEnquiry ? "Curated journey" : "Experience" });
-      if (expDest) {
-        lines.push({ label: "Destination", value: expDest === "siwa" ? "Siwa Oasis" : "North Coast" });
-      } else if (isJourneyEnquiry) {
-        lines.push({ label: "Destination", value: "North Coast + Siwa Oasis" });
+      const journeys = expPicks.filter(isJourneySlug);
+      const experiences = expPicks.filter((slug) => !isJourneySlug(slug));
+      const isJourneyEnquiry = journeys.length > 0;
+      lines.push({
+        label: "Type",
+        value: isJourneyEnquiry ? (experiences.length ? "Curated journey + experiences" : "Curated journey") : "Experience",
+      });
+      const destNames = (["siwa", "north-coast"] as const)
+        .filter((d) => expDests.includes(d))
+        .map((d) => (d === "siwa" ? "Siwa Oasis" : "North Coast"));
+      if (destNames.length) {
+        lines.push({ label: destNames.length > 1 ? "Destinations" : "Destination", value: destNames.join(" + ") });
       }
-      if (expName) {
-        lines.push({ label: isJourneyEnquiry ? "Journey" : "Experience", value: expName });
+      if (journeys.length) {
+        lines.push({ label: journeys.length > 1 ? "Journeys" : "Journey", value: journeys.map(expNameOf).join(" · ") });
       }
-      if (expDate) lines.push({ label: isJourneyEnquiry ? "Preferred start date" : "Date", value: expDate });
+      if (experiences.length) {
+        lines.push({ label: experiences.length > 1 ? "Experiences" : "Experience", value: experiences.map(expNameOf).join(" · ") });
+      }
+      if (expSuggest) lines.push({ label: "Suggestions", value: "Not sure yet — please suggest experiences" });
+      if (travelStyle) {
+        lines.push({
+          label: "Travelling as",
+          value: travelStyle === "Family" && childAges.trim() ? `Family — children aged ${childAges.trim()}` : travelStyle,
+        });
+      }
       if (expGuests) lines.push({ label: "Guests", value: expGuests });
+      if (expDate || expDateTo) {
+        const range = expDate && expDateTo && expDateTo !== expDate ? `${expDate} to ${expDateTo}` : expDate || expDateTo;
+        lines.push({
+          label: isJourneyEnquiry ? "Preferred start date" : expDateTo ? "Dates" : "Date",
+          value: expFlexible ? `${range} (flexible)` : range,
+        });
+      } else if (expFlexible) {
+        lines.push({ label: "Dates", value: "Flexible" });
+      }
       if (expPrivate) lines.push({ label: "Privacy", value: expPrivate });
       if (expStaying) lines.push({ label: "Staying at", value: expStaying });
     } else if (tab === "transport") {
@@ -471,8 +563,14 @@ export default function EnquirePage() {
     setAccomCheckin("");
     setAccomCheckout("");
     setAccomRoom("");
-    setExpName("");
+    setExpPicks([]);
+    setExpDests([]);
+    setExpSuggest(false);
+    setTravelStyle("");
+    setChildAges("");
     setExpDate("");
+    setExpDateTo("");
+    setExpFlexible(false);
     setExpStaying("");
     setExpNotes("");
     setTransportRoute("");
@@ -736,67 +834,59 @@ export default function EnquirePage() {
                     Experience <em className="italic text-coastal">enquiry.</em>
                   </h2>
                   <p className="text-[0.82rem] text-ink-soft leading-[1.75] mb-8 pb-8 border-b border-sand-light">
-                    Tell us which experience you're interested in and your
-                    preferred date. Siwa experiences book directly. North
+                    Tell us which experiences you're interested in — one or
+                    several, in one or both destinations — and your dates.
+                    Siwa experiences book directly. North
                     Coast experiences are arranged by our team — we confirm
                     availability and send a payment link within 24 hours.
                   </p>
 
-                  <Field label="Destination">
-                    <select
-                      value={expDest}
-                      onChange={(e) => {
-                        setExpDest(e.target.value);
-                        setExpName("");
-                      }}
-                      className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
-                    >
-                      <option value="">Select destination</option>
-                      <option value="siwa">Siwa Oasis</option>
-                      <option value="north-coast">North Coast</option>
-                    </select>
-                  </Field>
+                  <ChoiceButtons
+                    label="Destinations"
+                    multiple
+                    options={[
+                      { value: "siwa", label: "Siwa Oasis" },
+                      { value: "north-coast", label: "North Coast" },
+                    ]}
+                    value={expDests}
+                    onChange={changeExpDests}
+                  />
 
-                  <Field label="Experience">
-                    <select
-                      value={expName}
-                      onChange={(e) => setExpName(e.target.value)}
-                      disabled={!expDest}
-                      className={`w-full px-4 py-3.5 border text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer ${
-                        expNamePrefilled
-                          ? "bg-cream border-gold/35"
-                          : "bg-white border-sand"
-                      }`}
-                    >
-                      <option value="">
-                        {expDest
-                          ? "Select an experience"
-                          : "Select destination first"}
-                      </option>
-                      {(expDest === "siwa" ? siwaExps : expDest === "north-coast" ? ncExps : []).map((e) => (
-                        <option key={e.slug} value={e.name}>
-                          {e.name}
-                        </option>
-                      ))}
-                    </select>
-                    {expNamePrefilled && (
-                      <PrefillHint>Pre-filled from your selection</PrefillHint>
-                    )}
-                  </Field>
+                  <ExperiencePicker
+                    options={expOptions}
+                    visible={visibleExpOptions}
+                    value={expPicks}
+                    onChange={setExpPicks}
+                    prefilled={expNamePrefilled}
+                  />
+                  {expNamePrefilled && expPicks.includes(initialExpSlug ?? "") && (
+                    <div className="-mt-2 mb-4">
+                      <PrefillHint>Pre-filled from your selection — add more if you like</PrefillHint>
+                    </div>
+                  )}
+                  <label className="flex items-center gap-2.5 -mt-1 mb-6 text-[0.78rem] text-ink-soft cursor-pointer w-fit">
+                    <input
+                      type="checkbox"
+                      checked={expSuggest}
+                      onChange={(e) => setExpSuggest(e.target.checked)}
+                      className="w-4 h-4 accent-gold"
+                    />
+                    Not sure yet — suggest experiences for us
+                  </label>
+
+                  <ChoiceButtons
+                    label="Travelling as"
+                    optional
+                    columns="grid-cols-2 sm:grid-cols-3"
+                    options={["Solo", "Couple", "Family", "Friends", "Group / corporate", "Other"].map((v) => ({
+                      value: v,
+                      label: v,
+                    }))}
+                    value={travelStyle ? [travelStyle] : []}
+                    onChange={changeTravelStyle}
+                  />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
-                    <Field label="Preferred date">
-                      <input
-                        type="date"
-                        value={expDate}
-                        onChange={(e) => setExpDate(e.target.value)}
-                        className={`w-full px-4 py-3.5 border text-[0.84rem] text-navy font-body focus:border-gold outline-none cursor-pointer ${
-                          expDatePrefilled
-                            ? "bg-cream border-gold/35"
-                            : "bg-white border-sand"
-                        }`}
-                      />
-                    </Field>
                     <Field label="Number of guests">
                       <select
                         value={expGuests}
@@ -812,7 +902,53 @@ export default function EnquirePage() {
                         <option>7+ people</option>
                       </select>
                     </Field>
+                    {travelStyle === "Family" ? (
+                      <Field label="Children's ages" optional>
+                        <input
+                          type="text"
+                          value={childAges}
+                          onChange={(e) => setChildAges(e.target.value)}
+                          placeholder="e.g. 6 and 9"
+                          className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
+                        />
+                      </Field>
+                    ) : (
+                      <div className="hidden md:block" />
+                    )}
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-1">
+                    <Field label="Travel dates — from">
+                      <input
+                        type="date"
+                        value={expDate}
+                        onChange={(e) => setExpDate(e.target.value)}
+                        className={`w-full px-4 py-3.5 border text-[0.84rem] text-navy font-body focus:border-gold outline-none cursor-pointer ${
+                          expDatePrefilled
+                            ? "bg-cream border-gold/35"
+                            : "bg-white border-sand"
+                        }`}
+                      />
+                    </Field>
+                    <Field label="To" optional>
+                      <input
+                        type="date"
+                        value={expDateTo}
+                        min={expDate || undefined}
+                        onChange={(e) => setExpDateTo(e.target.value)}
+                        className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none cursor-pointer"
+                      />
+                    </Field>
+                  </div>
+                  <label className="flex items-center gap-2.5 mb-6 text-[0.78rem] text-ink-soft cursor-pointer w-fit">
+                    <input
+                      type="checkbox"
+                      checked={expFlexible}
+                      onChange={(e) => setExpFlexible(e.target.checked)}
+                      className="w-4 h-4 accent-gold"
+                    />
+                    My dates are flexible
+                  </label>
 
                   <Field label="Private experience?" optional>
                     <select
