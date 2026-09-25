@@ -37,6 +37,7 @@ import {
   FileText
 } from 'lucide-react';
 import { MediaField } from '@/components/admin/MediaPicker';
+import { NC_TRANSPORT, SIWA_TRANSPORT, transportAdminSections } from '@/lib/transport-content';
 
 interface Experience {
   id: number;
@@ -3555,6 +3556,26 @@ function PagesEditor({ toast }: { toast: any }) {
           ],
         },
       ],
+    },
+    {
+      id: 'siwa-transport',
+      label: 'Siwa transportation page',
+      route: '/siwa-oasis/transportation',
+      description: 'Routes to Siwa, desert drives, fleet, booking steps and tips. Grey text is what the site shows now — type to replace it.',
+      sections: transportAdminSections('siwa_transport', SIWA_TRANSPORT, {
+        cards: 'Desert drives',
+        card: 'Drive',
+      }),
+    },
+    {
+      id: 'nc-transport',
+      label: 'North Coast transportation page',
+      route: '/north-coast/transportation',
+      description: 'Routes to the coast, within-coast transfers, fleet, the North Coast vs Siwa panel, booking steps and tips. Grey text is what the site shows now — type to replace it.',
+      sections: transportAdminSections('nc_transport', NC_TRANSPORT, {
+        cards: 'Within-coast transfers',
+        card: 'Transfer',
+      }),
     },
     {
       id: 'nc-tips',
