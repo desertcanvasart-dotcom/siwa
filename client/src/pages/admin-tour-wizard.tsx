@@ -85,11 +85,14 @@ export default function AdminTourWizardPage() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(emptyForm);
   const [hydrated, setHydrated] = useState(!isEditing);
+  // What's saved on the server, to tell whether there are unsaved edits.
+  const [savedSnapshot, setSavedSnapshot] = useState(() => JSON.stringify(emptyForm));
+  const dirty = hydrated && JSON.stringify(form) !== savedSnapshot;
 
   useEffect(() => {
     if (!isEditing || !existing || hydrated) return;
     const d = existing.details ?? {};
-    setForm({
+    const loaded = {
       title: existing.title ?? "",
       slug: existing.slug ?? "",
       destination: existing.destination ?? "siwa",
@@ -110,9 +113,27 @@ export default function AdminTourWizardPage() {
       facts: Array.isArray(d.facts) ? d.facts : [],
       meetingPoint: d.meetingPoint ?? "",
       cancellationPolicy: d.cancellationPolicy ?? "",
-    });
+    };
+    setForm(loaded);
+    setSavedSnapshot(JSON.stringify(loaded));
     setHydrated(true);
   }, [existing, isEditing, hydrated]);
+
+  // Warn before closing / reloading the tab with unsaved edits.
+  useEffect(() => {
+    if (!dirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
+  const confirmLeave = (e: React.MouseEvent) => {
+    if (dirty && !window.confirm("You have unsaved changes to this tour. Leave without saving?")) {
+      e.preventDefault();
+    }
+  };
 
   // Auto-slug
   useEffect(() => {
@@ -178,7 +199,8 @@ export default function AdminTourWizardPage() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
+    // stay: save and keep editing (the mid-wizard "Save changes" button)
+    mutationFn: async (_opts: { stay?: boolean } = {}) => {
       const payload = buildPayload();
       // Tours don't have a create endpoint yet — admin/experiences only
       // supports PUT for now. Show a clear error if attempted on new.
@@ -191,7 +213,8 @@ export default function AdminTourWizardPage() {
       if (!res.ok) throw new Error("Failed to save");
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, opts) => {
+      setSavedSnapshot(JSON.stringify(form));
       queryClient.invalidateQueries({ queryKey: ["/api/admin/experiences"] });
       queryClient.invalidateQueries({ queryKey: ["/api/experiences"] });
       queryClient.invalidateQueries({
@@ -204,7 +227,7 @@ export default function AdminTourWizardPage() {
         title: isEditing ? "Tour updated" : "Tour created",
         description: `${form.title} saved successfully`,
       });
-      setLocation("/admin/dashboard");
+      if (!opts?.stay) setLocation("/admin/dashboard");
     },
     onError: (err: any) => {
       toast({ title: "Save failed", description: err?.message ?? "Could not save", variant: "destructive" });
@@ -231,6 +254,7 @@ export default function AdminTourWizardPage() {
           <div className="flex items-center gap-4 min-w-0">
             <Link
               href="/admin/dashboard"
+              onClick={confirmLeave}
               className="flex items-center gap-2 text-[0.6rem] tracking-[0.18em] uppercase text-ink-soft/65 hover:text-navy transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -244,6 +268,9 @@ export default function AdminTourWizardPage() {
               <h1 className="font-display text-[1.05rem] text-navy leading-tight truncate">
                 {form.title || (isEditing ? "Untitled tour" : "New tour")}
               </h1>
+              {dirty && (
+                <p className="text-[0.55rem] tracking-[0.18em] uppercase text-gold mt-0.5">● Unsaved changes</p>
+              )}
             </div>
           </div>
         </div>
@@ -554,22 +581,41 @@ export default function AdminTourWizardPage() {
             ← Back
           </Button>
           <p className="text-[0.58rem] tracking-[0.2em] uppercase text-ink-soft/55 hidden md:block">
-            Step {step} of {STEPS.length} · {STEPS[step - 1]?.label}
+            {!canAdvance()
+              ? "Add a title, slug and short summary to continue"
+              : `Step ${step} of ${STEPS.length} · ${STEPS[step - 1]?.label}`}
           </p>
           {step < STEPS.length ? (
-            <Button
-              type="button"
-              disabled={!canAdvance()}
-              onClick={() => setStep(step + 1)}
-              className="bg-navy hover:bg-navy/90 text-white rounded-none px-6"
-            >
-              Continue →
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Editing an existing tour: save from any step, so a new
+                  photo or a quick fix doesn't require clicking through
+                  every step to the end. */}
+              {isEditing && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!dirty || saveMutation.isPending || !form.title.trim() || !form.slug.trim()}
+                  onClick={() => saveMutation.mutate({ stay: true })}
+                  className="border-gold text-navy rounded-none px-5"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {saveMutation.isPending ? "Saving…" : dirty ? "Save changes" : "Saved"}
+                </Button>
+              )}
+              <Button
+                type="button"
+                disabled={!canAdvance()}
+                onClick={() => setStep(step + 1)}
+                className="bg-navy hover:bg-navy/90 text-white rounded-none px-6"
+              >
+                Continue →
+              </Button>
+            </div>
           ) : (
             <Button
               type="button"
               disabled={saveMutation.isPending || !form.title.trim() || !form.slug.trim()}
-              onClick={() => saveMutation.mutate()}
+              onClick={() => saveMutation.mutate({})}
               className="bg-gold hover:bg-gold-light text-navy rounded-none px-6"
             >
               <Save className="w-4 h-4 mr-2" />
