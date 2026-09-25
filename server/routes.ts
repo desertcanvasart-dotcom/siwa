@@ -1174,12 +1174,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
 
       // Send email
-      await sendEmail({
-        to: 'hello@solei.com',
-        from: 'noreply@solei.com',
+      // Same owner inbox and verified sender as every other form
+      // (EMAIL_TO / EMAIL_FROM) — this used to go to a hard-coded
+      // hello@solei.com. Fail loudly if it doesn't send.
+      const sent = await sendEmail({
+        replyTo: email,
         subject: `New Quote Request from ${fullName}`,
         html: emailHtml
       });
+      if (!sent) {
+        return res.status(502).json({
+          success: false,
+          message: 'Could not send your request. Please try again or contact us directly.'
+        });
+      }
 
       res.json({
         success: true,

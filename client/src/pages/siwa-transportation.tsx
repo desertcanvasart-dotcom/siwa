@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { Arch } from "@/components/ui/Arch";
 import { AccentTitle, withBreaks } from "@/components/ui/AccentTitle";
+import { BackgroundMedia } from "@/components/ui/BackgroundMedia";
 import { SmartLink } from "@/components/ui/SmartLink";
 import { TransportEnquiryForm } from "@/components/transport/TransportEnquiryForm";
 import { useSiteContent } from "@/lib/useSiteContent";
@@ -65,6 +66,9 @@ export default function SiwaTransportationPage() {
       <main>
         {/* ── HERO ─────────────────────────────────────────────── */}
         <section className="relative overflow-hidden bg-navy px-6 md:px-12 lg:px-20 pt-32 pb-20">
+          {t.hero.media && (
+            <BackgroundMedia src={t.hero.media} className="absolute inset-0 w-full h-full object-cover opacity-30" />
+          )}
           <div className="absolute inset-0 textile-bg pointer-events-none" />
           <div
             className="absolute -top-[30%] -right-[5%] w-[55vw] h-[55vw] pointer-events-none"
@@ -150,6 +154,9 @@ export default function SiwaTransportationPage() {
               className="reveal grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-[2px] group"
             >
               <div className="relative bg-[linear-gradient(155deg,#0F2436_0%,#1a3040_60%,#0a1e2e_100%)] min-h-[220px] md:min-h-[320px] overflow-hidden flex flex-col justify-end p-6 md:p-8">
+                {t.featured.image && (
+                  <img src={t.featured.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                )}
                 <div className="absolute inset-0 textile-bg--strong pointer-events-none" />
                 <div
                   className="absolute inset-0 pointer-events-none"
@@ -216,6 +223,11 @@ export default function SiwaTransportationPage() {
                   href="#enquiry-form"
                   className={`reveal ${i % 3 === 1 ? "reveal-d1" : i % 3 === 2 ? "reveal-d2" : ""} bg-white border border-sand p-7 flex flex-col hover:border-gold hover:bg-cream transition-colors group`}
                 >
+                  {r.image && (
+                    <div className="-mx-7 -mt-7 mb-6 h-40 overflow-hidden">
+                      <img src={r.image} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    </div>
+                  )}
                   <p className="font-display italic text-[0.78rem] text-gold/65 mb-3">
                     {r.num}
                   </p>
@@ -278,6 +290,11 @@ export default function SiwaTransportationPage() {
                   href="#enquiry-form"
                   className={`reveal ${i % 3 === 1 ? "reveal-d1" : i % 3 === 2 ? "reveal-d2" : ""} border border-sand px-8 py-10 block hover:border-gold hover:bg-cream transition-colors`}
                 >
+                  {d.image && (
+                    <div className="-mx-8 -mt-10 mb-6 h-44 overflow-hidden">
+                      <img src={d.image} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    </div>
+                  )}
                   <span className="block font-display italic text-[0.78rem] text-gold/65 mb-4">
                     {d.num}
                   </span>
@@ -334,7 +351,10 @@ export default function SiwaTransportationPage() {
                   className={`reveal ${i % 3 === 1 ? "reveal-d1" : i % 3 === 2 ? "reveal-d2" : ""} bg-white border border-sand p-7`}
                 >
                   <div className={`relative h-[120px] overflow-hidden mb-5 ${VEHICLE_GRADIENTS[i % VEHICLE_GRADIENTS.length]}`}>
-                    <div className="absolute inset-0 textile-bg--strong pointer-events-none" />
+                    {!v.image && <div className="absolute inset-0 textile-bg--strong pointer-events-none" />}
+                    {v.image && (
+                      <img src={v.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                    )}
                   </div>
                   <h3 className="font-display text-[1.05rem] text-navy mb-1">
                     {v.name}
@@ -484,6 +504,9 @@ export default function SiwaTransportationPage() {
 
         {/* ── CLOSING ─────────────────────────────────────────── */}
         <section className="relative overflow-hidden bg-navy px-6 md:px-12 lg:px-20 py-24 md:py-32 text-center">
+          {t.closing.media && (
+            <BackgroundMedia src={t.closing.media} className="absolute inset-0 w-full h-full object-cover opacity-25" />
+          )}
           <div className="absolute inset-0 textile-bg pointer-events-none" />
           <div className="relative z-[2] max-w-xl mx-auto">
             <div className="flex justify-center mb-10">
