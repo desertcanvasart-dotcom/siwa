@@ -3,7 +3,7 @@ import { SmartLink } from "@/components/ui/SmartLink";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
 import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
-import { buildRecCards, recPrefix, type RecCard, type RecDestination } from "@/lib/recommendations";
+import { buildRecCards, recHotelPrefix, recPrefix, type RecCard, type RecDestination } from "@/lib/recommendations";
 
 const STAR_TEX =
   "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B89A5B' fill-opacity='0.07'%3E%3Cpath d='M20 0L21 5L20 4L19 5ZM0 20L5 21L4 20L5 19ZM40 20L35 21L36 20L35 19ZM20 40L21 35L20 36L19 35Z'/%3E%3C/g%3E%3C/svg%3E\")";
@@ -29,42 +29,45 @@ export function HotelRecommendations({
   const hotelsMap = useHotelsBySlug();
   const { data: experiences } = useExperiencesRaw();
   const p = recPrefix(destination);
+  const hp = recHotelPrefix(currentSlug);
   const isSiwa = destination === "siwa";
 
-  const viewAll = pickContent(c, `${p}.view_all`, "View all →");
-  const viewAllHref = pickContent(
-    c,
-    `${p}.view_all_href`,
-    isSiwa ? "/siwa-oasis/accommodation" : "/north-coast/accommodation",
-  );
+  // This hotel's own setting when it has one, else the destination's.
+  const own = (field: string): string | undefined => {
+    const v = c[`${hp}.${field}`];
+    return typeof v === "string" && v.trim() ? v : undefined;
+  };
+  const ownCards = c[`${hp}.cards`];
+  const slots = Array.isArray(ownCards) && ownCards.length > 0 ? ownCards : c[`${p}.cards`];
+
+  const viewAll = own("view_all") ?? pickContent(c, `${p}.view_all`, "View all →");
+  const viewAllHref =
+    own("view_all_href") ??
+    pickContent(c, `${p}.view_all_href`, isSiwa ? "/siwa-oasis/accommodation" : "/north-coast/accommodation");
 
   const cards = useMemo(
     () =>
       buildRecCards({
-        slots: c[`${p}.cards`],
+        slots,
         currentSlug,
         destination,
         relatedSlugs,
         hotelsMap,
         experiences,
       }),
-    [c, p, currentSlug, destination, relatedSlugs, hotelsMap, experiences],
+    [slots, currentSlug, destination, relatedSlugs, hotelsMap, experiences],
   );
 
   // Default heading follows what's in the block: "Other Siwa properties"
   // when it's all hotels, "More from Siwa" once experiences or custom
   // cards are mixed in. An admin-set heading always wins.
   const allHotels = cards.every((card) => card.key.startsWith("hotel:"));
-  const title = pickContent(
-    c,
-    `${p}.title`,
-    allHotels ? (isSiwa ? "Other Siwa" : "Other coastal") : "More from",
-  );
-  const italic = pickContent(
-    c,
-    `${p}.italic`,
-    allHotels ? "properties" : isSiwa ? "Siwa" : "the coast",
-  );
+  const title =
+    own("title") ??
+    pickContent(c, `${p}.title`, allHotels ? (isSiwa ? "Other Siwa" : "Other coastal") : "More from");
+  const italic =
+    own("italic") ??
+    pickContent(c, `${p}.italic`, allHotels ? "properties" : isSiwa ? "Siwa" : "the coast");
 
   // "-" as the title hides the block; so does having nothing to show.
   if (title.trim() === "-" || cards.length === 0) return null;
