@@ -6,8 +6,8 @@ import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { getHotelDetail, type HotelDetail } from "@/lib/hotel-data";
 import { useHotelOverlay, useHotelOverlayQuery } from "@/lib/useHotelOverlay";
-import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
 import { resolvePrice } from "@/lib/price";
+import { HotelRecommendations } from "@/components/hotel/HotelRecommendations";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const siwaStubGradient =
@@ -41,7 +41,6 @@ export default function HotelDetailPage() {
   const baseFromTs = useMemo(() => getHotelDetail(slug), [slug]);
   const { isLoading: overlayLoading, isFetched: overlayFetched } = useHotelOverlayQuery(slug);
   const overlay = useHotelOverlay(slug);
-  const hotelsMap = useHotelsBySlug();
 
   // Lightbox state for the "View all photos" gallery.
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -164,64 +163,6 @@ export default function HotelDetailPage() {
     return Array.from(new Set(all));
   }, [hotel]);
 
-  // Related "Other properties" cards. Prefer the explicit related slugs
-  // from the TS file; when a hotel (e.g. one created in the dashboard)
-  // has none, fall back to other live hotels in the same destination.
-  // Each card's cover image comes from the /api/hotels overlay so newly
-  // uploaded photos show up.
-  const relatedCards = useMemo(() => {
-    if (!hotel) return [] as Array<{ slug: string; name: string; tagLine: string; destination: string; basePrice: number; priceDisplay: string; gradient: string; image?: string }>;
-    const wantSiwa = hotel.destination === "siwa-oasis";
-    // Each card resolves its own price/currency from its own overlay —
-    // a related property may be priced in a different currency.
-    const priceFor = (slug: string, fallbackAmount: number, fallbackLabel?: string) => {
-      const o = hotelsMap.get(slug);
-      return resolvePrice({
-        pricePerNight: o?.pricePerNight,
-        rooms: o?.details?.rooms,
-        fallbackAmount,
-        fallbackLabel,
-      });
-    };
-    const mkFromDetail = (r: HotelDetail) => ({
-      slug: r.slug,
-      name: r.name,
-      tagLine: r.tagLine,
-      destination: r.destination,
-      basePrice: priceFor(r.slug, r.basePrice, r.priceLabel).amount,
-      priceDisplay: priceFor(r.slug, r.basePrice, r.priceLabel).display,
-      gradient: r.gradient,
-      image: hotelsMap.get(r.slug)?.imageUrl || r.coverImage,
-    });
-
-    let cards = hotel.related
-      .map((s) => getHotelDetail(s))
-      .filter((h): h is HotelDetail => !!h)
-      .map(mkFromDetail);
-
-    if (cards.length === 0) {
-      // Fallback: sibling hotels from the API map, same destination,
-      // excluding the current one.
-      hotelsMap.forEach((o, s) => {
-        if (cards.length >= 3) return;
-        if (s === hotel.slug) return;
-        const oIsSiwa = (o as any).destination !== "north-coast";
-        if (oIsSiwa !== wantSiwa) return;
-        const ts = getHotelDetail(s);
-        cards.push({
-          slug: s,
-          name: o.name || ts?.name || s,
-          tagLine: ts?.tagLine || o.blurb || "",
-          destination: wantSiwa ? "siwa-oasis" : "north-coast",
-          basePrice: priceFor(s, ts?.basePrice ?? 0, ts?.priceLabel).amount,
-          priceDisplay: priceFor(s, ts?.basePrice ?? 0, ts?.priceLabel).display,
-          gradient: ts?.gradient || (wantSiwa ? siwaStubGradient : coastalStubGradient),
-          image: o.imageUrl || ts?.coverImage,
-        });
-      });
-    }
-    return cards.slice(0, 3);
-  }, [hotel, hotelsMap]);
 
   // Redirect to the hub when the API returns no record (drafted or
   // missing). The API is the source of truth — if it 404s, the hotel
@@ -669,82 +610,13 @@ export default function HotelDetailPage() {
           </aside>
         </section>
 
-        {/* ── RELATED PROPERTIES ─────────────────────────────── */}
-        {relatedCards.length > 0 && (
-        <section className="bg-sand-light px-6 md:px-12 lg:px-20 py-20">
-          <div className="max-w-5xl mx-auto">
-            <div className="reveal flex flex-col md:flex-row justify-between items-start md:items-end gap-3 mb-10">
-              <h2
-                className="font-display font-normal text-navy leading-[1.2]"
-                style={{ fontSize: "clamp(1.4rem, 2.5vw, 1.8rem)" }}
-              >
-                Other{" "}
-                {isSiwa ? (
-                  <>
-                    Siwa <em className="italic text-coastal">properties</em>
-                  </>
-                ) : (
-                  <>
-                    coastal <em className="italic text-coastal">properties</em>
-                  </>
-                )}
-              </h2>
-              <Link
-                href={`/${hotel.destination}/accommodation`}
-                className="text-[0.6rem] tracking-[0.2em] uppercase text-navy opacity-35 hover:opacity-100 transition-opacity inline-flex items-center gap-2"
-              >
-                View all →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-[2px]">
-              {relatedCards.map((r, i) => (
-                <Link
-                  key={r.slug}
-                  href={`/${r.destination}/accommodation/${r.slug}`}
-                  className={`reveal ${i > 0 ? `reveal-d${i}` : ""} group bg-white border border-sand hover:border-gold transition-colors block overflow-hidden`}
-                >
-                  <div className={`relative h-[160px] overflow-hidden ${r.gradient}`}>
-                    {r.image ? (
-                      <img
-                        src={r.image}
-                        alt={r.name}
-                        loading="lazy"
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          backgroundImage:
-                            "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B89A5B' fill-opacity='0.07'%3E%3Cpath d='M20 0L21 5L20 4L19 5ZM0 20L5 21L4 20L5 19ZM40 20L35 21L36 20L35 19ZM20 40L21 35L20 36L19 35Z'/%3E%3C/g%3E%3C/svg%3E\")",
-                        }}
-                      />
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-display text-[0.95rem] text-navy leading-tight mb-1">
-                      {r.name}
-                    </h3>
-                    <p className="text-[0.6rem] tracking-[0.1em] uppercase text-ink-soft/50 mb-3">
-                      {r.tagLine}
-                    </p>
-                    {r.basePrice > 0 && (
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[0.6rem] text-ink-soft/45">
-                          From
-                        </span>
-                        <span className="font-display text-[0.9rem] text-navy">
-                          {r.priceDisplay || `$${r.basePrice} / night`}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-        )}
+        {/* ── RECOMMENDATIONS (admin-configured per destination) ── */}
+        <HotelRecommendations
+          currentSlug={hotel.slug}
+          destination={isSiwa ? "siwa" : "north-coast"}
+          relatedSlugs={hotel.related}
+          gradient={isSiwa ? siwaStubGradient : coastalStubGradient}
+        />
 
         {/* ── CLOSING ─────────────────────────────────────────── */}
         <section className="bg-cream px-6 md:px-12 lg:px-20 py-24 text-center">

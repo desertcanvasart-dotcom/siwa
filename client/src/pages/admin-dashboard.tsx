@@ -38,6 +38,8 @@ import {
 } from 'lucide-react';
 import { MediaField } from '@/components/admin/MediaPicker';
 import { NC_TRANSPORT, SIWA_TRANSPORT, transportAdminSections } from '@/lib/transport-content';
+import { RecommendationsField } from '@/components/admin/RecommendationsField';
+import type { RecSlot } from '@/lib/recommendations';
 
 interface Experience {
   id: number;
@@ -3027,7 +3029,9 @@ function PagesEditor({ toast }: { toast: any }) {
     placeholder?: string;
     help?: string;
     /** 'media' renders the library picker + upload button. */
-    type?: 'text' | 'faq-list' | 'media' | 'media-video' | 'media-image';
+    type?: 'text' | 'faq-list' | 'media' | 'media-video' | 'media-image' | 'recs-list';
+    /** For 'recs-list': which destination's items to offer first. */
+    recsDestination?: 'siwa' | 'north-coast';
   };
   type FaqItem = { q: string; a: string };
   type Section = {
@@ -3578,6 +3582,27 @@ function PagesEditor({ toast }: { toast: any }) {
       }),
     },
     {
+      id: 'hotel-recs',
+      label: 'Hotel pages — recommendations',
+      route: '/siwa-oasis/accommodation',
+      description: 'The block at the bottom of every hotel page ("Other Siwa properties"). Choose up to 4 cards — published hotels, experiences or journeys, or custom cards (restaurants, spas, offers…). Hotels and experiences use their live photo, name and price, and hide automatically when unpublished. Leave the list empty to fill it automatically. To hide the whole block, enter - as the title.',
+      sections: (['siwa', 'north-coast'] as const).map((d) => {
+        const p = d === 'siwa' ? 'hotel_recs.siwa' : 'hotel_recs.nc';
+        const siwa = d === 'siwa';
+        return {
+          id: d,
+          label: siwa ? 'Siwa hotel pages' : 'North Coast hotel pages',
+          fields: [
+            { key: `${p}.title`, label: 'Title (before the italic word)', placeholder: siwa ? 'Other Siwa' : 'Other coastal' },
+            { key: `${p}.italic`, label: 'Italic word', placeholder: 'properties' },
+            { key: `${p}.view_all`, label: '"View all" link text', placeholder: 'View all →' },
+            { key: `${p}.view_all_href`, label: '"View all" link URL', placeholder: siwa ? '/siwa-oasis/accommodation' : '/north-coast/accommodation' },
+            { key: `${p}.cards`, label: 'Cards', type: 'recs-list' as const, recsDestination: d },
+          ],
+        };
+      }),
+    },
+    {
       id: 'nc-tips',
       label: 'North Coast Travel Tips page',
       route: '/north-coast-travel-tips',
@@ -4016,7 +4041,19 @@ function PagesEditor({ toast }: { toast: any }) {
                           </span>
                         )}
                       </Label>
-                      {field.type === 'faq-list' ? (
+                      {field.type === 'recs-list' ? (
+                        <RecommendationsField
+                          value={
+                            (Array.isArray(draft[field.key])
+                              ? draft[field.key]
+                              : Array.isArray(content[field.key])
+                                ? content[field.key]
+                                : []) as RecSlot[]
+                          }
+                          onChange={(next) => setDraft({ ...draft, [field.key]: next })}
+                          destination={field.recsDestination ?? 'siwa'}
+                        />
+                      ) : field.type === 'faq-list' ? (
                         (() => {
                           const items = faqValueOf(field.key);
                           const setItems = (next: FaqItem[]) =>
