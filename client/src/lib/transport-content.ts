@@ -27,6 +27,8 @@ export interface TransportRoute {
   desc: string;
   facts: string;
   price: string;
+  /** Optional photo; the featured route shows it in its image panel. */
+  image: string;
 }
 export interface TransportCard {
   num: string;
@@ -36,12 +38,14 @@ export interface TransportCard {
   includes: string;
   duration: string;
   price: string;
+  image: string;
 }
 export interface TransportVehicle {
   name: string;
   type: string;
   desc: string;
   specs: string;
+  image: string;
 }
 export interface TransportStep {
   title: string;
@@ -68,6 +72,7 @@ export interface TransportPageDefaults {
     title_2: string;
     body: string;
     principles: string;
+    media: string;
   };
   routes: {
     eyebrow: string;
@@ -98,18 +103,20 @@ export interface TransportPageDefaults {
     cta: string;
     cta_2: string;
     cta_2_href: string;
+    media: string;
   };
 }
 
-const EMPTY_ROUTE: TransportRoute = { num: "", from: "", via: "", to: "", desc: "", facts: "", price: "" };
-const EMPTY_CARD: TransportCard = { num: "", title: "", desc: "", includes_label: "", includes: "", duration: "", price: "" };
-const EMPTY_VEHICLE: TransportVehicle = { name: "", type: "", desc: "", specs: "" };
+const EMPTY_ROUTE: TransportRoute = { num: "", from: "", via: "", to: "", desc: "", facts: "", price: "", image: "" };
+const EMPTY_CARD: TransportCard = { num: "", title: "", desc: "", includes_label: "", includes: "", duration: "", price: "", image: "" };
+const EMPTY_VEHICLE: TransportVehicle = { name: "", type: "", desc: "", specs: "", image: "" };
 const EMPTY_STEP: TransportStep = { title: "", text: "" };
 const EMPTY_TIP: TransportTip = { title: "", desc: "" };
 
 /** Pad a default list with empty slots so the admin has room to add. */
-function withSpare<T>(items: T[], empty: T, total: number): T[] {
-  return [...items, ...Array.from({ length: Math.max(0, total - items.length) }, () => ({ ...empty }))];
+function withSpare<T>(items: Omit<T, "image">[], empty: T, total: number): T[] {
+  const filled = items.map((item) => ({ ...empty, ...item }) as T);
+  return [...filled, ...Array.from({ length: Math.max(0, total - items.length) }, () => ({ ...empty }))];
 }
 
 export const SIWA_TRANSPORT: TransportPageDefaults = {
@@ -130,6 +137,7 @@ export const SIWA_TRANSPORT: TransportPageDefaults = {
       "Routes selected for the journey, not just the destination",
       "Flexible timing — depart when you're ready",
     ].join("\n"),
+    media: "",
   },
   routes: {
     eyebrow: "Getting to Siwa",
@@ -155,6 +163,7 @@ export const SIWA_TRANSPORT: TransportPageDefaults = {
       "Vehicle: Private SUV or 4×4 — air-conditioned",
     ].join("\n"),
     price: "$180 per vehicle",
+    image: "",
   },
   routeItems: withSpare(
     [
@@ -328,6 +337,7 @@ export const SIWA_TRANSPORT: TransportPageDefaults = {
     cta: "Arrange transportation",
     cta_2: "View accommodation",
     cta_2_href: "/siwa-oasis/accommodation",
+    media: "",
   },
 };
 
@@ -349,6 +359,7 @@ export const NC_TRANSPORT: TransportPageDefaults = {
       "Between-property transfers across Marassi, Almaza Bay, El Alamein",
       "Flexible timing — depart when your stay is ready",
     ].join("\n"),
+    media: "",
   },
   routes: {
     eyebrow: "Getting to the coast",
@@ -374,6 +385,7 @@ export const NC_TRANSPORT: TransportPageDefaults = {
       "Drop-off: Direct to your property",
     ].join("\n"),
     price: "$80 per vehicle",
+    image: "",
   },
   routeItems: withSpare(
     [
@@ -577,6 +589,7 @@ export const NC_TRANSPORT: TransportPageDefaults = {
     cta: "Arrange transportation",
     cta_2: "View accommodation",
     cta_2_href: "/north-coast/accommodation",
+    media: "",
   },
 };
 
@@ -657,6 +670,8 @@ export interface TransportAdminField {
   label: string;
   placeholder?: string;
   multiline?: boolean;
+  /** Renders the media library picker + upload button. */
+  type?: "media" | "media-image";
 }
 export interface TransportAdminSection {
   id: string;
@@ -665,15 +680,16 @@ export interface TransportAdminSection {
   fields: TransportAdminField[];
 }
 
-type FieldSpec = [field: string, label: string, multiline?: boolean];
+type FieldSpec = [field: string, label: string, multiline?: boolean, type?: TransportAdminField["type"]];
 
 function fieldsFor(prefix: string, defaultsObj: object, specs: FieldSpec[]): TransportAdminField[] {
   const defaults = defaultsObj as Record<string, string>;
-  return specs.map(([field, label, multiline]) => ({
+  return specs.map(([field, label, multiline, type]) => ({
     key: `${prefix}.${field}`,
     label,
     placeholder: defaults[field] || undefined,
     multiline: multiline || (defaults[field] ?? "").includes("\n") || undefined,
+    type,
   }));
 }
 
@@ -725,6 +741,7 @@ export function transportAdminSections(
         ["title_2", "Second line"],
         ["body", "Intro paragraph", true],
         ["principles", "Bullet boxes (one per line)", true],
+        ["media", "Background image or video (optional)", false, "media"],
       ]),
     },
     {
@@ -748,6 +765,7 @@ export function transportAdminSections(
           ["desc", "Featured — description", true],
           ["facts", "Featured — facts", true],
           ["price", "Featured — price"],
+          ["image", "Featured — photo (fills the large image panel)", false, "media-image"],
         ]),
       ],
     },
@@ -763,6 +781,7 @@ export function transportAdminSections(
         ["desc", "description", true],
         ["facts", "facts", true],
         ["price", "price"],
+        ["image", "photo (optional)", false, "media-image"],
       ]),
     },
     {
@@ -779,6 +798,7 @@ export function transportAdminSections(
           ["includes", "list"],
           ["duration", "duration line"],
           ["price", "price"],
+          ["image", "photo (optional)", false, "media-image"],
         ]),
       ],
     },
@@ -793,6 +813,7 @@ export function transportAdminSections(
           ["type", "type line"],
           ["desc", "description", true],
           ["specs", "specs", true],
+          ["image", "photo (replaces the coloured panel)", false, "media-image"],
         ]),
       ],
     },
@@ -869,6 +890,7 @@ export function transportAdminSections(
         ["cta", "Gold button (scrolls to the form)"],
         ["cta_2", "Second button — label"],
         ["cta_2_href", "Second button — URL"],
+        ["media", "Background image or video (optional)", false, "media"],
       ]),
     },
   );
