@@ -6,8 +6,9 @@
  *
  * Env vars:
  *   RESEND_API_KEY — from resend.com → API Keys
- *   EMAIL_FROM     — verified sender, e.g. "Soléi <bookings@yourdomain.com>"
+ *   EMAIL_FROM     — verified sender (default "Soléi <hello@darsolei.com>")
  *   EMAIL_TO       — owner inbox that receives every enquiry
+ *                    (default hello@darsolei.com)
  *
  * In development (no key) it logs the email instead of sending, so the
  * forms still "work" locally without a Resend account.
@@ -16,8 +17,10 @@
 import { Resend } from "resend";
 import type { HotelRequest } from "@shared/schema";
 
-const FROM = process.env.EMAIL_FROM || "Soléi <onboarding@resend.dev>";
-const OWNER = process.env.EMAIL_TO || "";
+// Defaults are the business address on the Resend-verified darsolei.com
+// domain, so enquiries still go out if a variable is missing.
+const FROM = process.env.EMAIL_FROM || "Soléi <hello@darsolei.com>";
+const OWNER = process.env.EMAIL_TO || "hello@darsolei.com";
 
 let resend: Resend | null = null;
 function getResend(): Resend | null {
