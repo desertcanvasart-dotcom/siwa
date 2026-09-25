@@ -318,12 +318,18 @@ export function MediaGalleryField({
   onChange: (urls: string[]) => void;
 }) {
   const [open, setOpen] = useState(false);
+  // Uploading several files calls add() once per file in the same tick,
+  // before the parent re-renders with the new value — so build on the
+  // latest list, not the (stale) prop, or only the last photo survives.
+  const latest = useRef(value);
+  latest.current = value;
 
   const add = (url: string) => {
     if (!url) return;
     // Ignore duplicates so the same photo can't be added twice.
-    if (value.includes(url)) return;
-    onChange([...value, url]);
+    if (latest.current.includes(url)) return;
+    latest.current = [...latest.current, url];
+    onChange(latest.current);
   };
   const remove = (i: number) => onChange(value.filter((_, idx) => idx !== i));
   const move = (i: number, dir: -1 | 1) => {

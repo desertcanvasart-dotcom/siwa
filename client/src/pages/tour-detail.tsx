@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/seo";
@@ -6,6 +6,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import type { TourDetail } from "@shared/tour-detail";
+import { GalleryLightbox } from "@/components/ui/GalleryLightbox";
 
 /**
  * /siwa-oasis/experiences/:slug + /north-coast/experiences/:slug
@@ -86,6 +87,19 @@ export default function TourDetailPage() {
 
   const details = useMemo<TourDetail>(() => tour?.details ?? {}, [tour]);
   const overview = details.overview ?? (tour?.description ? [tour.description] : []);
+
+  // Gallery: the extra photos, plus the main photo first in the
+  // full-screen viewer so it can be browsed too.
+  const gallery = useMemo(
+    () => (details.gallery ?? []).filter((u) => typeof u === "string" && u.trim() && u !== tour?.imageUrl),
+    [details, tour],
+  );
+  const viewerImages = useMemo(
+    () => Array.from(new Set([tour?.imageUrl, ...gallery].filter((u): u is string => !!u))),
+    [tour, gallery],
+  );
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const openViewer = (src: string) => setViewerIndex(Math.max(0, viewerImages.indexOf(src)));
 
   if (isLoading || tour === undefined) {
     return (
@@ -212,6 +226,17 @@ export default function TourDetailPage() {
         {/* ── BODY GRID ─────────────────────────────────── */}
         <section className="max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
           <div>
+            {/* Gallery */}
+            {gallery.length > 0 && (
+              <PhotoMosaic
+                images={gallery}
+                total={viewerImages.length}
+                title={tour.title}
+                onOpen={openViewer}
+                onOpenAll={() => setViewerIndex(0)}
+              />
+            )}
+
             {/* Overview */}
             {overview.length > 0 && (
               <div className="reveal mb-14">
@@ -407,7 +432,90 @@ export default function TourDetailPage() {
         </section>
       </main>
 
+      {viewerIndex !== null && viewerImages.length > 0 && (
+        <GalleryLightbox
+          images={viewerImages}
+          index={viewerIndex}
+          setIndex={setViewerIndex}
+          onClose={() => setViewerIndex(null)}
+          title={tour.title}
+        />
+      )}
+
       <Footer />
     </>
+  );
+}
+
+/**
+ * Photo mosaic for an experience's gallery: one large photo and up to
+ * four smaller ones (fewer photos → simpler layouts). The last tile
+ * shows how many more there are; everything opens the full viewer.
+ */
+function PhotoMosaic({
+  images,
+  total,
+  title,
+  onOpen,
+  onOpenAll,
+}: {
+  images: string[];
+  total: number;
+  title: string;
+  onOpen: (src: string) => void;
+  onOpenAll: () => void;
+}) {
+  const n = images.length;
+  const shown = n >= 5 ? images.slice(0, 5) : n === 4 ? images.slice(0, 3) : images;
+  const hidden = n - shown.length;
+  const grid =
+    n === 1
+      ? "grid-cols-1"
+      : n === 2
+        ? "grid-cols-2"
+        : n <= 4
+          ? "grid-cols-3 grid-rows-2"
+          : "grid-cols-4 grid-rows-2";
+
+  return (
+    <div className="reveal mb-14">
+      <p className="text-[0.55rem] tracking-[0.3em] uppercase text-gold mb-3">Gallery</p>
+      <div className={`grid ${grid} gap-[2px] h-[260px] md:h-[380px]`}>
+        {shown.map((src, i) => {
+          const big = i === 0 && n >= 3;
+          const last = i === shown.length - 1 && hidden > 0;
+          return (
+            <button
+              key={src}
+              type="button"
+              onClick={() => onOpen(src)}
+              className={`relative overflow-hidden bg-sand-light group ${big ? "col-span-2 row-span-2" : ""}`}
+              aria-label={`${title} — photo ${i + 1}`}
+            >
+              <img
+                src={src}
+                alt=""
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+              />
+              {last && (
+                <span className="absolute inset-0 bg-navy-deep/55 flex items-center justify-center font-display text-[1.3rem] text-white">
+                  +{hidden}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {total > 1 && (
+        <button
+          type="button"
+          onClick={onOpenAll}
+          className="mt-4 text-[0.6rem] tracking-[0.2em] uppercase text-navy border border-sand px-5 py-2.5 hover:border-gold hover:text-gold transition-colors font-body"
+        >
+          View all photos ({total})
+        </button>
+      )}
+    </div>
   );
 }

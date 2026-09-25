@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { MediaField } from "@/components/admin/MediaPicker";
+import { MediaField, MediaGalleryField } from "@/components/admin/MediaPicker";
 
 /**
  * /admin/tours/new  and  /admin/tours/:id/edit
@@ -45,6 +45,7 @@ const emptyForm = {
   summary: "",
   description: "",
   imageUrl: "",
+  gallery: [] as string[],
   isActive: true,
   // Details JSONB
   overview: "",
@@ -103,6 +104,7 @@ export default function AdminTourWizardPage() {
       summary: existing.summary ?? "",
       description: existing.description ?? "",
       imageUrl: existing.imageUrl ?? "",
+      gallery: Array.isArray(d.gallery) ? d.gallery.filter((u: unknown) => typeof u === "string" && u) : [],
       isActive: existing.isActive !== false,
       overview: Array.isArray(d.overview) ? d.overview.join("\n\n") : "",
       includes: Array.isArray(d.includes) ? d.includes.join("\n") : "",
@@ -186,6 +188,7 @@ export default function AdminTourWizardPage() {
     wellness: existing?.wellness ?? false,
     isActive: form.isActive,
     details: {
+      gallery: form.gallery.filter(Boolean),
       overview: form.overview.split(/\n\n+/).map((p) => p.trim()).filter(Boolean),
       includes: form.includes.split("\n").map((s) => s.trim()).filter(Boolean),
       excludes: form.excludes.split("\n").map((s) => s.trim()).filter(Boolean),
@@ -369,6 +372,12 @@ export default function AdminTourWizardPage() {
                 accept="image"
                 placeholder="Pick from library, or paste a URL"
               />
+            </Field>
+            <Field
+              label="Photo gallery"
+              hint="Extra photos shown on the experience page, in this order. The card image stays the main photo."
+            >
+              <MediaGalleryField value={form.gallery} onChange={(urls) => set({ gallery: urls })} />
             </Field>
           </StepCard>
         )}
@@ -561,6 +570,7 @@ export default function AdminTourWizardPage() {
             <ReviewRow label="Price" value={`$${form.pricePerPerson || 0} / guest`} />
             <ReviewRow label="Max guests" value={String(form.maxGuests)} />
             <ReviewRow label="Image" value={form.imageUrl || "—"} />
+            <ReviewRow label="Gallery" value={`${form.gallery.length} photo${form.gallery.length === 1 ? "" : "s"}`} />
             <ReviewRow label="Itinerary" value={`${form.itinerary.length} step${form.itinerary.length === 1 ? "" : "s"}`} />
             <ReviewRow label="FAQs" value={`${form.faqs.length}`} />
             <ReviewRow label="Custom fields" value={`${form.facts.length}`} />
