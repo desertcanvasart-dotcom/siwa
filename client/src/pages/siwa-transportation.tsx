@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "wouter";
 import { SEO } from "@/components/seo";
 import { Nav } from "@/components/layout/Nav";
@@ -7,6 +6,7 @@ import { useReveal } from "@/components/home/useReveal";
 import { Arch } from "@/components/ui/Arch";
 import { AccentTitle, withBreaks } from "@/components/ui/AccentTitle";
 import { SmartLink } from "@/components/ui/SmartLink";
+import { TransportEnquiryForm } from "@/components/transport/TransportEnquiryForm";
 import { useSiteContent } from "@/lib/useSiteContent";
 import {
   SIWA_TRANSPORT,
@@ -51,13 +51,7 @@ function RouteName({ r, arrowClassName }: { r: TransportRoute; arrowClassName: s
 
 export default function SiwaTransportationPage() {
   useReveal();
-  const [submitted, setSubmitted] = useState(false);
   const t = resolveTransportPage(useSiteContent(), "siwa_transport", SIWA_TRANSPORT);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
 
   return (
     <>
@@ -475,131 +469,16 @@ export default function SiwaTransportationPage() {
               )}
             </div>
 
-            {submitted ? (
-              <div className="bg-white border border-sand p-8">
-                <h3 className="font-display text-[1.2rem] text-navy mb-3">
-                  Request received.
-                </h3>
-                <p className="text-[0.85rem] text-ink-soft leading-[1.8] mb-6">
-                  Thank you. Our team will confirm vehicle and driver within
-                  24 hours and send a secure payment link via WhatsApp or
-                  email.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setSubmitted(false)}
-                  className="text-[0.58rem] tracking-[0.18em] uppercase text-gold hover:text-gold-light transition-colors"
-                >
-                  Submit another request →
-                </button>
-              </div>
-            ) : (
-              <form
-                onSubmit={handleSubmit}
-                className="bg-white border border-sand p-7"
-              >
-                <Field label="Route">
-                  <select
-                    required
-                    defaultValue=""
-                    className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled>
-                      Select your route
-                    </option>
-                    <optgroup label="Routes to Siwa">
-                      <option>Cairo → Siwa Oasis (~8 hrs)</option>
-                      <option>Marsa Matrouh → Siwa (~3 hrs)</option>
-                      <option>Alexandria → Siwa (~6 hrs)</option>
-                    </optgroup>
-                    <optgroup label="Return from Siwa">
-                      <option>Siwa → Cairo (~8 hrs)</option>
-                      <option>Siwa → Marsa Matrouh (~3 hrs)</option>
-                      <option>Siwa → Alexandria (~6 hrs)</option>
-                    </optgroup>
-                    <optgroup label="Desert drives within Siwa">
-                      <option>Great Sand Sea Drive (half/full day)</option>
-                      <option>Salt Lakes & Springs Circuit (half day)</option>
-                      <option>Ancient Sites Drive (morning)</option>
-                      <option>Sunrise Desert Drive</option>
-                      <option>In-oasis transfer</option>
-                      <option>Full day bespoke</option>
-                    </optgroup>
-                  </select>
-                </Field>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
-                  <Field label="Travel date">
-                    <input
-                      type="date"
-                      required
-                      className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none cursor-pointer"
-                    />
-                  </Field>
-                  <Field label="Departure time (approx.)">
-                    <input
-                      type="text"
-                      placeholder="e.g. 6:00am"
-                      className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none"
-                    />
-                  </Field>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
-                  <Field label="Passengers">
-                    <select
-                      defaultValue="2"
-                      className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
-                    >
-                      <option>1 passenger</option>
-                      <option>2 passengers</option>
-                      <option>3 passengers</option>
-                      <option>4 passengers</option>
-                      <option>5–6 passengers</option>
-                      <option>7–8 passengers</option>
-                    </select>
-                  </Field>
-                  <Field label="Vehicle preference">
-                    <select
-                      defaultValue="Let Soléi decide"
-                      className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
-                    >
-                      <option>Let Soléi decide</option>
-                      <option>Private SUV</option>
-                      <option>4×4 Desert Vehicle</option>
-                      <option>Private Minivan</option>
-                    </select>
-                  </Field>
-                </div>
-
-                <Field label="Pickup location">
-                  <input
-                    type="text"
-                    placeholder="Hotel name, address, or area"
-                    className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none"
-                  />
-                </Field>
-
-                <Field label="Any notes or special requests">
-                  <textarea
-                    rows={4}
-                    placeholder="Stops along the way, luggage, accessibility needs, or anything else we should know…"
-                    className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none resize-y"
-                  />
-                </Field>
-
-                <button
-                  type="submit"
-                  className="block w-full mt-3 text-[0.65rem] tracking-[0.2em] uppercase text-navy bg-gold py-4 font-body font-medium hover:bg-gold-light transition-colors"
-                >
-                  Send transportation request
-                </button>
-                <p className="text-[0.68rem] text-ink-soft/50 text-center mt-3 leading-[1.6]">
-                  We respond within 24 hours. No payment until vehicle and
-                  driver are confirmed.
-                </p>
-              </form>
-            )}
+            <TransportEnquiryForm
+              t={t}
+              destination="Siwa"
+              accent="gold"
+              routesGroupLabel="Routes to and from Siwa"
+              cardsGroupLabel="Desert drives within Siwa"
+              pickupPlaceholder="Hotel name, address, or area"
+              departurePlaceholder="e.g. 6:00am"
+              notesPlaceholder="Stops along the way, luggage, accessibility needs, or anything else we should know…"
+            />
           </div>
         </section>
 
@@ -641,22 +520,5 @@ export default function SiwaTransportationPage() {
 
       <Footer />
     </>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="mb-3">
-      <label className="block text-[0.56rem] tracking-[0.22em] uppercase text-ink-soft/55 mb-1.5">
-        {label}
-      </label>
-      {children}
-    </div>
   );
 }

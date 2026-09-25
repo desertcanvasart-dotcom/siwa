@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "wouter";
 import { SEO } from "@/components/seo";
 import { Nav } from "@/components/layout/Nav";
@@ -7,6 +6,7 @@ import { useReveal } from "@/components/home/useReveal";
 import { Arch } from "@/components/ui/Arch";
 import { AccentTitle, withBreaks } from "@/components/ui/AccentTitle";
 import { SmartLink } from "@/components/ui/SmartLink";
+import { TransportEnquiryForm } from "@/components/transport/TransportEnquiryForm";
 import { useSiteContent } from "@/lib/useSiteContent";
 import {
   NC_TRANSPORT,
@@ -59,14 +59,8 @@ function RouteName({ r, arrowClassName }: { r: TransportRoute; arrowClassName: s
 
 export default function NorthCoastTransportationPage() {
   useReveal();
-  const [submitted, setSubmitted] = useState(false);
   const t = resolveTransportPage(useSiteContent(), "nc_transport", NC_TRANSPORT);
   const compare = t.compare!;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
 
   return (
     <>
@@ -563,139 +557,17 @@ export default function NorthCoastTransportationPage() {
               )}
             </div>
 
-            {submitted ? (
-              <div className="bg-white border border-sand p-8">
-                <h3 className="font-display text-[1.2rem] text-navy mb-3">
-                  Request received.
-                </h3>
-                <p className="text-[0.85rem] text-ink-soft leading-[1.8] mb-6">
-                  Thank you. Our team will confirm vehicle and driver within
-                  24 hours and send a secure payment link via WhatsApp or
-                  email.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setSubmitted(false)}
-                  className="text-[0.58rem] tracking-[0.18em] uppercase text-coastal hover:text-[#266080] transition-colors"
-                >
-                  Submit another request →
-                </button>
-              </div>
-            ) : (
-              <form
-                onSubmit={handleSubmit}
-                className="bg-white border border-sand p-7"
-              >
-                <Field label="Route">
-                  <select
-                    required
-                    defaultValue=""
-                    className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-coastal outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled>
-                      Select your route
-                    </option>
-                    <optgroup label="Routes to North Coast">
-                      <option>Cairo → North Coast (~2.5 hrs)</option>
-                      <option>Alexandria → North Coast (~45 min)</option>
-                      <option>Cairo → Alexandria → North Coast (~4 hrs)</option>
-                      <option>Airport pickup → North Coast</option>
-                    </optgroup>
-                    <optgroup label="Return from North Coast">
-                      <option>North Coast → Cairo (~2.5 hrs)</option>
-                      <option>North Coast → Alexandria (~45 min)</option>
-                      <option>North Coast → Airport</option>
-                    </optgroup>
-                    <optgroup label="Within the North Coast">
-                      <option>Marassi ↔ Almaza Bay (~1 hr)</option>
-                      <option>Marassi ↔ El Alamein (~30 min)</option>
-                      <option>Property to experience transfer</option>
-                      <option>On-demand in-area transfer</option>
-                      <option>Cairo day trip (full day)</option>
-                    </optgroup>
-                  </select>
-                </Field>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
-                  <Field label="Travel date">
-                    <input
-                      type="date"
-                      required
-                      className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-coastal outline-none cursor-pointer"
-                    />
-                  </Field>
-                  <Field label="Departure time (approx.)">
-                    <input
-                      type="text"
-                      placeholder="e.g. 7:00am"
-                      className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-coastal outline-none"
-                    />
-                  </Field>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
-                  <Field label="Passengers">
-                    <select
-                      defaultValue="2"
-                      className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-coastal outline-none appearance-none cursor-pointer"
-                    >
-                      <option>1 passenger</option>
-                      <option>2 passengers</option>
-                      <option>3 passengers</option>
-                      <option>4 passengers</option>
-                      <option>5–6 passengers</option>
-                      <option>7–8 passengers</option>
-                    </select>
-                  </Field>
-                  <Field label="Vehicle preference">
-                    <select
-                      defaultValue="Let Soléi decide"
-                      className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-coastal outline-none appearance-none cursor-pointer"
-                    >
-                      <option>Let Soléi decide</option>
-                      <option>Private SUV</option>
-                      <option>Premium Sedan</option>
-                      <option>Private Minivan</option>
-                    </select>
-                  </Field>
-                </div>
-
-                <Field label="Pickup location">
-                  <input
-                    type="text"
-                    placeholder="Hotel name, address, or area (e.g. Marassi marina)"
-                    className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-coastal outline-none"
-                  />
-                </Field>
-
-                <Field label="Drop-off location">
-                  <input
-                    type="text"
-                    placeholder="Property name or destination on the coast"
-                    className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-coastal outline-none"
-                  />
-                </Field>
-
-                <Field label="Any notes or special requests">
-                  <textarea
-                    rows={4}
-                    placeholder="Flight number for airport pickups, child seats, luggage, accessibility needs…"
-                    className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-coastal outline-none resize-y"
-                  />
-                </Field>
-
-                <button
-                  type="submit"
-                  className="block w-full mt-3 text-[0.65rem] tracking-[0.2em] uppercase text-white bg-coastal py-4 font-body font-medium hover:bg-[#266080] transition-colors"
-                >
-                  Send transportation request
-                </button>
-                <p className="text-[0.68rem] text-ink-soft/50 text-center mt-3 leading-[1.6]">
-                  We respond within 24 hours. No payment until vehicle and
-                  driver are confirmed.
-                </p>
-              </form>
-            )}
+            <TransportEnquiryForm
+              t={t}
+              destination="North Coast"
+              accent="coastal"
+              routesGroupLabel="Routes to and from the North Coast"
+              cardsGroupLabel="Within the North Coast"
+              showDropoff
+              pickupPlaceholder="Hotel name, address, or area (e.g. Marassi marina)"
+              departurePlaceholder="e.g. 7:00am"
+              notesPlaceholder="Flight number for airport pickups, child seats, luggage, accessibility needs…"
+            />
           </div>
         </section>
 
@@ -737,22 +609,5 @@ export default function NorthCoastTransportationPage() {
 
       <Footer />
     </>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="mb-3">
-      <label className="block text-[0.56rem] tracking-[0.22em] uppercase text-ink-soft/55 mb-1.5">
-        {label}
-      </label>
-      {children}
-    </div>
   );
 }
