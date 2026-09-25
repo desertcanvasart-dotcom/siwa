@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Arch } from "@/components/ui/Arch";
 import { useReveal } from "@/components/home/useReveal";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
-import { resolvePrice, parseAmount } from "@/lib/price";
+import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
 import adrereAmellalImage from "@assets/adrerre-amelal_1751755031600.jpg";
 import taziryImage from "@assets/taziry-room-.jpg";
 import ghalietImage from "@assets/galit-lodge-siwa_1751833109925.jpg";
@@ -251,14 +251,9 @@ export default function SiwaOasisAccommodation() {
             ...inline,
             name: overlay?.name || inline.name,
             desc: overlay?.blurb || inline.desc,
-            // Shared resolver: pins USD, strips a baked-in "From", and
-            // prefers the lowest room rate — same as every other surface.
-            price:
-              resolvePrice({
-                pricePerNight: overlay?.pricePerNight,
-                rooms: overlay?.details?.rooms,
-                fallbackAmount: parseAmount(inline.price),
-              }).display || inline.price,
+            // Only the price entered in the dashboard — never the
+            // sample price bundled with the inline card.
+            price: adminPrice(overlay).display || PRICE_ON_REQUEST,
             image: overlay?.imageUrl || inline.image,
           }
         : {
@@ -267,11 +262,7 @@ export default function SiwaOasisAccommodation() {
             type: "Hotel",
             desc: overlay?.blurb || overlay?.description || "",
             highlights: Array.isArray(overlay?.amenities) ? overlay!.amenities! : [],
-            price:
-              resolvePrice({
-                pricePerNight: overlay?.pricePerNight,
-                rooms: overlay?.details?.rooms,
-              }).display || "On request",
+            price: adminPrice(overlay).display || PRICE_ON_REQUEST,
             categories: ["eco"],
             gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#0F2436_60%,#2a5a7a_100%)]",
             image: overlay?.imageUrl,
@@ -294,13 +285,12 @@ export default function SiwaOasisAccommodation() {
         return {
           ...h,
           name: o.name || h.name,
-          fromPrice: (() => {
-            const p = resolvePrice({
-              pricePerNight: o.pricePerNight,
-              rooms: o.details?.rooms,
-              fallbackAmount: parseAmount(h.fromPrice),
-            });
-            return p.amount > 0 ? `${p.currency}${p.amount.toLocaleString()}` : h.fromPrice;
+          ...(() => {
+            // Only the dashboard price; the bundled one is sample copy.
+            const p = adminPrice(o);
+            return p.amount > 0
+              ? { fromPrice: `${p.currency}${p.amount.toLocaleString()}`, priceNote: p.label }
+              : { fromPrice: "", priceNote: "" };
           })(),
           image: o.imageUrl || h.image,
         };
@@ -680,7 +670,7 @@ function CollectionCard({
           className="absolute top-5 left-5 z-[3] text-[0.5rem] tracking-[0.25em] uppercase text-gold border border-gold/50 px-3 py-1 font-body"
           style={{ backdropFilter: "blur(8px)", background: "rgba(9,24,32,0.5)" }}
         >
-          Soléi Collection · From {hotel.fromPrice}
+          Soléi Collection · {hotel.fromPrice ? `From ${hotel.fromPrice}` : PRICE_ON_REQUEST}
         </span>
 
         {/* Content overlay */}
@@ -713,15 +703,19 @@ function CollectionCard({
 
           {/* Footer */}
           <div className="flex justify-between items-center pt-4 border-t border-gold/20">
-            <div>
-              <div className="text-[0.6rem] uppercase tracking-[0.12em] text-white/40 font-body">From</div>
-              <div className="font-display text-[1.3rem] text-gold leading-none">
-                {hotel.fromPrice}{" "}
-                <span className="font-body text-[0.72rem] text-white/40 font-light">{hotel.priceNote}</span>
+            {hotel.fromPrice ? (
+              <div>
+                <div className="text-[0.6rem] uppercase tracking-[0.12em] text-white/40 font-body">From</div>
+                <div className="font-display text-[1.3rem] text-gold leading-none">
+                  {hotel.fromPrice}{" "}
+                  <span className="font-body text-[0.72rem] text-white/40 font-light">{hotel.priceNote}</span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="font-display text-[1.05rem] text-gold leading-none">{PRICE_ON_REQUEST}</div>
+            )}
             <span className={`text-[0.6rem] tracking-[0.18em] uppercase text-navy px-6 py-2.5 font-body transition-colors ${hovered ? "bg-gold-light" : "bg-gold"}`}>
-              Book now
+              {hotel.fromPrice ? "Book now" : "Submit a request"}
             </span>
           </div>
         </div>
@@ -765,12 +759,16 @@ function PartnerCard({ hotel, delay }: { hotel: PartnerHotel; delay: number }) {
           ))}
         </div>
         <div className="flex justify-between items-center pt-4 border-t border-sand-light">
-          <div>
-            <div className="text-[0.6rem] text-ink-soft/50 font-body">From</div>
-            <div className="font-display text-[1rem] text-navy">{hotel.price}</div>
-          </div>
+          {hotel.price === PRICE_ON_REQUEST ? (
+            <div className="font-display text-[0.95rem] text-navy">{PRICE_ON_REQUEST}</div>
+          ) : (
+            <div>
+              <div className="text-[0.6rem] text-ink-soft/50 font-body">From</div>
+              <div className="font-display text-[1rem] text-navy">{hotel.price}</div>
+            </div>
+          )}
           <span className="text-[0.58rem] tracking-[0.16em] uppercase text-navy bg-gold px-4 py-2 group-hover:bg-gold-light transition-colors font-body">
-            Book now
+            {hotel.price === PRICE_ON_REQUEST ? "Submit a request" : "Book now"}
           </span>
         </div>
       </div>

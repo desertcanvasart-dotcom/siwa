@@ -59,7 +59,6 @@ export function hotelCard(slug: string, hotelsMap: Map<string, HotelOverlay>): R
   const price = resolvePrice({
     pricePerNight: o.pricePerNight,
     rooms: (o as any).details?.rooms,
-    fallbackAmount: ts?.basePrice ?? 0,
     fallbackLabel: ts?.priceLabel,
   });
   return {

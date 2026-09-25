@@ -6,6 +6,8 @@ import { Arch } from "@/components/ui/Arch";
 import { useReveal } from "@/components/home/useReveal";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 import { useActiveSlugs } from "@/lib/useActiveSlugs";
+import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
+import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
 import vidaMarinaImage from "@assets/Vida Marina Resort Marassi _1758142322079.jpg";
 import addressBeachImage from "@assets/Address beach Resort _1758144493080.jpg";
 import casaCookImage from "@assets/Casa Cook North Coast _001_1758143858816.png";
@@ -246,6 +248,11 @@ export default function NorthCoastHub() {
 
   // Hide drafted hotels / experiences using the live API slug sets.
   const liveHotels = useActiveSlugs("/api/hotels");
+  // Card prices come only from the dashboard; the inline ones are
+  // sample copy. Empty until the API answers, so nothing flashes.
+  const hotelPrices = useHotelsBySlug();
+  const priceFor = (slug: string) =>
+    !liveHotels.loaded ? "" : adminPrice(hotelPrices.get(slug)).display || PRICE_ON_REQUEST;
   const liveExperiences = useActiveSlugs("/api/experiences");
   const visibleHotels = liveHotels.loaded
     ? hotels.filter((h) => liveHotels.slugs.has(h.slug))
@@ -598,14 +605,18 @@ export default function NorthCoastHub() {
                       {h.desc}
                     </p>
                     <div className="flex justify-between items-center pt-4 border-t border-sand-light">
-                      <div>
-                        <p className="text-[0.65rem] text-ink-soft/45">From</p>
-                        <p className="font-display text-[1.05rem] text-navy">
-                          {h.price}
-                        </p>
-                      </div>
+                      {priceFor(h.slug) === PRICE_ON_REQUEST ? (
+                        <p className="font-display text-[0.95rem] text-navy">{PRICE_ON_REQUEST}</p>
+                      ) : (
+                        <div>
+                          <p className="text-[0.65rem] text-ink-soft/45">{priceFor(h.slug) ? "From" : "\u00a0"}</p>
+                          <p className="font-display text-[1.05rem] text-navy">
+                            {priceFor(h.slug)}
+                          </p>
+                        </div>
+                      )}
                       <span className="text-[0.58rem] tracking-[0.15em] uppercase text-gold">
-                        Enquire →
+                        {priceFor(h.slug) === PRICE_ON_REQUEST ? "Submit a request →" : "Enquire →"}
                       </span>
                     </div>
                   </div>
