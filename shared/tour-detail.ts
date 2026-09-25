@@ -32,6 +32,9 @@ export interface TourFact {
 }
 
 export interface TourDetail {
+  /** Extra photos (URLs) shown in the page gallery, in order. The
+   *  experience's `imageUrl` stays the main / card photo. */
+  gallery?: string[];
   /** Paragraphs shown above the inclusion list. Falls back to the
    *  experience's `description` when empty. */
   overview?: string[];
