@@ -37,6 +37,7 @@ import {
   FileText
 } from 'lucide-react';
 import { MediaField } from '@/components/admin/MediaPicker';
+import { NC_TRANSPORT, SIWA_TRANSPORT, transportAdminSections } from '@/lib/transport-content';
 
 interface Experience {
   id: number;
@@ -368,6 +369,19 @@ function PageBuilderManagement() {
   );
 }
 
+/** Expiry (ms since epoch) from the admin JWT's `exp` claim, or null
+ *  if the token carries none or can't be read. */
+function adminTokenExpiresAt(token: string | null): number | null {
+  if (!token) return null;
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const exp = JSON.parse(atob(payload)).exp;
+    return typeof exp === 'number' ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
@@ -402,12 +416,29 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
 
   // Check authentication
+  // Logins last 24h. A tab left open past that still renders the
+  // dashboard, but every save then fails with 401 — so send an expired
+  // session straight to login, and warn an open tab when it lapses
+  // (without redirecting, so unsaved edits aren't thrown away).
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
-    if (!token) {
+    const expiresAt = adminTokenExpiresAt(token);
+    if (!token || (expiresAt !== null && expiresAt <= Date.now())) {
+      localStorage.removeItem('adminToken');
       setLocation('/admin/login');
+      return;
     }
-  }, [setLocation]);
+    if (expiresAt === null) return;
+    const timer = window.setTimeout(() => {
+      toast({
+        title: 'Session expired',
+        description: 'Log in again in a new tab before saving — your unsaved edits stay on this page.',
+        variant: 'destructive',
+        duration: Infinity,
+      });
+    }, Math.min(expiresAt - Date.now(), 2 ** 31 - 1));
+    return () => window.clearTimeout(timer);
+  }, [setLocation, toast]);
 
   // Fetch experiences
   const { data: experiences = [], isLoading: experiencesLoading } = useQuery<Experience[]>({
@@ -3525,6 +3556,26 @@ function PagesEditor({ toast }: { toast: any }) {
           ],
         },
       ],
+    },
+    {
+      id: 'siwa-transport',
+      label: 'Siwa transportation page',
+      route: '/siwa-oasis/transportation',
+      description: 'Routes to Siwa, desert drives, fleet, booking steps and tips. Grey text is what the site shows now — type to replace it.',
+      sections: transportAdminSections('siwa_transport', SIWA_TRANSPORT, {
+        cards: 'Desert drives',
+        card: 'Drive',
+      }),
+    },
+    {
+      id: 'nc-transport',
+      label: 'North Coast transportation page',
+      route: '/north-coast/transportation',
+      description: 'Routes to the coast, within-coast transfers, fleet, the North Coast vs Siwa panel, booking steps and tips. Grey text is what the site shows now — type to replace it.',
+      sections: transportAdminSections('nc_transport', NC_TRANSPORT, {
+        cards: 'Within-coast transfers',
+        card: 'Transfer',
+      }),
     },
     {
       id: 'nc-tips',
