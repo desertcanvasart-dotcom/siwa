@@ -48,6 +48,10 @@ export const REC_MAX = 4;
 /** site_content key prefix for a destination. */
 export const recPrefix = (d: RecDestination) => `hotel_recs.${d === "siwa" ? "siwa" : "nc"}`;
 
+/** site_content key prefix for one hotel's own settings. Anything a
+ *  hotel doesn't set falls back to its destination's defaults. */
+export const recHotelPrefix = (slug: string) => `hotel_recs.hotel.${slug}`;
+
 const hotelDestOf = (o: HotelOverlay): RecDestination =>
   (o as any).destination === "north-coast" ? "north-coast" : "siwa";
 

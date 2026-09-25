@@ -3032,6 +3032,8 @@ function PagesEditor({ toast }: { toast: any }) {
     type?: 'text' | 'faq-list' | 'media' | 'media-video' | 'media-image' | 'recs-list';
     /** For 'recs-list': which destination's items to offer first. */
     recsDestination?: 'siwa' | 'north-coast';
+    /** For 'recs-list': note shown while no cards are chosen. */
+    recsEmptyHint?: string;
   };
   type FaqItem = { q: string; a: string };
   type Section = {
@@ -3585,13 +3587,13 @@ function PagesEditor({ toast }: { toast: any }) {
       id: 'hotel-recs',
       label: 'Hotel pages — recommendations',
       route: '/siwa-oasis/accommodation',
-      description: 'The block at the bottom of every hotel page ("Other Siwa properties"). Choose up to 4 cards — published hotels, experiences or journeys, or custom cards (restaurants, spas, offers…). Hotels and experiences use their live photo, name and price, and hide automatically when unpublished. Leave the list empty to fill it automatically. To hide the whole block, enter - as the title.',
+      description: 'The block at the bottom of every hotel page ("Other Siwa properties"). Choose up to 4 cards — published hotels, experiences or journeys, or custom cards (restaurants, spas, offers…). Hotels and experiences use their live photo, name and price, and hide automatically when unpublished. The defaults below apply to every hotel page in that destination; pick a hotel above them to give that one page its own heading or cards (anything you leave empty there uses the default). Leave the cards empty to fill them automatically. To hide the block, enter - as the title.',
       sections: (['siwa', 'north-coast'] as const).map((d) => {
         const p = d === 'siwa' ? 'hotel_recs.siwa' : 'hotel_recs.nc';
         const siwa = d === 'siwa';
         return {
           id: d,
-          label: siwa ? 'Siwa hotel pages' : 'North Coast hotel pages',
+          label: siwa ? 'Default — all Siwa hotel pages' : 'Default — all North Coast hotel pages',
           fields: [
             { key: `${p}.title`, label: 'Title (before the italic word)', placeholder: siwa ? 'Other Siwa' : 'Other coastal' },
             { key: `${p}.italic`, label: 'Italic word', placeholder: 'properties' },
@@ -3907,6 +3909,59 @@ function PagesEditor({ toast }: { toast: any }) {
   const [draft, setDraft] = useState<Record<string, any>>({});
   const selectedPage = pages.find((p) => p.id === selectedPageId) ?? pages[0];
 
+  // Hotel recommendations: one hotel's own settings, layered over its
+  // destination's defaults. The section is built for whichever hotel is
+  // picked, keyed hotel_recs.hotel.<slug>.*
+  const { data: recHotels = [] } = useQuery<Array<{ slug: string; name: string; destination?: string }>>({
+    queryKey: ['/api/hotels', 'rec-picker'],
+    queryFn: async () => {
+      const res = await fetch('/api/hotels');
+      return res.ok ? res.json() : [];
+    },
+  });
+  const [recsHotel, setRecsHotel] = useState('');
+  const recsHotelInfo = recHotels.find((h) => h.slug === recsHotel);
+  const hotelHasOwnRecs = (slug: string) =>
+    Object.entries(content).some(
+      ([k, v]) =>
+        k.startsWith(`hotel_recs.hotel.${slug}.`) &&
+        ((typeof v === 'string' && v.trim() !== '') || (Array.isArray(v) && v.length > 0)),
+    );
+  const hotelRecsSection: Section | null =
+    selectedPage.id === 'hotel-recs' && recsHotelInfo
+      ? (() => {
+          const siwa = recsHotelInfo.destination !== 'north-coast';
+          const d = siwa ? 'hotel_recs.siwa' : 'hotel_recs.nc';
+          const hp = `hotel_recs.hotel.${recsHotelInfo.slug}`;
+          const where = siwa ? 'Siwa' : 'North Coast';
+          const dflt = (field: string, fallback: string) => {
+            const v = content[`${d}.${field}`];
+            return `${typeof v === 'string' && v.trim() ? v : fallback} (default)`;
+          };
+          return {
+            id: `hotel-${recsHotelInfo.slug}`,
+            label: `Only on: ${recsHotelInfo.name}`,
+            description: `Settings for this hotel's page only. Leave a field empty to use the ${where} default shown in grey.`,
+            fields: [
+              { key: `${hp}.title`, label: 'Title (before the italic word)', placeholder: dflt('title', siwa ? 'Other Siwa' : 'Other coastal') },
+              { key: `${hp}.italic`, label: 'Italic word', placeholder: dflt('italic', 'properties') },
+              { key: `${hp}.view_all`, label: '"View all" link text', placeholder: dflt('view_all', 'View all →') },
+              { key: `${hp}.view_all_href`, label: '"View all" link URL', placeholder: dflt('view_all_href', siwa ? '/siwa-oasis/accommodation' : '/north-coast/accommodation') },
+              {
+                key: `${hp}.cards`,
+                label: 'Cards',
+                type: 'recs-list' as const,
+                recsDestination: (siwa ? 'siwa' : 'north-coast') as 'siwa' | 'north-coast',
+                recsEmptyHint: `No cards chosen for this hotel — its page uses the ${where} default cards below. Add cards to give this page its own.`,
+              },
+            ],
+          };
+        })()
+      : null;
+  const visibleSections = hotelRecsSection
+    ? [hotelRecsSection, ...selectedPage.sections]
+    : selectedPage.sections;
+
   const stringValueOf = (key: string) =>
     draft[key] !== undefined
       ? (typeof draft[key] === 'string' ? draft[key] : '')
@@ -4002,7 +4057,45 @@ function PagesEditor({ toast }: { toast: any }) {
               {selectedPage.description}
             </p>
           )}
-          {selectedPage.sections.map((section) => {
+          {selectedPage.id === 'hotel-recs' && (
+            <div className="bg-white border border-sand px-6 py-5">
+              <p className="text-[0.55rem] tracking-[0.3em] uppercase text-gold mb-1">Customise one hotel</p>
+              <label className="block text-[0.78rem] text-ink-soft/70 mb-2" htmlFor="recs-hotel">
+                Pick a hotel to give its page its own recommendations. Hotels marked ● already have their own.
+              </label>
+              <select
+                id="recs-hotel"
+                value={recsHotel}
+                onChange={(e) => setRecsHotel(e.target.value)}
+                className="flex h-10 w-full border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">— All hotels use the defaults below —</option>
+                {(['siwa', 'north-coast'] as const).map((dest) => (
+                  <optgroup key={dest} label={dest === 'siwa' ? 'Siwa Oasis' : 'North Coast'}>
+                    {recHotels
+                      .filter((h) => (h.destination === 'north-coast' ? 'north-coast' : 'siwa') === dest)
+                      .map((h) => (
+                        <option key={h.slug} value={h.slug}>
+                          {hotelHasOwnRecs(h.slug) ? '● ' : ''}{h.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+              {recsHotelInfo && (
+                <a
+                  href={`/${recsHotelInfo.destination === 'north-coast' ? 'north-coast' : 'siwa-oasis'}/accommodation/${recsHotelInfo.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 mt-3 text-[0.6rem] tracking-[0.18em] uppercase text-ink-soft/65 hover:text-navy transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  View {recsHotelInfo.name}
+                </a>
+              )}
+            </div>
+          )}
+          {visibleSections.map((section) => {
             const dirtyKeys = sectionDirtyKeys(section);
             const saving =
               saveSectionMutation.isPending &&
@@ -4052,6 +4145,7 @@ function PagesEditor({ toast }: { toast: any }) {
                           }
                           onChange={(next) => setDraft({ ...draft, [field.key]: next })}
                           destination={field.recsDestination ?? 'siwa'}
+                          emptyHint={field.recsEmptyHint}
                         />
                       ) : field.type === 'faq-list' ? (
                         (() => {

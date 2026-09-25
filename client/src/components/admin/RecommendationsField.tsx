@@ -20,10 +20,13 @@ export function RecommendationsField({
   value,
   onChange,
   destination,
+  emptyHint,
 }: {
   value: RecSlot[];
   onChange: (next: RecSlot[]) => void;
   destination: RecDestination;
+  /** Shown when no cards are chosen (defaults to the automatic-fill note). */
+  emptyHint?: string;
 }) {
   const { data: hotels = [] } = useQuery<Array<{ slug: string; name: string; destination?: string }>>({
     queryKey: ["/api/hotels", "rec-picker"],
@@ -59,8 +62,8 @@ export function RecommendationsField({
     <div className="space-y-3 mt-2">
       {value.length === 0 && (
         <p className="text-xs text-ink-soft/70 bg-cream border border-sand-light px-3 py-2">
-          No cards chosen — the block fills itself automatically: other published hotels here first,
-          then published experiences. Add cards to choose exactly what shows.
+          {emptyHint ??
+            "No cards chosen — the block fills itself automatically: other published hotels here first, then published experiences. Add cards to choose exactly what shows."}
         </p>
       )}
 
