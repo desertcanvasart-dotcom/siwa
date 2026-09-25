@@ -72,30 +72,40 @@ export function ChoiceButtons({
   );
 }
 
-export interface ExperienceOption {
+export interface PickOption {
   slug: string;
   name: string;
   /** null = spans both destinations (e.g. a multi-region journey). */
   dest: "siwa" | "north-coast" | null;
-  journey: boolean;
+  /** Listed under its own heading first (curated journeys). */
+  featured?: boolean;
 }
+/** @deprecated alias kept for the experience tab. */
+export type ExperienceOption = PickOption & { journey: boolean };
 
 /**
- * Multi-select for experiences: a select-styled button opens an inline,
- * searchable checklist grouped into Curated journeys / Siwa Oasis /
- * North Coast. Picks show as removable tags underneath.
+ * Multi-select: a select-styled button opens an inline, searchable
+ * checklist grouped into [featured] / Siwa Oasis / North Coast. Picks
+ * show as removable tags underneath.
  */
-export function ExperiencePicker({
+export function MultiPicker({
+  label,
+  noun,
+  featuredLabel = "Curated journeys",
   options,
   visible,
   value,
   onChange,
   prefilled,
 }: {
+  label: string;
+  /** Plural noun for the button and search, e.g. "experiences". */
+  noun: string;
+  featuredLabel?: string;
   /** Every option — used to name the selected tags. */
-  options: ExperienceOption[];
+  options: PickOption[];
   /** The options to list (already filtered by destination). */
-  visible: ExperienceOption[];
+  visible: PickOption[];
   value: string[];
   onChange: (next: string[]) => void;
   prefilled?: boolean;
@@ -125,26 +135,26 @@ export function ExperiencePicker({
     const q = query.trim().toLowerCase();
     const list = q ? visible.filter((o) => o.name.toLowerCase().includes(q)) : visible;
     return [
-      { label: "Curated journeys", items: list.filter((o) => o.journey) },
-      { label: "Siwa Oasis", items: list.filter((o) => !o.journey && o.dest !== "north-coast") },
-      { label: "North Coast", items: list.filter((o) => !o.journey && o.dest === "north-coast") },
+      { label: featuredLabel, items: list.filter((o) => o.featured) },
+      { label: "Siwa Oasis", items: list.filter((o) => !o.featured && o.dest !== "north-coast") },
+      { label: "North Coast", items: list.filter((o) => !o.featured && o.dest === "north-coast") },
     ].filter((g) => g.items.length > 0);
-  }, [visible, query]);
+  }, [visible, query, featuredLabel]);
 
   const toggle = (slug: string) =>
     onChange(value.includes(slug) ? value.filter((s) => s !== slug) : [...value, slug]);
 
   const summary =
     value.length === 0
-      ? "Select experiences"
+      ? `Select ${noun}`
       : value.length === 1
-        ? byName.get(value[0]) ?? "1 experience selected"
-        : `${value.length} experiences selected`;
+        ? byName.get(value[0]) ?? "1 selected"
+        : `${value.length} ${noun} selected`;
 
   return (
     <div className="mb-4" ref={boxRef}>
       <p className={LABEL}>
-        <FieldLabel label="Experiences" />
+        <FieldLabel label={label} />
         <span className="normal-case tracking-normal ml-1.5 text-ink-soft/35">— choose as many as you like</span>
       </p>
 
@@ -168,14 +178,14 @@ export function ExperiencePicker({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search experiences"
-            aria-label="Search experiences"
+            placeholder={`Search ${noun}`}
+            aria-label={`Search ${noun}`}
             autoFocus
             className="w-full px-4 py-3 border-b border-sand-light text-[0.84rem] text-navy font-body outline-none placeholder:text-ink-soft/35"
           />
           <div className="max-h-72 overflow-y-auto py-1">
             {groups.length === 0 && (
-              <p className="px-4 py-4 text-[0.8rem] text-ink-soft/60">No experiences match.</p>
+              <p className="px-4 py-4 text-[0.8rem] text-ink-soft/60">Nothing matches.</p>
             )}
             {groups.map((g) => (
               <div key={g.label} role="group" aria-label={g.label}>
