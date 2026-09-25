@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "wouter";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
-import { resolvePrice, parseAmount } from "@/lib/price";
+import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
 import adrereAmellalImage from "@assets/adrerre-amelal_1751755031600.jpg";
 import taziryImage from "@assets/taziry-room-.jpg";
 import soleiOldTownImage from "@assets/solei-old-town-heritage.png";
@@ -112,20 +112,14 @@ export function AccommodationGrid() {
         .map((h) => {
         const o = overlays.get(h.slug);
         if (!o) return h;
-        // One shared resolver so the card can't disagree with the
-        // property page (it used to print the raw admin text, giving
-        // "From From $620 / night" and "$70" against the page's "$70").
-        const resolved = resolvePrice({
-          pricePerNight: o.pricePerNight,
-          rooms: o.details?.rooms,
-          fallbackAmount: parseAmount(h.price),
-          fallbackLabel: "/ night",
-        });
+        // Only the price entered in the dashboard — never the sample
+        // price bundled with the card.
+        const resolved = adminPrice(o);
         return {
           ...h,
           name: o.name || h.name,
           desc: o.blurb || h.desc,
-          price: resolved.display || h.price,
+          price: resolved.display || PRICE_ON_REQUEST,
           image: o.imageUrl || h.image,
         };
       }),
@@ -199,14 +193,18 @@ export function AccommodationGrid() {
                   {h.desc}
                 </p>
                 <div className="flex justify-between items-center pt-4 border-t border-sand-light">
-                  <div>
-                    <p className="text-[0.68rem] text-ink-soft/60">From</p>
-                    <p className="font-display text-[1.05rem] text-navy">
-                      {h.price}
-                    </p>
-                  </div>
+                  {h.price === PRICE_ON_REQUEST ? (
+                    <p className="font-display text-[0.95rem] text-navy">{PRICE_ON_REQUEST}</p>
+                  ) : (
+                    <div>
+                      <p className="text-[0.68rem] text-ink-soft/60">From</p>
+                      <p className="font-display text-[1.05rem] text-navy">
+                        {h.price}
+                      </p>
+                    </div>
+                  )}
                   <span className="text-[0.58rem] tracking-[0.16em] uppercase text-gold">
-                    {h.dest === "Siwa Oasis" ? "Book →" : "Enquire →"}
+                    {h.price === PRICE_ON_REQUEST ? "Submit a request →" : h.dest === "Siwa Oasis" ? "Book →" : "Enquire →"}
                   </span>
                 </div>
               </div>

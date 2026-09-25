@@ -101,3 +101,20 @@ export function resolvePrice(src: PriceSource): PriceParts {
     display: amount > 0 ? `${currency}${amount.toLocaleString()} ${label}`.trim() : "",
   };
 }
+
+/**
+ * Shown wherever a property has no price entered in the dashboard.
+ * Prices must only ever come from the admin — the bundled defaults in
+ * hotel-data / listing arrays are sample copy, and showing them made
+ * properties look priced when the owner had set nothing.
+ */
+export const PRICE_ON_REQUEST = "Price on request";
+
+/** A property's price exactly as the admin set it (price field or room
+ *  rates) — never a bundled fallback. `amount` is 0 when there's none. */
+export function adminPrice(o?: {
+  pricePerNight?: string | null;
+  details?: { rooms?: Array<{ price?: number | null }> | null } | null;
+} | null): PriceParts {
+  return resolvePrice({ pricePerNight: o?.pricePerNight, rooms: o?.details?.rooms });
+}

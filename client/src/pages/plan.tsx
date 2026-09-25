@@ -207,16 +207,14 @@ export default function PlanPage() {
     return diff > 0 ? Math.round(diff) : 0;
   }, [checkin, checkout]);
 
+  // Only prices entered in the dashboard count — the bundled room
+  // rates / basePrice are sample copy. 0 = quoted by the team.
   const perNight = useMemo(() => {
-    const rooms = hotelOverlay?.details?.rooms?.length
-      ? hotelOverlay.details.rooms
-      : HOTEL_DETAILS[propertySlug]?.rooms;
+    const rooms = hotelOverlay?.details?.rooms;
     const picked = room ? rooms?.find((r) => r.name === room) : undefined;
     if (picked?.price) return picked.price;
-    const fromOverlay = parseMoney(hotelOverlay?.pricePerNight);
-    if (fromOverlay) return fromOverlay;
-    return HOTEL_DETAILS[propertySlug]?.basePrice ?? 0;
-  }, [hotelOverlay, propertySlug, room]);
+    return parseMoney(hotelOverlay?.pricePerNight);
+  }, [hotelOverlay, room]);
 
   const selectedExps = useMemo(
     () => expOptions.filter((e) => expSlugs.includes(e.slug)),
@@ -241,6 +239,8 @@ export default function PlanPage() {
             : `${money(perNight)} / night — add dates`,
         amount: nights > 0 ? nights * perNight : 0,
       });
+    } else if (hotelName) {
+      items.push({ label: hotelName, detail: "Rates quoted by our team", amount: 0 });
     }
     if (trIncluded && trVehicle === "Flight") {
       items.push({

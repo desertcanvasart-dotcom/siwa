@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { getHotelDetail, type HotelDetail } from "@/lib/hotel-data";
 import { useHotelOverlay, useHotelOverlayQuery } from "@/lib/useHotelOverlay";
-import { resolvePrice } from "@/lib/price";
+import { resolvePrice, PRICE_ON_REQUEST } from "@/lib/price";
 import { HotelRecommendations } from "@/components/hotel/HotelRecommendations";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -93,24 +93,30 @@ export default function HotelDetailPage() {
     const nonEmpty = <T,>(v: T[] | undefined): T[] | undefined =>
       v && v.length > 0 ? v : undefined;
 
-    // Shared resolver — the homepage card runs the exact same logic, so
-    // the two surfaces can no longer disagree on amount or currency.
-    const rooms = nonEmpty(d.rooms) ?? baseHotel.rooms;
+    // Prices come ONLY from the dashboard (price field or room rates).
+    // The bundled basePrice and sample room rates are placeholder copy;
+    // falling back to them made unpriced properties look priced. With
+    // no admin rooms the sample rooms still describe the property, but
+    // without their sample rates.
+    const adminRooms = nonEmpty(d.rooms);
+    const rooms = adminRooms ?? baseHotel.rooms.map((r) => ({ ...r, price: 0 }));
     const resolved = resolvePrice({
       pricePerNight: overlay.pricePerNight,
-      rooms,
-      fallbackAmount: baseHotel.basePrice,
+      rooms: adminRooms,
       fallbackLabel: baseHotel.priceLabel,
     });
     const basePrice = resolved.amount;
 
     // Hero meta can carry a price string too ("From $145 / night") —
-    // keep both its amount AND currency in sync with the resolved price.
-    const heroMeta = (nonEmpty(d.heroMeta) ?? baseHotel.heroMeta).map((m) =>
-      basePrice > 0
-        ? m.replace(/[$$£]\s?\d+(?:[.,]\d+)?/, `${resolved.currency}${basePrice}`)
-        : m,
-    );
+    // keep it in sync with the real price, or drop it when there's none.
+    const hasPriceText = (m: string) => /[$€£]\s?\d/.test(m);
+    const heroMeta = (nonEmpty(d.heroMeta) ?? baseHotel.heroMeta)
+      .filter((m) => basePrice > 0 || !hasPriceText(m))
+      .map((m) =>
+        basePrice > 0
+          ? m.replace(/[$€£]\s?\d+(?:[.,]\d+)?/, `${resolved.currency}${basePrice}`)
+          : m,
+      );
 
     return {
       ...baseHotel,
@@ -293,15 +299,21 @@ export default function HotelDetailPage() {
               {hotel.name}
             </div>
             <div className="text-[0.82rem] text-ink-soft">
-              {/* The amount is the lowest room rate, so say "From" —
-                  otherwise the cheapest room reads as THE price. */}
-              {hotel.rooms.length > 1 && (
-                <span className="text-[0.68rem] text-ink-soft/60">From </span>
+              {hotel.basePrice > 0 ? (
+                <>
+                  {/* The amount is the lowest room rate, so say "From" —
+                      otherwise the cheapest room reads as THE price. */}
+                  {hotel.rooms.length > 1 && (
+                    <span className="text-[0.68rem] text-ink-soft/60">From </span>
+                  )}
+                  <strong className="font-display text-[1.1rem] text-navy font-normal">
+                    {currency}{hotel.basePrice}
+                  </strong>{" "}
+                  {hotel.priceLabel}
+                </>
+              ) : (
+                <span className="font-display text-[1rem] text-navy">{PRICE_ON_REQUEST}</span>
               )}
-              <strong className="font-display text-[1.1rem] text-navy font-normal">
-                {currency}{hotel.basePrice}
-              </strong>{" "}
-              {hotel.priceLabel}
             </div>
             <a
               href="#booking-panel"
@@ -311,7 +323,7 @@ export default function HotelDetailPage() {
                   : "text-coastal border border-coastal hover:bg-coastal hover:text-white"
               }`}
             >
-              {isSiwa ? "Book now" : "Enquire to book"}
+              {hotel.basePrice <= 0 ? "Submit a request" : isSiwa ? "Book now" : "Enquire to book"}
             </a>
           </div>
         </div>
@@ -442,14 +454,20 @@ export default function HotelDetailPage() {
                         </div>
                       </div>
                       <div className="flex justify-between items-end">
-                        <div>
-                          <p className="text-[0.58rem] text-ink-soft/45">
-                            From
-                          </p>
-                          <p className="font-display text-[1rem] text-navy">
-                            {currency}{room.price} / night
-                          </p>
-                        </div>
+                        {/* A room without its own rate shows the property's
+                            "from" price; with neither, it's on request. */}
+                        {(room.price || hotel.basePrice) > 0 ? (
+                          <div>
+                            <p className="text-[0.58rem] text-ink-soft/45">
+                              From
+                            </p>
+                            <p className="font-display text-[1rem] text-navy">
+                              {currency}{room.price || hotel.basePrice} / night
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="font-display text-[0.9rem] text-navy">{PRICE_ON_REQUEST}</p>
+                        )}
                         <a
                           href="#booking-panel"
                           className={`text-[0.58rem] tracking-[0.15em] uppercase px-3 py-2 transition-colors ${
@@ -833,7 +851,9 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
   const [checkout, setCheckout] = useState("");
   const [guests, setGuests] = useState("2 adults");
 
-  const perNight = hotel.rooms[roomIdx]?.price ?? hotel.basePrice;
+  // A room without its own rate falls back to the property's price;
+  // 0 means no price was entered anywhere → "Price on request".
+  const perNight = hotel.rooms[roomIdx]?.price || hotel.basePrice;
   const nights = useMemo(() => {
     if (!checkin || !checkout) return 0;
     const diff =
@@ -865,17 +885,26 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
         <div className="absolute inset-0 textile-bg pointer-events-none" />
         <div className="relative z-[2]">
           <p className="text-[0.56rem] tracking-[0.28em] uppercase text-gold/75 mb-1">
-            Book directly
+            {perNight > 0 ? "Book directly" : "Rates on request"}
           </p>
-          <div className="flex items-baseline gap-2">
-            <span className="text-[0.72rem] text-white/35">From</span>
-            <span className="font-display text-[1.8rem] text-white font-normal">
-              {currency}{perNight}
-            </span>
-            <span className="text-[0.72rem] text-white/35">
-              {hotel.priceLabel}
-            </span>
-          </div>
+          {perNight > 0 ? (
+            <div className="flex items-baseline gap-2">
+              <span className="text-[0.72rem] text-white/35">From</span>
+              <span className="font-display text-[1.8rem] text-white font-normal">
+                {currency}{perNight}
+              </span>
+              <span className="text-[0.72rem] text-white/35">
+                {hotel.priceLabel}
+              </span>
+            </div>
+          ) : (
+            <>
+              <div className="font-display text-[1.5rem] text-white font-normal">{PRICE_ON_REQUEST}</div>
+              <p className="text-[0.72rem] text-white/40 mt-1 leading-[1.6]">
+                Tell us your dates — we'll send rates within 24 hours.
+              </p>
+            </>
+          )}
         </div>
       </div>
       <div className="p-5">
@@ -887,7 +916,7 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
           >
             {hotel.rooms.map((r, i) => (
               <option key={r.name} value={i}>
-                {r.name} — {currency}{r.price}/night
+                {r.price > 0 ? `${r.name} — ${currency}${r.price}/night` : r.name}
               </option>
             ))}
           </select>
@@ -923,7 +952,7 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
           </select>
         </Field>
 
-        {nights > 0 && (
+        {nights > 0 && perNight > 0 && (
           <div className="border-t border-sand-light pt-3 mb-3">
             <div className="flex justify-between text-[0.78rem] text-ink-soft py-1">
               <span>
@@ -961,12 +990,13 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
             href={enquiryHref}
             className="block w-full text-[0.65rem] tracking-[0.2em] uppercase text-navy bg-gold py-4 text-center font-body font-medium hover:bg-gold-light transition-colors"
           >
-            Book now
+            {perNight > 0 ? "Book now" : "Submit a request"}
           </a>
         )}
         <p className="text-[0.7rem] text-ink-soft/55 text-center mt-3 leading-[1.6]">
-          Free cancellation up to 7 days before arrival. Secure payment via
-          our booking system.
+          {perNight > 0
+            ? "Free cancellation up to 7 days before arrival. Secure payment via our booking system."
+            : "We respond within 24 hours. No payment until we confirm availability."}
         </p>
       </div>
     </div>
@@ -999,15 +1029,19 @@ function NorthCoastBookingPanel({ hotel, currency }: { hotel: HotelDetail; curre
           <p className="text-[0.56rem] tracking-[0.28em] uppercase text-gold/80 mb-1">
             Make a reservation
           </p>
-          <div className="flex items-baseline gap-2">
-            <span className="text-[0.72rem] text-white/45">From</span>
-            <span className="font-display text-[1.6rem] text-white font-normal">
-              {currency}{hotel.basePrice}
-            </span>
-            <span className="text-[0.72rem] text-white/45">
-              {hotel.priceLabel}
-            </span>
-          </div>
+          {hotel.basePrice > 0 ? (
+            <div className="flex items-baseline gap-2">
+              <span className="text-[0.72rem] text-white/45">From</span>
+              <span className="font-display text-[1.6rem] text-white font-normal">
+                {currency}{hotel.basePrice}
+              </span>
+              <span className="text-[0.72rem] text-white/45">
+                {hotel.priceLabel}
+              </span>
+            </div>
+          ) : (
+            <div className="font-display text-[1.4rem] text-white font-normal">{PRICE_ON_REQUEST}</div>
+          )}
         </div>
       </div>
       <div className="p-5">
@@ -1074,7 +1108,7 @@ function NorthCoastBookingPanel({ hotel, currency }: { hotel: HotelDetail; curre
           >
             {hotel.rooms.map((r) => (
               <option key={r.name} value={r.name}>
-                {r.name} — from {currency}{r.price}/night
+                {r.price > 0 ? `${r.name} — from ${currency}${r.price}/night` : r.name}
               </option>
             ))}
           </select>
@@ -1097,7 +1131,7 @@ function NorthCoastBookingPanel({ hotel, currency }: { hotel: HotelDetail; curre
           href={enquiryHref}
           className="block w-full text-[0.65rem] tracking-[0.2em] uppercase text-white bg-coastal py-4 text-center font-body font-medium hover:bg-[#266080] transition-colors"
         >
-          Send reservation request
+          {hotel.basePrice > 0 ? "Send reservation request" : "Submit a request"}
         </a>
         <p className="text-[0.7rem] text-ink-soft/55 text-center mt-3 leading-[1.6]">
           We respond within 24 hours. No payment until we confirm availability.

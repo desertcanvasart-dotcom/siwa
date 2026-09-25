@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Arch } from "@/components/ui/Arch";
 import { useReveal } from "@/components/home/useReveal";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
-import { resolvePrice, parseAmount } from "@/lib/price";
+import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
 import addressBeachImage from "@assets/Address beach Resort _1758144493080.jpg";
 import vidaMarinaImage from "@assets/Vida Marina Resort Marassi _1758142322079.jpg";
 import addressGolfImage from "@assets/Address Golf Resort_1758143858790.jpg";
@@ -332,14 +332,9 @@ export default function NorthCoastAccommodation() {
               ...h,
               name: o.name || h.name,
               desc: o.blurb || h.desc,
-              // Shared resolver — pins USD, strips a baked-in "From",
-              // prefers the lowest room rate.
-              price:
-                resolvePrice({
-                  pricePerNight: o.pricePerNight,
-                  rooms: o.details?.rooms,
-                  fallbackAmount: parseAmount(h.price),
-                }).display || h.price,
+              // Only the price entered in the dashboard — never the
+              // sample price bundled with the inline card.
+              price: adminPrice(o).display || PRICE_ON_REQUEST,
               image: o.imageUrl || h.image,
             };
           }),
@@ -360,11 +355,7 @@ export default function NorthCoastAccommodation() {
         type: "Partner Property · North Coast",
         desc: o.blurb || o.description || "",
         highlights: o.amenities || [],
-        price:
-          resolvePrice({
-            pricePerNight: o.pricePerNight,
-            rooms: o.details?.rooms,
-          }).display || "On request",
+        price: adminPrice(o).display || PRICE_ON_REQUEST,
         categories: extraCats,
         gradient: "bg-[linear-gradient(155deg,#1a4a6a_0%,#0F2436_100%)]",
         image: o.imageUrl,
@@ -907,14 +898,9 @@ function FeaturedCard({ hotel, delay }: { hotel: Hotel; delay: number }) {
           </div>
         </div>
         <div className="flex justify-between items-center pt-4 border-t border-sand-light">
-          <div>
-            <div className="text-[0.62rem] text-ink-soft/45">From</div>
-            <div className="font-display text-[1.1rem] text-navy">
-              {hotel.price}
-            </div>
-          </div>
+          <PriceBlock price={hotel.price} size="text-[1.1rem]" />
           <span className="text-[0.6rem] tracking-[0.16em] uppercase text-navy bg-gold px-4 py-2 group-hover:bg-gold-light transition-colors">
-            Enquire to book
+            {hotel.price === PRICE_ON_REQUEST ? "Submit a request" : "Enquire to book"}
           </span>
         </div>
       </div>
@@ -968,17 +954,25 @@ function StandardCard({ hotel, delay }: { hotel: Hotel; delay: number }) {
           ))}
         </div>
         <div className="flex justify-between items-center pt-4 border-t border-sand-light">
-          <div>
-            <div className="text-[0.62rem] text-ink-soft/45">From</div>
-            <div className="font-display text-[1.05rem] text-navy">
-              {hotel.price}
-            </div>
-          </div>
+          <PriceBlock price={hotel.price} size="text-[1.05rem]" />
           <span className="text-[0.6rem] tracking-[0.16em] uppercase text-coastal border border-coastal px-4 py-2 group-hover:bg-coastal group-hover:text-white transition-colors">
-            Enquire →
+            {hotel.price === PRICE_ON_REQUEST ? "Submit a request →" : "Enquire →"}
           </span>
         </div>
       </div>
     </Link>
+  );
+}
+
+/** "From $X / night", or "Price on request" when none is set. */
+function PriceBlock({ price, size }: { price: string; size: string }) {
+  if (price === PRICE_ON_REQUEST) {
+    return <div className="font-display text-[0.95rem] text-navy">{PRICE_ON_REQUEST}</div>;
+  }
+  return (
+    <div>
+      <div className="text-[0.62rem] text-ink-soft/45">From</div>
+      <div className={`font-display ${size} text-navy`}>{price}</div>
+    </div>
   );
 }

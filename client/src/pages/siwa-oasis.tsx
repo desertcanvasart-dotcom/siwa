@@ -6,6 +6,8 @@ import { Arch } from "@/components/ui/Arch";
 import { useReveal } from "@/components/home/useReveal";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 import { useActiveSlugs } from "@/lib/useActiveSlugs";
+import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
+import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
 
 /**
  * /siwa-oasis — primary destination hub.
@@ -194,6 +196,11 @@ export default function SiwaOasis() {
   // list (these are the canonical Siwa properties) to avoid an empty
   // flash, then it narrows to live ones.
   const liveHotels = useActiveSlugs("/api/hotels");
+  // Card prices come only from the dashboard; the inline ones are
+  // sample copy. Empty until the API answers, so nothing flashes.
+  const hotelPrices = useHotelsBySlug();
+  const priceFor = (slug: string) =>
+    !liveHotels.loaded ? "" : adminPrice(hotelPrices.get(slug)).display || PRICE_ON_REQUEST;
   const liveExperiences = useActiveSlugs("/api/experiences");
   const visibleHotels = liveHotels.loaded
     ? hotels.filter((h) => liveHotels.slugs.has(h.slug))
@@ -625,14 +632,18 @@ export default function SiwaOasis() {
                       {h.desc}
                     </p>
                     <div className="flex justify-between items-center pt-4 border-t border-sand-light">
-                      <div>
-                        <p className="text-[0.65rem] text-ink-soft/45">From</p>
-                        <p className="font-display text-[1.05rem] text-navy">
-                          {h.price}
-                        </p>
-                      </div>
+                      {priceFor(h.slug) === PRICE_ON_REQUEST ? (
+                        <p className="font-display text-[0.95rem] text-navy">{PRICE_ON_REQUEST}</p>
+                      ) : (
+                        <div>
+                          <p className="text-[0.65rem] text-ink-soft/45">{priceFor(h.slug) ? "From" : "\u00a0"}</p>
+                          <p className="font-display text-[1.05rem] text-navy">
+                            {priceFor(h.slug)}
+                          </p>
+                        </div>
+                      )}
                       <span className="text-[0.58rem] tracking-[0.15em] uppercase text-gold">
-                        Book →
+                        {priceFor(h.slug) === PRICE_ON_REQUEST ? "Submit a request →" : "Book →"}
                       </span>
                     </div>
                   </div>
