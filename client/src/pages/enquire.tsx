@@ -10,7 +10,10 @@ import { HOTEL_DETAILS } from "@/lib/hotel-data";
 import { EXPERIENCE_DETAILS } from "@/lib/experience-data";
 import { useExperiencesBySlug } from "@/lib/useExperiencesBySlug";
 import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
-import { ChoiceButtons, ExperiencePicker, type ExperienceOption } from "@/components/enquire/ChoiceFields";
+import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
+import { useSiteContent } from "@/lib/useSiteContent";
+import { NC_TRANSPORT, SIWA_TRANSPORT, resolveTransportPage } from "@/lib/transport-content";
+import { ChoiceButtons, MultiPicker, type ExperienceOption, type PickOption } from "@/components/enquire/ChoiceFields";
 import { useContact } from "@/lib/useContact";
 
 /** Slugs the public API still publishes (drafts are filtered server-side). */
@@ -56,6 +59,8 @@ function useActiveSlugs(endpoint: string): Set<string> {
 
 type EnquiryType = "accommodation" | "experience" | "transport";
 
+const TRAVEL_STYLES = ["Solo", "Couple", "Family", "Friends", "Group / corporate", "Other"];
+
 /** "honeymoon-escape" → "Honeymoon Escape". Only a stopgap for the
  *  moment before live records load — never a substitute for the real
  *  title. */
@@ -67,62 +72,6 @@ function prettifySlug(slug: string): string {
     .join(" ");
 }
 
-const ROUTE_OPTIONS = [
-  {
-    label: "Routes to Siwa Oasis",
-    options: [
-      "Cairo → Siwa Oasis (~8 hrs)",
-      "Marsa Matrouh → Siwa (~3 hrs)",
-      "Alexandria → Siwa (~6 hrs)",
-    ],
-  },
-  {
-    label: "Return from Siwa",
-    options: [
-      "Siwa → Cairo (~8 hrs)",
-      "Siwa → Marsa Matrouh (~3 hrs)",
-      "Siwa → Alexandria (~6 hrs)",
-    ],
-  },
-  {
-    label: "Desert drives within Siwa",
-    options: [
-      "Great Sand Sea drive (half/full day)",
-      "Salt Lakes & Springs circuit",
-      "Ancient sites drive",
-      "Sunrise desert drive",
-      "In-oasis transfer",
-      "Full day bespoke",
-    ],
-  },
-  {
-    label: "Routes to North Coast",
-    options: [
-      "Cairo → North Coast (~2.5 hrs)",
-      "Alexandria → North Coast (~45 min)",
-      "Cairo → Alexandria → North Coast",
-      "Airport pickup → North Coast",
-    ],
-  },
-  {
-    label: "Return from North Coast",
-    options: [
-      "North Coast → Cairo (~2.5 hrs)",
-      "North Coast → Alexandria (~45 min)",
-      "North Coast → Airport",
-    ],
-  },
-  {
-    label: "Within the North Coast",
-    options: [
-      "Marassi ↔ Almaza Bay (~1 hr)",
-      "Marassi ↔ El Alamein (~30 min)",
-      "Property to experience transfer",
-      "On-demand in-area transfer",
-      "Cairo day trip (full day)",
-    ],
-  },
-];
 
 function buildRef(): string {
   const year = new Date().getFullYear();
@@ -191,6 +140,26 @@ export default function EnquirePage() {
     () => allHotels.filter((h) => h.destination === "north-coast" && activeHotelSlugs.has(h.slug)),
     [allHotels, activeHotelSlugs],
   );
+  // Every published property, straight from the API — hotels added in
+  // the dashboard included. The bundled list only stands in until the
+  // API answers.
+  const liveHotels = useHotelsBySlug();
+  const hotelOptions = useMemo<PickOption[]>(() => {
+    const live: PickOption[] = [];
+    liveHotels.forEach((h, slug) =>
+      live.push({
+        slug,
+        name: h.name || allHotels.find((x) => x.slug === slug)?.name || prettifySlug(slug),
+        dest: h.destination === "north-coast" ? "north-coast" : "siwa",
+      }),
+    );
+    if (live.length > 0) return live;
+    return [...siwaHotels, ...ncHotels].map((h) => ({
+      slug: h.slug,
+      name: h.name,
+      dest: h.destination === "north-coast" ? ("north-coast" as const) : ("siwa" as const),
+    }));
+  }, [liveHotels, allHotels, siwaHotels, ncHotels]);
   // Every published experience and curated journey, straight from the
   // API — so anything added in the dashboard is selectable here. The
   // bundled list only stands in until the API answers (or if it fails).
@@ -203,6 +172,7 @@ export default function EnquirePage() {
         name: e.title!,
         dest: e.destination === "siwa" || e.destination === "north-coast" ? e.destination : null,
         journey: e.category === "Curated Journey",
+        featured: e.category === "Curated Journey",
       }));
     if (live.length > 0) return live;
     return EXPERIENCE_DETAILS.map((e) => ({
@@ -210,6 +180,7 @@ export default function EnquirePage() {
       name: e.name,
       dest: e.destination === "north-coast" ? ("north-coast" as const) : ("siwa" as const),
       journey: false,
+      featured: false,
     }));
   }, [liveExps]);
 
@@ -224,14 +195,25 @@ export default function EnquirePage() {
             ? "north-coast"
             : "siwa")
           : "";
-  const [accomDest, setAccomDest] = useState(initialAccomDest);
-  const initialAccomProperty = paramProperty
-    ? (allHotels.find((h) => h.slug === paramProperty)?.name ?? "")
-    : "";
-  const [accomProperty, setAccomProperty] = useState(initialAccomProperty);
+  const [accomDests, setAccomDests] = useState<string[]>(initialAccomDest ? [initialAccomDest] : []);
+  const [accomPicks, setAccomPicks] = useState<string[]>(paramProperty ? [paramProperty] : []);
+  const [accomSuggest, setAccomSuggest] = useState(false);
   const [accomCheckin, setAccomCheckin] = useState(paramCheckin);
   const [accomCheckout, setAccomCheckout] = useState(paramCheckout);
-  const [accomAdults, setAccomAdults] = useState(paramGuests || "2 adults");
+  const [accomFlexible, setAccomFlexible] = useState(false);
+  // Inbound guests arrive as "2", "2 adults", "2 adults, 1 child" or
+  // "Family (5+)" — split them into the adults / children fields.
+  const initialAccomGuests = (() => {
+    const g = paramGuests.toLowerCase();
+    const adultsN = parseInt(g.match(/(\d+)\s*adult/)?.[1] ?? (/^\d+$/.test(g) ? g : ""), 10);
+    const childN = parseInt(g.match(/(\d+)\s*child/)?.[1] ?? "0", 10);
+    const adults = !adultsN ? "2 adults" : adultsN >= 5 ? "5+ adults" : adultsN === 1 ? "1 adult" : `${adultsN} adults`;
+    if (g.startsWith("family")) return { adults: "2 adults", children: "3+ children", family: true };
+    const children = !childN ? "No children" : childN >= 3 ? "3+ children" : childN === 1 ? "1 child" : `${childN} children`;
+    return { adults, children, family: childN > 0 };
+  })();
+  const [accomAdults, setAccomAdults] = useState(initialAccomGuests.adults);
+  const [accomChildren, setAccomChildren] = useState(initialAccomGuests.children);
   const [accomRoom, setAccomRoom] = useState(paramRoom);
 
   /* ── Experience form state ─────────────────────────────── */
@@ -256,7 +238,7 @@ export default function EnquirePage() {
   const initialExpSlug = paramJourney ?? paramExp;
   const [expPicks, setExpPicks] = useState<string[]>(initialExpSlug ? [initialExpSlug] : []);
   const [expSuggest, setExpSuggest] = useState(false);
-  const [travelStyle, setTravelStyle] = useState("");
+  const [travelStyle, setTravelStyle] = useState(initialAccomGuests.family ? "Family" : "");
   const [childAges, setChildAges] = useState("");
   const [expDate, setExpDate] = useState(paramDate);
   const [expDateTo, setExpDateTo] = useState("");
@@ -283,8 +265,50 @@ export default function EnquirePage() {
   const [expNotes, setExpNotes] = useState(paramNotes);
 
   /* ── Transport form state ──────────────────────────────── */
-  const [transportRoute, setTransportRoute] = useState(paramRoute ?? "");
+  // Routes, drives and vehicles come from the (admin-editable)
+  // transportation pages, so this list always matches what they offer.
+  const siteContent = useSiteContent();
+  const routeGroups = useMemo(() => {
+    const label = (r: { from: string; via: string; to: string }) => [r.from, r.via, r.to].filter(Boolean).join(" → ");
+    const siwa = resolveTransportPage(siteContent, "siwa_transport", SIWA_TRANSPORT);
+    const nc = resolveTransportPage(siteContent, "nc_transport", NC_TRANSPORT);
+    return {
+      groups: [
+        { label: "Siwa Oasis — routes", options: [siwa.featured, ...siwa.routeItems].map(label) },
+        { label: "Siwa Oasis — desert drives", options: siwa.cardItems.map((c) => c.title) },
+        { label: "North Coast — routes", options: [nc.featured, ...nc.routeItems].map(label) },
+        { label: "North Coast — within the coast", options: nc.cardItems.map((c) => c.title) },
+      ].map((g) => ({ ...g, options: g.options.filter(Boolean) })),
+      vehicles: Array.from(new Set([...siwa.fleetItems, ...nc.fleetItems].map((v) => v.name).filter(Boolean))),
+    };
+  }, [siteContent]);
+  // Inbound ?route= is either an option label or a slug like
+  // "cairo-north-coast" (home booking bar) — map the slug onto the
+  // matching route, or show it readably if there's no exact match.
+  const initialRoute = (() => {
+    if (!paramRoute) return "";
+    const all = routeGroups.groups.flatMap((g) => g.options);
+    if (all.includes(paramRoute)) return paramRoute;
+    const m = paramRoute.toLowerCase().match(/^(cairo|alexandria|siwa|north-coast|marsa-matrouh)-(.+)$/);
+    if (!m) return paramRoute;
+    const words = (x: string) => x.replace(/-/g, " ");
+    const from = words(m[1]);
+    const to = words(m[2]);
+    const hit = all.find((o) => {
+      const [f, ...rest] = o.toLowerCase().split(" → ");
+      return f.startsWith(from) && rest.join(" ").includes(to);
+    });
+    const title = (x: string) => x.replace(/\b\w/g, (c) => c.toUpperCase());
+    return hit ?? `${title(from)} → ${title(to)}`;
+  })();
+  const [transportRoute, setTransportRoute] = useState(initialRoute);
+  const [transportTrip, setTransportTrip] = useState("One way");
   const [transportDate, setTransportDate] = useState(paramDate);
+  const [transportTime, setTransportTime] = useState("");
+  const [transportPax, setTransportPax] = useState("2 passengers");
+  const [transportVehicle, setTransportVehicle] = useState("Let Soléi decide");
+  const [transportPickup, setTransportPickup] = useState("");
+  const [transportDropoff, setTransportDropoff] = useState("");
 
   /* ── Prefill flags (drive styling + hints) ─────────────── */
   const accomPropertyPrefilled = !!paramProperty;
@@ -347,7 +371,38 @@ export default function EnquirePage() {
     setTravelStyle(style);
     if (style === "Solo") setExpGuests("1 person");
     if (style === "Couple") setExpGuests("2 people");
+    if (style === "Solo") setAccomAdults("1 adult");
+    if (style === "Couple") setAccomAdults("2 adults");
   };
+
+  // Accommodation: list properties for the chosen destination(s), and
+  // drop picks that belong only to a destination being unticked.
+  const visibleHotelOptions = useMemo(
+    () => (accomDests.length === 0 ? hotelOptions : hotelOptions.filter((o) => !o.dest || accomDests.includes(o.dest))),
+    [hotelOptions, accomDests],
+  );
+  const changeAccomDests = (next: string[]) => {
+    setAccomDests(next);
+    if (next.length > 0) {
+      setAccomPicks((picks) =>
+        picks.filter((slug) => {
+          const d = hotelOptions.find((o) => o.slug === slug)?.dest;
+          return !d || next.includes(d);
+        }),
+      );
+    }
+  };
+  const hotelNameOf = (slug: string) =>
+    hotelOptions.find((o) => o.slug === slug)?.name ||
+    allHotels.find((h) => h.slug === slug)?.name ||
+    prettifySlug(slug);
+  // A property link whose destination wasn't given: take it from the
+  // live record once it loads.
+  useEffect(() => {
+    if (!paramProperty) return;
+    const d = hotelOptions.find((o) => o.slug === paramProperty)?.dest;
+    if (d) setAccomDests((prev) => (prev.length > 0 ? prev : [d]));
+  }, [hotelOptions, paramProperty]);
   const expDatePrefilled = !!paramDate;
   const transportRoutePrefilled = !!paramRoute;
 
@@ -418,11 +473,25 @@ export default function EnquirePage() {
     const lines: { label: string; value: string }[] = [];
     if (tab === "accommodation") {
       lines.push({ label: "Type", value: "Accommodation" });
-      if (accomDest) lines.push({ label: "Destination", value: accomDest === "siwa" ? "Siwa Oasis" : "North Coast" });
-      if (accomProperty) lines.push({ label: "Property", value: accomProperty });
+      const destNames = (["siwa", "north-coast"] as const)
+        .filter((d) => accomDests.includes(d))
+        .map((d) => (d === "siwa" ? "Siwa Oasis" : "North Coast"));
+      if (destNames.length) {
+        lines.push({ label: destNames.length > 1 ? "Destinations" : "Destination", value: destNames.join(" + ") });
+      }
+      if (accomPicks.length) {
+        lines.push({ label: accomPicks.length > 1 ? "Properties" : "Property", value: accomPicks.map(hotelNameOf).join(" · ") });
+      }
+      if (accomSuggest) lines.push({ label: "Suggestions", value: "Not sure yet — please recommend a property" });
+      if (travelStyle) lines.push({ label: "Travelling as", value: travelStyle });
+      const guests = [accomAdults, accomChildren !== "No children" ? accomChildren : ""].filter(Boolean).join(", ");
+      if (guests) lines.push({ label: "Guests", value: guests });
+      if (childAges.trim() && (accomChildren !== "No children" || travelStyle === "Family")) {
+        lines.push({ label: "Children's ages", value: childAges.trim() });
+      }
       if (accomCheckin) lines.push({ label: "Check-in", value: accomCheckin });
       if (accomCheckout) lines.push({ label: "Check-out", value: accomCheckout });
-      if (accomAdults) lines.push({ label: "Guests", value: accomAdults });
+      if (accomFlexible) lines.push({ label: "Dates", value: "Flexible" });
       if (accomRoom) lines.push({ label: "Room preference", value: accomRoom });
     } else if (tab === "experience") {
       // A journey must not reach the team labelled as a one-off
@@ -469,7 +538,13 @@ export default function EnquirePage() {
     } else if (tab === "transport") {
       lines.push({ label: "Type", value: "Transportation" });
       if (transportRoute) lines.push({ label: "Route", value: transportRoute });
+      lines.push({ label: "Trip", value: transportTrip });
       if (transportDate) lines.push({ label: "Travel date", value: transportDate });
+      if (transportTime) lines.push({ label: "Departure time", value: transportTime });
+      if (transportPax) lines.push({ label: "Passengers", value: transportPax });
+      if (transportVehicle) lines.push({ label: "Vehicle preference", value: transportVehicle });
+      if (transportPickup) lines.push({ label: "Pickup", value: transportPickup });
+      if (transportDropoff) lines.push({ label: "Drop-off", value: transportDropoff });
     }
     return lines;
   };
@@ -559,7 +634,11 @@ export default function EnquirePage() {
 
   const clearContext = () => {
     setBannerDismissed(true);
-    setAccomProperty("");
+    setAccomPicks([]);
+    setAccomDests([]);
+    setAccomSuggest(false);
+    setAccomFlexible(false);
+    setAccomChildren("No children");
     setAccomCheckin("");
     setAccomCheckout("");
     setAccomRoom("");
@@ -575,6 +654,9 @@ export default function EnquirePage() {
     setExpNotes("");
     setTransportRoute("");
     setTransportDate("");
+    setTransportTime("");
+    setTransportPickup("");
+    setTransportDropoff("");
     setLocation("/enquire");
   };
 
@@ -708,56 +790,59 @@ export default function EnquirePage() {
                     <em className="italic text-coastal">enquiry.</em>
                   </h2>
                   <p className="text-[0.82rem] text-ink-soft leading-[1.75] mb-8 pb-8 border-b border-sand-light">
-                    Tell us which destination and property you're interested
-                    in, your dates, and how many guests. For Siwa, we'll
+                    Tell us which destinations and properties you're
+                    interested in — one or several — your dates, and who's
+                    travelling. For Siwa, we'll
                     confirm availability and send a secure booking link. For
                     North Coast, we confirm with the hotel directly and
                     send a secure payment link within 24 hours.
                   </p>
 
-                  <Field label="Destination">
-                    <select
-                      value={accomDest}
-                      onChange={(e) => {
-                        setAccomDest(e.target.value);
-                        setAccomProperty("");
-                      }}
-                      className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
-                    >
-                      <option value="">Select destination</option>
-                      <option value="siwa">Siwa Oasis</option>
-                      <option value="north-coast">North Coast</option>
-                    </select>
-                  </Field>
+                  <ChoiceButtons
+                    label="Destinations"
+                    multiple
+                    options={[
+                      { value: "siwa", label: "Siwa Oasis" },
+                      { value: "north-coast", label: "North Coast" },
+                    ]}
+                    value={accomDests}
+                    onChange={changeAccomDests}
+                  />
 
-                  <Field label="Property">
-                    <select
-                      value={accomProperty}
-                      onChange={(e) => setAccomProperty(e.target.value)}
-                      disabled={!accomDest}
-                      className={`w-full px-4 py-3.5 border text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer ${
-                        accomPropertyPrefilled
-                          ? "bg-cream border-gold/35"
-                          : "bg-white border-sand"
-                      }`}
-                    >
-                      <option value="">
-                        {accomDest
-                          ? "Select a property"
-                          : "Select destination first"}
-                      </option>
-                      {(accomDest === "siwa" ? siwaHotels : accomDest === "north-coast" ? ncHotels : []).map((h) => (
-                        <option key={h.slug} value={h.name}>
-                          {h.name}
-                        </option>
-                      ))}
-                    </select>
-                    {accomPropertyPrefilled && (
-                      <PrefillHint>Pre-filled from your selection</PrefillHint>
-                    )}
-                  </Field>
+                  <MultiPicker
+                    label="Properties"
+                    noun="properties"
+                    options={hotelOptions}
+                    visible={visibleHotelOptions}
+                    value={accomPicks}
+                    onChange={setAccomPicks}
+                    prefilled={accomPropertyPrefilled}
+                  />
+                  {accomPropertyPrefilled && accomPicks.includes(paramProperty ?? "") && (
+                    <div className="-mt-2 mb-4">
+                      <PrefillHint>Pre-filled from your selection — add more to compare</PrefillHint>
+                    </div>
+                  )}
+                  <label className="flex items-center gap-2.5 -mt-1 mb-6 text-[0.78rem] text-ink-soft cursor-pointer w-fit">
+                    <input
+                      type="checkbox"
+                      checked={accomSuggest}
+                      onChange={(e) => setAccomSuggest(e.target.checked)}
+                      className="w-4 h-4 accent-gold"
+                    />
+                    Not sure yet — recommend a property for us
+                  </label>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
+                  <ChoiceButtons
+                    label="Travelling as"
+                    optional
+                    columns="grid-cols-2 sm:grid-cols-3"
+                    options={TRAVEL_STYLES.map((v) => ({ value: v, label: v }))}
+                    value={travelStyle ? [travelStyle] : []}
+                    onChange={changeTravelStyle}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-1">
                     <Field label="Check-in">
                       <input
                         type="date"
@@ -774,6 +859,7 @@ export default function EnquirePage() {
                       <input
                         type="date"
                         value={accomCheckout}
+                        min={accomCheckin || undefined}
                         onChange={(e) => setAccomCheckout(e.target.value)}
                         className={`w-full px-4 py-3.5 border text-[0.84rem] text-navy font-body focus:border-gold outline-none cursor-pointer ${
                           accomCheckoutPrefilled
@@ -783,6 +869,15 @@ export default function EnquirePage() {
                       />
                     </Field>
                   </div>
+                  <label className="flex items-center gap-2.5 mb-6 text-[0.78rem] text-ink-soft cursor-pointer w-fit">
+                    <input
+                      type="checkbox"
+                      checked={accomFlexible}
+                      onChange={(e) => setAccomFlexible(e.target.checked)}
+                      className="w-4 h-4 accent-gold"
+                    />
+                    My dates are flexible
+                  </label>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
                     <Field label="Adults">
@@ -799,7 +894,11 @@ export default function EnquirePage() {
                       </select>
                     </Field>
                     <Field label="Children" optional>
-                      <select className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer">
+                      <select
+                        value={accomChildren}
+                        onChange={(e) => setAccomChildren(e.target.value)}
+                        className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
+                      >
                         <option>No children</option>
                         <option>1 child</option>
                         <option>2 children</option>
@@ -807,6 +906,18 @@ export default function EnquirePage() {
                       </select>
                     </Field>
                   </div>
+
+                  {(accomChildren !== "No children" || travelStyle === "Family") && (
+                    <Field label="Children's ages" optional>
+                      <input
+                        type="text"
+                        value={childAges}
+                        onChange={(e) => setChildAges(e.target.value)}
+                        placeholder="e.g. 6 and 9 — helps us suggest the right rooms"
+                        className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
+                      />
+                    </Field>
+                  )}
 
                   <Field label="Room preference" optional>
                     <input
@@ -852,7 +963,9 @@ export default function EnquirePage() {
                     onChange={changeExpDests}
                   />
 
-                  <ExperiencePicker
+                  <MultiPicker
+                    label="Experiences"
+                    noun="experiences"
                     options={expOptions}
                     visible={visibleExpOptions}
                     value={expPicks}
@@ -878,10 +991,7 @@ export default function EnquirePage() {
                     label="Travelling as"
                     optional
                     columns="grid-cols-2 sm:grid-cols-3"
-                    options={["Solo", "Couple", "Family", "Friends", "Group / corporate", "Other"].map((v) => ({
-                      value: v,
-                      label: v,
-                    }))}
+                    options={TRAVEL_STYLES.map((v) => ({ value: v, label: v }))}
                     value={travelStyle ? [travelStyle] : []}
                     onChange={changeTravelStyle}
                   />
@@ -1002,13 +1112,19 @@ export default function EnquirePage() {
                       }`}
                     >
                       <option value="">Select your route</option>
-                      {ROUTE_OPTIONS.map((group) => (
-                        <optgroup key={group.label} label={group.label}>
-                          {group.options.map((opt) => (
-                            <option key={opt}>{opt}</option>
-                          ))}
-                        </optgroup>
-                      ))}
+                      {routeGroups.groups.map((group) =>
+                        group.options.length > 0 ? (
+                          <optgroup key={group.label} label={group.label}>
+                            {group.options.map((opt) => (
+                              <option key={opt}>{opt}</option>
+                            ))}
+                          </optgroup>
+                        ) : null,
+                      )}
+                      {transportRoute && !routeGroups.groups.some((g) => g.options.includes(transportRoute)) && (
+                        <option>{transportRoute}</option>
+                      )}
+                      <option>Something else (describe in notes)</option>
                     </select>
                     {transportRoutePrefilled && (
                       <PrefillHint>Pre-filled from your selection</PrefillHint>
@@ -1016,6 +1132,16 @@ export default function EnquirePage() {
                   </Field>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
+                    <Field label="Trip">
+                      <select
+                        value={transportTrip}
+                        onChange={(e) => setTransportTrip(e.target.value)}
+                        className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
+                      >
+                        <option>One way</option>
+                        <option>Return</option>
+                      </select>
+                    </Field>
                     <Field label="Travel date">
                       <input
                         type="date"
@@ -1024,19 +1150,22 @@ export default function EnquirePage() {
                         className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none cursor-pointer"
                       />
                     </Field>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
                     <Field label="Departure time (approx.)">
                       <input
                         type="text"
+                        value={transportTime}
+                        onChange={(e) => setTransportTime(e.target.value)}
                         placeholder="e.g. 6:00am"
                         className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
                       />
                     </Field>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
                     <Field label="Passengers">
                       <select
-                        defaultValue="2 passengers"
+                        value={transportPax}
+                        onChange={(e) => setTransportPax(e.target.value)}
                         className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
                       >
                         <option>1 passenger</option>
@@ -1047,35 +1176,41 @@ export default function EnquirePage() {
                         <option>7–8 passengers</option>
                       </select>
                     </Field>
-                    <Field label="Vehicle preference">
-                      <select
-                        defaultValue="Let Soléi decide"
-                        className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
-                      >
-                        <option>Let Soléi decide</option>
-                        <option>Private SUV</option>
-                        <option>4×4 Desert Vehicle (Siwa)</option>
-                        <option>Premium Sedan (North Coast)</option>
-                        <option>Private Minivan</option>
-                      </select>
-                    </Field>
                   </div>
 
-                  <Field label="Pickup location">
-                    <input
-                      type="text"
-                      placeholder="Hotel name, address, or area"
-                      className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
-                    />
+                  <Field label="Vehicle preference">
+                    <select
+                      value={transportVehicle}
+                      onChange={(e) => setTransportVehicle(e.target.value)}
+                      className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
+                    >
+                      <option>Let Soléi decide</option>
+                      {routeGroups.vehicles.map((v) => (
+                        <option key={v}>{v}</option>
+                      ))}
+                    </select>
                   </Field>
 
-                  <Field label="Drop-off location">
-                    <input
-                      type="text"
-                      placeholder="Property name or destination"
-                      className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
-                    />
-                  </Field>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] mb-3">
+                    <Field label="Pickup location">
+                      <input
+                        type="text"
+                        value={transportPickup}
+                        onChange={(e) => setTransportPickup(e.target.value)}
+                        placeholder="Hotel name, address, or area"
+                        className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
+                      />
+                    </Field>
+                    <Field label="Drop-off location">
+                      <input
+                        type="text"
+                        value={transportDropoff}
+                        onChange={(e) => setTransportDropoff(e.target.value)}
+                        placeholder="Property name or destination"
+                        className="w-full px-4 py-3.5 bg-white border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none placeholder:text-ink-soft/35"
+                      />
+                    </Field>
+                  </div>
 
                   <ContactFields notesPlaceholder="Flight number for airport pickups, child seats, luggage details, accessibility needs…" contact={contactProps} />
 
