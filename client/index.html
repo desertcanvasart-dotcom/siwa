@@ -33,6 +33,25 @@
 
       gtag('config', 'G-PBSX5VDXEQ');
     </script>
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      // Same consent gate as gtag above: the pixel holds events until
+      // the visitor accepts via the cookie banner (CookieConsent.tsx
+      // grants/revokes). The <noscript> image fallback is omitted on
+      // purpose — it would fire without consent.
+      if (soleiConsent !== 'granted') fbq('consent', 'revoke');
+      fbq('init', '1445186627739975');
+      fbq('track', 'PageView');
+    </script>
+    <!-- End Meta Pixel Code -->
   </head>
   <body>
     <div id="root"></div>

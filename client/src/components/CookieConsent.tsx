@@ -9,8 +9,8 @@ import { Link, useLocation } from "wouter";
  * visitors). This banner appears only while no choice is stored;
  * Accept flips consent to granted from that moment on, Decline keeps
  * everything off. The choice lives in localStorage under
- * "solei-consent". The site runs no ads, so ad_* signals stay denied
- * permanently either way.
+ * "solei-consent". The same choice grants/revokes the Meta Pixel
+ * (fbq consent). Google ad_* signals stay denied permanently.
  */
 const STORAGE_KEY = "solei-consent";
 
@@ -25,6 +25,8 @@ function updateGtagConsent(granted: boolean) {
       analytics_storage: granted ? "granted" : "denied",
     });
   }
+  const fbq = (window as any).fbq;
+  if (typeof fbq === "function") fbq("consent", granted ? "grant" : "revoke");
 }
 
 export function CookieConsent() {
@@ -67,8 +69,8 @@ export function CookieConsent() {
         Cookies
       </p>
       <p className="text-[0.78rem] text-ink-soft leading-[1.7] mb-4">
-        We use analytics cookies to understand how visitors use Soléi —
-        nothing more. See our{" "}
+        We use analytics and Meta (Facebook) cookies to understand how
+        visitors use Soléi and to measure our ads. See our{" "}
         <Link href="/privacy" className="text-coastal underline underline-offset-2 hover:text-navy">
           privacy policy
         </Link>

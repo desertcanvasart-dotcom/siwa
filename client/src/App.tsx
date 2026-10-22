@@ -220,7 +220,7 @@ function ScrollRestoration() {
 }
 
 /**
- * Google Analytics page views for client-side navigation. The gtag
+ * Google Analytics + Meta Pixel page views for client-side navigation. The gtag
  * snippet in index.html only records the initial full-page load; in
  * an SPA every route change after that would go uncounted without
  * this. The first location is skipped — gtag('config') already
@@ -242,6 +242,8 @@ function AnalyticsPageViews() {
         page_title: document.title,
       });
     }
+    const fbq = (window as any).fbq;
+    if (typeof fbq === "function") fbq("track", "PageView");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
   return null;
