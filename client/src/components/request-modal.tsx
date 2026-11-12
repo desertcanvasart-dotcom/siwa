@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import { useState } from 'react';
 import { Phone, Mail, X } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -10,7 +11,7 @@ interface RequestModalProps {
   hotelEmail?: string;
 }
 
-export function RequestModal({ isOpen, onClose, hotelName, hotelEmail = "info@siwahotels.com" }: RequestModalProps) {
+export function RequestModal({ isOpen, onClose, hotelName, hotelEmail = CONTACT_EMAIL }: RequestModalProps) {
   const { toast } = useToast();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 
 /**
@@ -14,7 +15,6 @@ import { useSiteContent, pickContent } from "@/lib/useSiteContent";
  */
 const FALLBACK_WHATSAPP = "201206887575";
 const FALLBACK_WHATSAPP_LABEL = "+20 120 688 7575";
-const FALLBACK_EMAIL = "hello@solei.travel";
 
 export interface ContactChannels {
   /** Digits only, country code first — ready for a wa.me URL. */
@@ -32,7 +32,8 @@ export function useContact(): ContactChannels {
   const whatsappDigits = raw.replace(/\D/g, "");
   const whatsappLabel =
     pickContent<string>(content, "contact.whatsapp_label", "") || FALLBACK_WHATSAPP_LABEL;
-  const email = pickContent<string>(content, "contact.email", "") || FALLBACK_EMAIL;
+  // Email is fixed (owner decision): never taken from the CMS.
+  const email = CONTACT_EMAIL;
 
   return {
     whatsappDigits,

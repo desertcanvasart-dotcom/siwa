@@ -3059,11 +3059,10 @@ function PagesEditor({ toast }: { toast: any }) {
         {
           id: 'owner',
           label: 'Owner contact',
-          description: 'Used as the fallback contact when the AI chat is unavailable. The WhatsApp number should include country code, digits only (e.g. 201234567890).',
+          description: 'Used as the fallback contact when the AI chat is unavailable. The WhatsApp number should include country code, digits only (e.g. 201234567890). The contact email is fixed to hello@darsolei.com site-wide and is not editable here.',
           fields: [
             { key: 'contact.whatsapp', label: 'WhatsApp number (with country code, digits only)', placeholder: '201234567890' },
             { key: 'contact.whatsapp_label', label: 'WhatsApp display label', placeholder: '+20 1234 567890' },
-            { key: 'contact.email', label: 'Contact email', placeholder: 'hello@solei.travel' },
             { key: 'contact.fallback_message', label: 'Chat fallback message', multiline: true, placeholder: "Sorry, I'm not available right now. Please try again later or reach the Soléi team directly on WhatsApp." },
           ],
         },

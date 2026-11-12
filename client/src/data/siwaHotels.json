@@ -7,7 +7,7 @@
     "category": "heritage",
     "price": "$50/night",
     "amenities": ["Historic Location", "Cultural Tours", "Rooftop Views", "Traditional Crafts"],
-    "email": "hello@lasolei.com"
+    "email": "hello@darsolei.com"
   },
   {
     "name": "Soléi Royal",
@@ -17,7 +17,7 @@
     "category": "wellness",
     "price": "$500/night",
     "amenities": ["Mineral Spa", "Float Therapy", "Wellness Programs", "Meditation Gardens"],
-    "email": "hello@lasolei.com"
+    "email": "hello@darsolei.com"
   },
   {
     "name": "Soléi Desert Retreat",
@@ -29,7 +29,7 @@
     "amenities": ["Eco-Spa", "Natural Healing", "Meditation Gardens"],
     "location": "Cairo, Egypt",
     "phone": "+20 120 688 7575",
-    "email": "hello@lasolei.com"
+    "email": "hello@darsolei.com"
   },
   {
     "name": "Soléi Salt Caves",
@@ -39,7 +39,7 @@
     "category": "wellness",
     "price": "$50/night",
     "amenities": ["Natural Pools", "Yoga Studio", "Organic Garden", "Sand Bath Therapy"],
-    "email": "hello@lasolei.com"
+    "email": "hello@darsolei.com"
   },
   {
     "name": "Talist Siwa",
@@ -49,7 +49,7 @@
     "category": "eco-luxury",
     "price": "$65/night",
     "amenities": ["Private Gardens", "Date Palm Groves", "Eco-Friendly Design", "Wellness Treatments"],
-    "email": "hello@lasolei.com"
+    "email": "hello@darsolei.com"
   },
   {
     "name": "Adrère Amellal",
@@ -59,7 +59,7 @@
     "category": "eco-luxury",
     "price": "$840/night",
     "amenities": ["Salt Lake Access", "Organic Cuisine", "Stargazing Deck", "Desert Spa"],
-    "email": "hello@lasolei.com"
+    "email": "hello@darsolei.com"
   },
   {
     "name": "Azad Siwa Hotel",
@@ -69,7 +69,7 @@
     "category": "eco-luxury",
     "price": "$60/night",
     "amenities": ["Modern Amenities", "Traditional Hospitality", "Oasis Views", "Local Experiences"],
-    "email": "hello@lasolei.com"
+    "email": "hello@darsolei.com"
   },
   {
     "name": "Siwa Shali Resort",
@@ -79,6 +79,6 @@
     "category": "glamping",
     "price": "From $75/night",
     "amenities": ["Luxury Tents", "Campfire Dining", "Desert Excursions", "Astronomy Tours"],
-    "email": "hello@lasolei.com"
+    "email": "hello@darsolei.com"
   }
 ]

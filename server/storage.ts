@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import {
   users,
   admins,
@@ -208,7 +209,7 @@ export class MemStorage implements IStorage {
       id: this.currentAdminId++,
       username: process.env.ADMIN_USERNAME || 'admin',
       password: hashedPassword,
-      email: process.env.ADMIN_EMAIL || 'admin@solei.com',
+      email: process.env.ADMIN_EMAIL || CONTACT_EMAIL,
       createdAt: new Date(),
     };
 

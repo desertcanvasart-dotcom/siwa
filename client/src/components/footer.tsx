@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import { Link } from "wouter";
 
 export function Footer() {
@@ -15,7 +16,7 @@ export function Footer() {
           </div>
           <div className="mt-8 pt-8 border-t border-white/10 text-white/40 text-sm">
             <div className="mb-4 space-y-1">
-              <div>Email: <a href="mailto:hello@lasolei.com" className="text-solei-gold hover:text-yellow-400 transition-colors duration-300">hello@lasolei.com</a></div>
+              <div>Email: <a href={`mailto:${CONTACT_EMAIL}`} className="text-solei-gold hover:text-yellow-400 transition-colors duration-300">{CONTACT_EMAIL}</a></div>
               <div>Phone: <a href="tel:+201206887575" className="text-solei-gold hover:text-yellow-400 transition-colors duration-300">+20 120 688 7575</a></div>
             </div>
             <div className="mb-2">© 2024 Soléi Travel. All rights reserved.</div>

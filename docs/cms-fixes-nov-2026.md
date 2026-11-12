@@ -9,12 +9,11 @@ Canonical facts now live in `client/src/lib/site-facts.ts`. Use them when writin
 ## 1. Legal / trust — owner to supply
 - [ ] **Entity name:** "Soléi Inc." is described as registered under Egyptian law, but "Inc." is not an Egyptian company form. Confirm the legal entity and update Terms and Privacy.
 - [ ] **Ministry of Tourism licence:** no number appears anywhere. Add it to the footer, Terms and Privacy.
-- [ ] **Email domains:** the site is soléi.com, but contact addresses use three different domains:
-  - `@lasolei.com`: the Privacy and unsubscribe addresses, plus the footer and contact-section code.
-  - `site_content.contact.email` = **hello@ldarsolei.com** (looks like a typo).
-  - `.env.example` `EMAIL_FROM` / `EMAIL_TO`: `@darsolei.com`.
-
-  Pick one domain and update all three places.
+- [x] **Email:** fixed in code. **hello@darsolei.com** is the only address, defined in `shared/contact.ts`.
+  - The site ignores the CMS `contact.email` key, and the API serves only that address. The key was set to a misspelled domain; you can clear it in the dashboard.
+  - Server email refuses any `EMAIL_FROM` / `EMAIL_TO` that isn't on darsolei.com.
+  - `npm run build` fails if any other address appears in the source (`npm run check:emails`).
+  - Make sure darsolei.com is verified in Resend and that `EMAIL_FROM` / `EMAIL_TO` on Railway use it.
 - [ ] **WhatsApp number:** it appears only in the Privacy Policy. Consider showing it on the concierge buttons.
 - [ ] **Terms §19:** grants a perpetual, worldwide, royalty-free licence to guest images. Consider making it opt-in.
 - [ ] **Cancellation terms:** the Terms now say the product page's terms win. That means each product's `details.cancellationPolicy` must be the intended policy, so review every product.

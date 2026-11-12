@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -71,7 +72,7 @@ export function ContactSection() {
               </div>
               <div className="flex items-center">
                 <i className="fas fa-envelope text-solei-gold mr-4"></i>
-                <a href="mailto:hello@lasolei.com" className="hover:text-solei-gold transition-colors duration-300">hello@lasolei.com</a>
+                <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-solei-gold transition-colors duration-300">{CONTACT_EMAIL}</a>
               </div>
               <div className="flex items-center">
                 <i className="fas fa-map-marker-alt text-solei-gold mr-4"></i>
@@ -111,7 +112,7 @@ export function ContactSection() {
                   value={formData.email}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:border-solei-gold focus:outline-none focus:ring-2 focus:ring-solei-gold/50 text-white placeholder-white/60" 
-                  placeholder="your@email.com"
+                  placeholder="you@example.com"
                   required
                 />
               </div>

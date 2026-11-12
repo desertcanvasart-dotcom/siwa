@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import Layout from "@/components/layout/layout";
@@ -157,8 +158,8 @@ export default function Privacy() {
               <p>
                 As data controller, we determine the purposes and means of processing your personal
                 data. Our designated Privacy Contact can be reached at{" "}
-                <a href="mailto:privacy@lasolei.com" className="text-coastal hover:underline">
-                  privacy@lasolei.com
+                <a href={`mailto:${CONTACT_EMAIL}`} className="text-coastal hover:underline">
+                  {CONTACT_EMAIL}
                 </a>.
               </p>
             </Section>
@@ -295,8 +296,8 @@ export default function Privacy() {
               </ul>
               <HighlightBox>
                 To exercise any of these rights, contact us at{" "}
-                <a href="mailto:privacy@lasolei.com" className="text-coastal hover:underline">
-                  privacy@lasolei.com
+                <a href={`mailto:${CONTACT_EMAIL}`} className="text-coastal hover:underline">
+                  {CONTACT_EMAIL}
                 </a>
                 . We will respond within 30 days. We may need to verify your identity before
                 processing the request.
@@ -338,8 +339,8 @@ export default function Privacy() {
               <p>
                 Every marketing communication includes an unsubscribe link. You may also opt out
                 by emailing{" "}
-                <a href="mailto:hello@lasolei.com" className="text-coastal hover:underline">
-                  hello@lasolei.com
+                <a href={`mailto:${CONTACT_EMAIL}`} className="text-coastal hover:underline">
+                  {CONTACT_EMAIL}
                 </a>{" "}
                 with "Unsubscribe" in the subject line. We will action opt-outs within 10 business
                 days.
@@ -357,8 +358,8 @@ export default function Privacy() {
               <p>
                 If you believe a child's data has been collected without appropriate consent,
                 please contact us immediately at{" "}
-                <a href="mailto:privacy@lasolei.com" className="text-coastal hover:underline">
-                  privacy@lasolei.com
+                <a href={`mailto:${CONTACT_EMAIL}`} className="text-coastal hover:underline">
+                  {CONTACT_EMAIL}
                 </a>.
               </p>
             </Section>
@@ -428,8 +429,8 @@ export default function Privacy() {
                 </p>
                 <p className="font-body text-sm text-ink-soft mt-3">
                   Email:{" "}
-                  <a href="mailto:privacy@lasolei.com" className="text-coastal hover:underline">
-                    privacy@lasolei.com
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="text-coastal hover:underline">
+                    {CONTACT_EMAIL}
                   </a>
                 </p>
                 <p className="font-body text-sm text-ink-soft">
@@ -463,10 +464,10 @@ export default function Privacy() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="mailto:privacy@lasolei.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="font-body text-[0.72rem] tracking-[0.18em] uppercase px-8 py-3 bg-navy text-cream hover:bg-navy-mid transition-colors"
             >
-              privacy@lasolei.com
+              {CONTACT_EMAIL}
             </a>
             <Link
               href="/terms-of-service"

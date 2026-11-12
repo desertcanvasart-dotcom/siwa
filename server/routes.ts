@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import express from "express";
@@ -583,7 +584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public: read all key/value pairs for the static-page overlay
   app.get('/api/site-content', async (_req, res) => {
     try {
-      res.json(await storage.getSiteContent());
+      res.json(enforceContactEmail(await storage.getSiteContent()));
     } catch (error) {
       console.error('Error fetching site content:', error);
       res.status(500).json({ message: 'Failed to fetch site content' });
@@ -593,7 +594,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: upsert a single key — body { value: any }
   app.put('/api/admin/site-content/:key', authenticateAdmin, async (req, res) => {
     try {
-      const result = await storage.upsertSiteContent(req.params.key, req.body?.value);
+      const result = await storage.upsertSiteContent(
+        req.params.key,
+        enforceContactEmail({ [req.params.key]: req.body?.value })[req.params.key],
+      );
       res.json(result);
     } catch (error) {
       console.error('Error saving site content:', error);
@@ -1176,7 +1180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send email
       // Same owner inbox and verified sender as every other form
       // (EMAIL_TO / EMAIL_FROM) — this used to go to a hard-coded
-      // hello@solei.com. Fail loudly if it doesn't send.
+      // address. Fail loudly if it doesn't send.
       const sent = await sendEmail({
         replyTo: email,
         subject: `New Quote Request from ${fullName}`,
@@ -1515,4 +1519,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+/**
+ * Site content may never publish an email other than CONTACT_EMAIL:
+ * contact.email is forced, and any other address inside a text value
+ * (e.g. a Privacy override) is rewritten. Image names like "x@2x.png"
+ * are left alone.
+ */
+const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.(?!(?:png|jpe?g|webp|gif|svg|avif|mp4|webm)\b)[A-Za-z]{2,}\b/g;
+function rewriteEmails(v: unknown): unknown {
+  if (typeof v === "string") return v.replace(EMAIL_RE, CONTACT_EMAIL);
+  if (Array.isArray(v)) return v.map(rewriteEmails);
+  if (v && typeof v === "object") {
+    return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, rewriteEmails(x)]));
+  }
+  return v;
+}
+function enforceContactEmail<T extends Record<string, unknown>>(content: T): T {
+  const out = rewriteEmails(content) as T;
+  if ("contact.email" in out) (out as Record<string, unknown>)["contact.email"] = CONTACT_EMAIL;
+  return out;
 }

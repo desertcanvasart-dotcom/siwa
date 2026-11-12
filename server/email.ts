@@ -14,13 +14,22 @@
  * forms still "work" locally without a Resend account.
  */
 
+import { CONTACT_DOMAIN, CONTACT_EMAIL, CONTACT_FROM, isSoleiAddress } from "@shared/contact";
 import { Resend } from "resend";
 import type { HotelRequest } from "@shared/schema";
 
 // Defaults are the business address on the Resend-verified darsolei.com
 // domain, so enquiries still go out if a variable is missing.
-const FROM = process.env.EMAIL_FROM || "Soléi <hello@darsolei.com>";
-const OWNER = process.env.EMAIL_TO || "hello@darsolei.com";
+// Only darsolei.com addresses are allowed (owner decision): an env var
+// pointing anywhere else is ignored with a warning.
+function soleiOnly(name: string, value: string | undefined, fallback: string): string {
+  if (!value) return fallback;
+  if (isSoleiAddress(value)) return value;
+  console.warn(`[email] ${name}="${value}" is not on ${CONTACT_DOMAIN}; using ${fallback}`);
+  return fallback;
+}
+const FROM = soleiOnly("EMAIL_FROM", process.env.EMAIL_FROM, CONTACT_FROM);
+const OWNER = soleiOnly("EMAIL_TO", process.env.EMAIL_TO, CONTACT_EMAIL);
 
 let resend: Resend | null = null;
 function getResend(): Resend | null {
