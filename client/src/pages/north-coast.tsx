@@ -15,12 +15,10 @@ import { useToast } from "@/hooks/use-toast";
 // Helper function to get hotel route from name
 function getHotelRoute(hotelName: string): string {
   const routeMap: Record<string, string> = {
-    "The G Hotel Seashell": "/hotel/the-g-hotel-seashell",
     "Vida Marina Marassi": "/hotel/vida-marina-resort-marassi",
     "Al Alamein Hotel": "/hotel/al-alamein-hotel", 
     "Rixos Premium Alamein": "/hotel/rixos-premium-alamein",
     "Address Beach Resort": "/hotel/address-beach-resort-marassi",
-    "Casa Cook North Coast": "/hotel/casa-cook-north-coast",
     "JAZ Almaza Beach Resort": "/hotel/jaz-almaza-beach-resort",
     "Address Golf Resort": "/hotel/address-marassi-golf-resort"
   };

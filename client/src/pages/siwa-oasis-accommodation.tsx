@@ -7,6 +7,7 @@ import { Arch } from "@/components/ui/Arch";
 import { useReveal } from "@/components/home/useReveal";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
 import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
+import { SIWA } from "@/lib/site-facts";
 import adrereAmellalImage from "@assets/adrerre-amelal_1751755031600.jpg";
 import taziryImage from "@assets/taziry-room-.jpg";
 import ghalietImage from "@assets/galit-lodge-siwa_1751833109925.jpg";
@@ -58,10 +59,10 @@ const soleiCollection: SoleiHotel[] = [
     slug: "solei-old-town",
     name: "Soléi Old Town",
     nameItalic: "Old Town",
-    type: "Heritage Stay · Ancient Medina · Shali Views",
+    type: "Heritage Stay · Old Town · Shali Views",
     fromPrice: "$145",
     priceNote: "/ night",
-    highlights: ["Old City", "Shali fortress views", "Heritage rooms", "Rooftop terrace"],
+    highlights: ["Old Town", "Shali fortress views", "Heritage rooms", "Rooftop terrace"],
     gradient: "bg-[linear-gradient(155deg,#1e3a52_0%,#0F2436_45%,#0e2030_100%)]",
     image: soleiOldTownImage,
   },
@@ -80,10 +81,10 @@ const soleiCollection: SoleiHotel[] = [
     slug: "solei-desert-retreat",
     name: "Soléi Desert Retreat",
     nameItalic: "Desert Retreat",
-    type: "Desert Lodge · Salt Flats · Completely Remote",
+    type: "Desert Lodge · Salt Flats · Away from town",
     fromPrice: "$240",
     priceNote: "/ night · full board",
-    highlights: ["3 rooms only", "Great Sand Sea", "No light pollution", "Fire-cooked meals", "Star-gazing deck"],
+    highlights: ["Private rooms", "Great Sand Sea", "No light pollution", "Meals on request", "Star-gazing deck"],
     gradient: "bg-[linear-gradient(155deg,#0a1e2e_0%,#1a3a52_45%,#0F2436_100%)]",
     image: soleiDesertRetreatImage,
   },
@@ -94,7 +95,7 @@ const soleiCollection: SoleiHotel[] = [
     type: "Wellness Retreat · Natural Caves · Ancient Healing",
     fromPrice: "$175",
     priceNote: "/ night",
-    highlights: ["Cave rooms", "Salt air therapy", "Ancient microclimate", "Guided cave walks"],
+    highlights: ["Cave rooms", "Salt air therapy", "Daily salt-cave session"],
     gradient: "bg-[linear-gradient(155deg,#162030_0%,#0a1828_45%,#1a2e40_100%)]",
     image: soleiSaltCavesImage,
   },
@@ -103,10 +104,10 @@ const soleiCollection: SoleiHotel[] = [
 const partnerProperties: PartnerHotel[] = [
   {
     slug: "adrere-amellal",
-    name: "Adrere Amellal",
+    name: "Adrère Amellal",
     type: "Eco Lodge · White Mountain · Lake views",
-    desc: "Egypt's most celebrated eco-lodge. Built entirely from karsheef salt rock and palm wood into the white mountain at the edge of the salt lake. No electricity, no internet, no noise — just the oasis in its most elemental form. Oil lamps at night. The silence is the point.",
-    highlights: ["No electricity", "Oil lamp lighting", "Salt lake front", "Organic farm"],
+    desc: "Egypt's most celebrated eco-lodge. Built entirely from karsheef (salt-rock and mud) and palm wood into the white mountain at the edge of the salt lake. No electricity, no internet, no noise — just the oasis in its most elemental form. Only candlelight at night. The silence is the point.",
+    highlights: ["No electricity", "Candlelight", "Salt lake front", "Organic farm"],
     price: "$320 / night",
     categories: ["eco"],
     gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#0F2436_60%,#0a1e2e_100%)]",
@@ -117,7 +118,7 @@ const partnerProperties: PartnerHotel[] = [
     slug: "taziry-ecolodge",
     name: "Taziry Ecolodge",
     type: "Boutique Eco Lodge · Salt lake views · Pool",
-    desc: "Mud-brick villas arranged around a courtyard garden, with uninterrupted views of Siwa's salt lakes. A salt water pool, organic meals, and the kind of unhurried service that earns its reputation quietly. More accessible than Adrere Amellal, no less considered.",
+    desc: "Mud-brick villas arranged around a courtyard garden, with uninterrupted views of Siwa's salt lakes. A salt water pool, organic meals, and the kind of unhurried service that earns its reputation quietly. More accessible than Adrère Amellal, no less considered.",
     highlights: ["Salt water pool", "Lake views", "Organic kitchen", "Mud-brick villas"],
     price: "$180 / night",
     categories: ["eco", "boutique"],
@@ -176,18 +177,21 @@ const partnerProperties: PartnerHotel[] = [
 ];
 
 const upsellMoments = [
-  { slug: "salt-and-spring-escape",        title: "Salt & Spring Escape",          detail: "Half day · 2–3 hours · From $60pp" },
-  { slug: "desert-sunset-experience",      title: "Desert Sunset Experience",      detail: "Sunset · 3–4 hours · From $80pp" },
-  { slug: "desert-night-experience",       title: "Desert Night Experience",       detail: "Sunset → Morning · From $150pp" },
-  { slug: "solei-signature-siwa-journey",  title: "Soléi Signature Siwa Journey",  detail: "Full day → Night · From $250pp" },
+  { slug: "salt-and-spring-escape",        title: "Salt & Spring Escape",          detail: "Half day · 2–3 hours" },
+  { slug: "desert-sunset-experience",      title: "Desert Sunset Experience",      detail: "Late afternoon into sunset" },
+  { slug: "desert-night-experience",       title: "Desert Night Experience",       detail: "Sunset → Morning" },
+  { slug: "solei-signature-siwa-journey",  title: "Soléi Signature Siwa Journey",  detail: "Full day → Night" },
 ];
 
 const bookingSteps = [
-  { n: "1.", title: "Choose your property & dates",    text: "Select from the listings above. Each property page shows live availability." },
+  { n: "1.", title: "Choose your property & dates",    text: "Select from the listings above. Each property page shows availability and its own cancellation terms." },
   { n: "2.", title: "Select room type",                text: "Room types, occupancy, and inclusions shown clearly — no hidden extras." },
-  { n: "3.", title: "Pay securely on site",            text: "Payment processed via our booking system. Instant confirmation sent to your email." },
+  { n: "3.", title: "Pay securely on site",            text: `Payment processed via our ${SIWA.bookingEngine} booking system. Where live booking is shown, confirmation is instant; otherwise we confirm availability and send a secure payment link.` },
   { n: "4.", title: "Add experiences & transportation",text: "After confirming accommodation, you'll be invited to add Siwa experiences and arrange your transfer — nothing required, everything available." },
 ];
+
+const COUNT_WORDS = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+const countWord = (n: number) => COUNT_WORDS[n] ?? String(n);
 
 const TEXTILE = "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B89A5B' fill-opacity='0.06'%3E%3Cpath d='M20 0L21 5L20 4L19 5ZM0 20L5 21L4 20L5 19ZM40 20L35 21L36 20L35 19ZM20 40L21 35L20 36L19 35Z'/%3E%3C/g%3E%3C/svg%3E\")";
 
@@ -303,8 +307,8 @@ export default function SiwaOasisAccommodation() {
   return (
     <>
       <SEO
-        title="Siwa Accommodation — 10 Curated Properties | Soléi"
-        description="Ten curated Siwa properties — four Soléi-owned stays, world-famous eco-lodges, boutique retreats, and classic resorts. Direct booking with live availability."
+        title="Siwa Accommodation — Soléi-Owned Stays | Soléi"
+        description={`${countWord(SIWA.ownedProperties.length)} Soléi-owned stays in Siwa Oasis, booked directly on each property's page — plus partner eco-lodges arranged on request through our concierge.`}
         path="/siwa-oasis/accommodation"
       />
       <Nav />
@@ -338,19 +342,19 @@ export default function SiwaOasisAccommodation() {
               >
                 Siwa <em className="italic text-gold">accommodation.</em>
                 <br />
-                Ten properties. One oasis.
+                {countWord(SIWA.ownedProperties.length)} Soléi properties. One oasis.
               </h1>
             </div>
 
             <div className="pb-2 animate-fade-up" style={{ animationDelay: "0.7s" }}>
               <p className="text-[0.9rem] text-white/45 leading-[1.95] mb-8 font-body">
-                From our own four properties — designed, operated, and answered for by us — to six partner lodges personally visited and chosen because they understand what it means to be somewhere, not just to stay somewhere.
+                From our own {countWord(SIWA.ownedProperties.length).toLowerCase()} properties — designed, operated, and answered for by us — to partner lodges personally visited and chosen because they understand what it means to be somewhere, not just to stay somewhere. Partner lodges are arranged on request through our concierge.
               </p>
               <div className="flex gap-10 border-t border-gold/15 pt-5">
                 {[
-                  { num: "10",  label: "Properties" },
-                  { num: "4",   label: "Soléi owned" },
-                  { num: "$95", label: "Starting from" },
+                  { num: String(SIWA.ownedProperties.length), label: "Soléi owned" },
+                  { num: String(SIWA.partnerLodgesOnRequest.length), label: "Partner lodges on request" },
+                  { num: String(SIWA.experienceSlugs.length), label: "Siwa experiences" },
                 ].map(s => (
                   <div key={s.label}>
                     <div className="font-display text-[2rem] font-normal text-gold leading-none">{s.num}</div>
@@ -400,7 +404,7 @@ export default function SiwaOasisAccommodation() {
                   className="font-display font-normal text-white leading-[1.15]"
                   style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
                 >
-                  Four properties.
+                  {countWord(SIWA.ownedProperties.length)} properties.
                   <br />
                   <em className="italic text-gold">All ours.</em>
                 </h2>
@@ -412,7 +416,7 @@ export default function SiwaOasisAccommodation() {
                 <div className="border-t border-gold/15 pt-4 flex flex-col gap-1.5">
                   {[
                     "Every detail chosen by us — architecture, menu, service, guides",
-                    "Direct booking — live availability, instant confirmation",
+                    "Direct booking on each property's page",
                     "Full accountability — Soléi is responsible for your stay, end to end",
                   ].map(line => (
                     <div key={line} className="flex items-center gap-2.5 text-[0.78rem] text-white/35 font-body">
@@ -507,12 +511,12 @@ export default function SiwaOasisAccommodation() {
                 className="font-display font-normal text-navy leading-[1.25] mb-5"
                 style={{ fontSize: "clamp(1.5rem, 3vw, 2.2rem)" }}
               >
-                All Siwa properties
+                Soléi properties
                 <br />
                 book <em className="italic text-coastal">directly on site.</em>
               </h2>
               <p className="text-[0.88rem] text-ink-soft leading-[1.95] font-body">
-                Unlike our North Coast properties — which go through a personal reservation process — all Siwa accommodation is bookable directly here via our integrated booking system. Select your dates, choose your room, and confirm in minutes. No waiting. No payment link to follow.
+                Unlike our North Coast properties — which go through a personal reservation process — our own Siwa properties book directly on each property's page via our {SIWA.bookingEngine} booking system. Select your dates, choose your room, and pay securely: where live booking is shown, confirmation is instant; otherwise send a reservation request and we'll confirm availability and send a secure payment link. Partner lodges are arranged on request through our concierge.
               </p>
             </div>
             <ul className="reveal reveal-d1 list-none border-t border-sand">
@@ -577,7 +581,7 @@ export default function SiwaOasisAccommodation() {
               >
                 <div>
                   <div className="font-display text-[1rem] text-white leading-tight">View all Siwa experiences</div>
-                  <div className="text-[0.68rem] text-white/30 mt-1 font-body">10 curated experiences available</div>
+                  <div className="text-[0.68rem] text-white/30 mt-1 font-body">{SIWA.experienceSlugs.length} curated experiences available</div>
                 </div>
                 <span className="text-[0.58rem] tracking-[0.18em] uppercase text-gold/65 flex-shrink-0 font-body">See all →</span>
               </Link>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useRoute } from "wouter";
+import { Link, useRoute } from "wouter";
 import { SEO } from "@/components/seo";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
@@ -9,8 +9,20 @@ import {
   getBlogPost,
   type BlogPost,
 } from "@/lib/blog-data";
-import { getExperience } from "@/lib/experience-data";
 import { useBlogOverlay, useBlogOverlayQuery } from "@/lib/useBlogOverlay";
+import { useBlogPostsBySlug } from "@/lib/useBlogPostsBySlug";
+import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
+import NotFound from "@/pages/not-found";
+
+/**
+ * Legacy experience slugs still stored on some Journal posts (CMS
+ * `linkedExperience`) → the live product slugs. Anything that doesn't
+ * resolve to a published experience gets no CTA at all.
+ */
+const LEGACY_EXPERIENCE_SLUGS: Record<string, string> = {
+  "salt-lake-float-therapy": "salt-and-spring-escape",
+  "desert-stargazing-experience": "desert-stargazing",
+};
 
 /* ──────────────────────────────────────────────────────────────
  *  /journal/:slug
@@ -18,7 +30,8 @@ import { useBlogOverlay, useBlogOverlayQuery } from "@/lib/useBlogOverlay";
  *  Editorial article template. Gold 2px reading progress bar
  *  pinned above the nav. Navy hero with tag chips. 3-column
  *  reading grid with content centred in min(680px). Italic
- *  Playfair lede, body in Raleway, optional pull quote.
+ *  Playfair lede, body in Raleway, pull quote only when the post
+ *  has an explicit `pullQuote` field.
  *  Optional inline experience CTA (when linkedExperience set).
  *  Author bio + related articles.
  * ────────────────────────────────────────────────────────────── */
@@ -58,7 +71,6 @@ function cardGradientFor(post: BlogPost): string {
 
 export default function BlogPostPage() {
   useReveal();
-  const [, setLocation] = useLocation();
   const [match, params] = useRoute("/journal/:slug");
   const slug = (match && params?.slug) || "";
   const basePostFromTs = useMemo(() => getBlogPost(slug), [slug]);
@@ -85,6 +97,7 @@ export default function BlogPostPage() {
       featured: !!overlay.featured,
       tags: overlay.tags || [],
       destination: dest === "siwa" || dest === "north-coast" ? dest : undefined,
+      linkedExperience: overlay.linkedExperience,
     };
   }, [basePostFromTs, overlay, slug]);
 
@@ -113,18 +126,14 @@ export default function BlogPostPage() {
         overlay.content && overlay.content.length > 0
           ? overlay.content
           : basePost.content,
+      linkedExperience: overlay.linkedExperience || basePost.linkedExperience,
+      pullQuote: overlay.pullQuote || basePost.pullQuote,
     };
   }, [basePost, overlay]);
 
-  // Redirect to /journal when the API has no published post for this
-  // slug. The API is the source of truth — drafted posts disappear
-  // from the public site even when the inline TS file still has them.
-  useEffect(() => {
-    if (!slug) return;
-    if (overlayLoading || !overlayFetched) return;
-    if (overlay) return;
-    setLocation("/journal");
-  }, [slug, overlay, overlayLoading, overlayFetched, setLocation]);
+  // Live data for the CTA and the "More from the Journal" strip.
+  const { data: liveExperiences } = useExperiencesRaw();
+  const livePosts = useBlogPostsBySlug();
 
   /* ── Gold reading progress bar ── */
   const [progress, setProgress] = useState(0);
@@ -144,16 +153,34 @@ export default function BlogPostPage() {
     };
   }, []);
 
+  // The API is the source of truth — an unpublished or unknown slug is
+  // a real 404, even when the inline TS file still has the post.
   if (overlayLoading || !overlayFetched) return null;
-  if (!overlay) return null;
-  if (!post) return null;
+  if (!overlay || !post) return <NotFound />;
 
-  const linkedExp = post.linkedExperience
-    ? getExperience(post.linkedExperience)
+  // CTA to the live product (title + link only — the price lives on the
+  // experience page, so it can't drift here).
+  const linkedSlug = post.linkedExperience
+    ? LEGACY_EXPERIENCE_SLUGS[post.linkedExperience] ?? post.linkedExperience
+    : "";
+  const linkedLive = linkedSlug
+    ? liveExperiences.find((e) => e.slug === linkedSlug && e.title)
+    : undefined;
+  const linkedExp = linkedLive
+    ? {
+        name: linkedLive.title!,
+        destination: linkedLive.destination === "north-coast" ? "north-coast" : "siwa-oasis",
+        href:
+          linkedLive.category === "Curated Journey"
+            ? `/journeys/${linkedSlug}`
+            : `/${linkedLive.destination === "north-coast" ? "north-coast" : "siwa-oasis"}/experiences/${linkedSlug}`,
+      }
     : undefined;
 
+  // Only published posts (per the API) are suggested.
   const related = blogPosts
     .filter((p) => p.slug !== post.slug)
+    .filter((p) => livePosts.size === 0 || livePosts.has(p.slug))
     .sort((a, b) => {
       const aMatch = a.destination === post.destination ? 1 : 0;
       const bMatch = b.destination === post.destination ? 1 : 0;
@@ -164,10 +191,11 @@ export default function BlogPostPage() {
     })
     .slice(0, 3);
 
-  // Choose a mid-article paragraph to render as a pull quote
-  const pullQuoteIndex = post.content.length >= 4
-    ? Math.floor(post.content.length / 2)
-    : -1;
+  // A pull quote is shown only when the post defines one explicitly,
+  // placed after the middle paragraph. Body paragraphs are never
+  // promoted to quotes.
+  const pullQuote = post.pullQuote?.trim() || "";
+  const pullQuoteAfter = pullQuote ? Math.max(1, Math.floor(post.content.length / 2)) : -1;
 
   return (
     <>
@@ -275,32 +303,27 @@ export default function BlogPostPage() {
               {post.content[0]}
             </p>
 
-            {/* Body paragraphs with optional pull quote in the middle */}
+            {/* Body paragraphs, with the post's own pull quote (if any)
+                after the middle paragraph */}
             {post.content.slice(1).map((p, i) => {
               const bodyIdx = i + 1;
-              const isPullQuote = bodyIdx === pullQuoteIndex;
               return (
                 <div key={i}>
-                  {isPullQuote && (
+                  <p
+                    className="text-ink-soft mb-6"
+                    style={{ fontSize: "1rem", lineHeight: 2 }}
+                  >
+                    {p}
+                  </p>
+                  {bodyIdx === pullQuoteAfter && (
                     <blockquote className="my-10 py-7 px-6 md:px-8 border-l-2 border-gold bg-white">
                       <p
-                        className="font-display italic font-normal leading-[1.65] text-navy mb-3"
+                        className="font-display italic font-normal leading-[1.65] text-navy"
                         style={{ fontSize: "clamp(1.05rem, 1.8vw, 1.3rem)" }}
                       >
-                        "{post.content[pullQuoteIndex]}"
+                        "{pullQuote}"
                       </p>
-                      <span className="text-[0.62rem] tracking-[0.2em] uppercase text-ink-soft/50">
-                        Soléi Journal
-                      </span>
                     </blockquote>
-                  )}
-                  {!isPullQuote && (
-                    <p
-                      className="text-ink-soft mb-6"
-                      style={{ fontSize: "1rem", lineHeight: 2 }}
-                    >
-                      {p}
-                    </p>
                   )}
                 </div>
               );
@@ -324,25 +347,22 @@ export default function BlogPostPage() {
           <section className="bg-cream grid grid-cols-[1rem_minmax(0,680px)_1rem] md:grid-cols-[minmax(2.5rem,1fr)_minmax(0,680px)_minmax(2.5rem,1fr)] pb-14">
             <div className="col-start-2">
               <Link
-                href={`/${linkedExp.destination}/experiences/${linkedExp.slug}`}
+                href={linkedExp.href}
                 className="relative overflow-hidden bg-navy flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-8 p-8 md:p-10 group hover:opacity-95 transition-opacity"
               >
                 <div className="absolute inset-0 textile-bg pointer-events-none" />
                 <div className="relative z-[2]">
                   <p className="text-[0.56rem] tracking-[0.28em] uppercase text-gold/75 mb-2">
-                    Book the experience
+                    The experience
                   </p>
                   <p className="font-display text-[1.15rem] md:text-[1.3rem] text-white font-normal leading-tight">
-                    {linkedExp.name}{" "}
-                    <em className="italic text-gold">
-                      — from ${linkedExp.price} per person
-                    </em>
+                    {linkedExp.name}
                   </p>
                 </div>
                 <span className="relative z-[2] text-[0.6rem] tracking-[0.18em] uppercase text-navy bg-gold px-7 py-3 whitespace-nowrap flex-shrink-0 group-hover:bg-gold-light transition-colors">
                   {linkedExp.destination === "north-coast"
                     ? "Enquire to book →"
-                    : "Book now →"}
+                    : "View the experience →"}
                 </span>
               </Link>
             </div>

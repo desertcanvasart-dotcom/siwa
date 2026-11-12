@@ -6,18 +6,23 @@ import { Footer } from "@/components/layout/Footer";
 import { Arch } from "@/components/ui/Arch";
 import { useReveal } from "@/components/home/useReveal";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
-import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
+import { adminPrice, parseAmount, PRICE_ON_REQUEST, CANONICAL_CURRENCY } from "@/lib/price";
+import { useExperiencesBySlug } from "@/lib/useExperiencesBySlug";
+import { NORTH_COAST, SIWA } from "@/lib/site-facts";
+
+const NUMBER_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+const numberWord = (n: number) => NUMBER_WORDS[n] ?? String(n);
+const NC_COUNT = NORTH_COAST.properties.length;
 import addressBeachImage from "@assets/Address beach Resort _1758144493080.jpg";
 import vidaMarinaImage from "@assets/Vida Marina Resort Marassi _1758142322079.jpg";
 import addressGolfImage from "@assets/Address Golf Resort_1758143858790.jpg";
-import casaCookImage from "@assets/Casa Cook North Coast _001_1758143858816.png";
 import jazAlmazaImage from "@assets/JAZ Almaza Beach-Resort_1758143858816.jpg";
-import gHotelImage from "@assets/The G Hotel Seashell_1758142922930.png";
 import rixosImage from "@assets/Rixos Premium Alamein_1758143858817.png";
 import alAlameinImage from "@assets/Al Alamein Hotel__1758143858816.png";
 
 /**
- * /north-coast/accommodation — listing for all 8 Mediterranean properties.
+ * /north-coast/accommodation — listing for every North Coast property
+ * in NORTH_COAST.properties (site-facts).
  *
  * Hotel names, types, and descriptions are drawn from the live detail
  * pages (SEO copy in *.tsx) to match what already ships in the DB —
@@ -112,21 +117,21 @@ const marassi: Hotel[] = [
     rightTag: "Enquire",
   },
   {
-    slug: "casa-cook-north-coast",
-    name: "Casa Cook North Coast",
-    type: "Boutique Resort · Design hotel · Beachfront",
-    desc: "Minimalist beachfront luxury with Casa Cook's signature design — earthy tones, rattan, organic forms — that works unusually well against the Egyptian coastal landscape. For guests who travel slowly and notice the details most resorts overlook. Smaller, quieter, more considered.",
+    slug: "al-alamein-hotel",
+    name: "Al Alamein Hotel",
+    type: "Heritage Hotel · Marassi · Sea front",
+    desc: "A beachfront hotel inside Marassi, at Sidi Abdel Rahman, offering superior to family rooms with beach access. Older, quieter, and carrying a faded grandeur the newer resorts around it don't have — the most characterful of the Marassi properties.",
     highlights: [
-      "Design-led rooms",
-      "Beach club",
-      "Yoga & wellness",
-      "Adults-friendly",
+      "Sea front position",
+      "Heritage character",
+      "Inside Marassi",
+      "Quiet location",
     ],
-    price: "$195 / night",
+    price: "$175 / night",
     categories: ["boutique", "marassi"],
-    gradient: "bg-[linear-gradient(155deg,#235570_0%,#2F6F8F_100%)]",
-    image: casaCookImage,
-    topTag: { label: "Boutique · Design-led", variant: "boutique" },
+    gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#3d8aad_100%)]",
+    image: alAlameinImage,
+    topTag: { label: "Heritage · Coastal", variant: "boutique" },
     rightTag: "Enquire",
   },
 ];
@@ -136,7 +141,7 @@ const almaza: Hotel[] = [
     slug: "jaz-almaza-beach-resort",
     name: "Jaz Almaza Beach Resort",
     type: "Beach Resort · Almaza Bay · All-inclusive option",
-    desc: "On Almaza Bay's most praised stretch of beach — clear water, white sand, and a quality of light in the afternoons that photographers know about. Family-friendly with entertainment and all-inclusive available but not compulsory. Larger than Casa Cook but less frenetic than Marassi.",
+    desc: "On Almaza Bay's most praised stretch of beach — clear water, white sand, and a quality of light in the afternoons that photographers know about. Family-friendly with entertainment and all-inclusive available but not compulsory. Quieter and less frenetic than Marassi.",
     highlights: [
       "Private beach",
       "Crystal clear water",
@@ -148,24 +153,6 @@ const almaza: Hotel[] = [
     gradient: "bg-[linear-gradient(155deg,#1d5070_0%,#0F2436_100%)]",
     image: jazAlmazaImage,
     topTag: { label: "Almaza Bay · Beach", variant: "resort" },
-    rightTag: "Enquire",
-  },
-  {
-    slug: "the-g-hotel-seashell",
-    name: "The G Hotel Seashell",
-    type: "Boutique Hotel · Almaza Bay · Intimate",
-    desc: "A boutique beachfront resort with villa options up to five bedrooms and direct white-sand beach access. One of Almaza Bay's smaller, more intimate options — fewer rooms, more attention per guest, without the crowds of the larger resort complexes.",
-    highlights: [
-      "5-bedroom villas",
-      "Beach access",
-      "Personalised service",
-      "Quiet location",
-    ],
-    price: "$185 / night",
-    categories: ["boutique", "almaza"],
-    gradient: "bg-[linear-gradient(155deg,#163a52_0%,#2F6F8F_100%)]",
-    image: gHotelImage,
-    topTag: { label: "Boutique · Almaza Bay", variant: "boutique" },
     rightTag: "Enquire",
   },
 ];
@@ -188,24 +175,6 @@ const alamein: Hotel[] = [
     gradient: "bg-[linear-gradient(155deg,#1a3a52_0%,#2F6F8F_100%)]",
     image: rixosImage,
     topTag: { label: "Premium · All-inclusive", variant: "luxury" },
-    rightTag: "Enquire",
-  },
-  {
-    slug: "al-alamein-hotel",
-    name: "Al Alamein Hotel",
-    type: "Heritage Hotel · El Alamein · Sea front",
-    desc: "A beachfront resort at historic Al Alamein offering superior to family rooms with beach access and proximity to the WWII Museum. Older, quieter, and carrying a faded grandeur that suits the historical weight of this stretch of coast. Best for travellers who want to understand this part of Egypt more fully.",
-    highlights: [
-      "Sea front position",
-      "Heritage character",
-      "Near WWII museum",
-      "Quiet location",
-    ],
-    price: "$175 / night",
-    categories: ["boutique", "alamein"],
-    gradient: "bg-[linear-gradient(155deg,#0F2436_0%,#3d8aad_100%)]",
-    image: alAlameinImage,
-    topTag: { label: "Heritage · Coastal", variant: "boutique" },
     rightTag: "Enquire",
   },
 ];
@@ -252,27 +221,13 @@ const howSteps = [
   },
 ];
 
+/** Live catalogue items to cross-sell. Duration and price come from the
+ *  experience data (CMS) at render time — never hard-coded here. */
 const upsellMoments = [
-  {
-    slug: "private-yacht-sunset-ritual",
-    title: "Private yacht sunset ritual",
-    detail: "Sunset · 3 hours · From $120pp",
-  },
-  {
-    slug: "signature-dinner-experience",
-    title: "Signature dinner experience",
-    detail: "Evening · 3 hours · From $140pp",
-  },
-  {
-    slug: "coastal-wellness-ritual",
-    title: "Coastal wellness ritual",
-    detail: "Morning · Half day · From $130pp",
-  },
-  {
-    slug: "beach-club-experience",
-    title: "Beach club experience",
-    detail: "Day · Flexible · From $75pp",
-  },
+  { slug: "private-yacht-sunset-ritual", title: "Private Yacht Experience", when: "On the water" },
+  { slug: "signature-dinner-experience", title: "Signature Dinner", when: "Evening" },
+  { slug: "coastal-wellness-ritual", title: "Luxury Spa", when: "Spa" },
+  { slug: "beach-club-experience", title: "Beach Club", when: "Day" },
 ];
 
 interface LocationGroup {
@@ -288,21 +243,21 @@ const groups: LocationGroup[] = [
     id: "marassi",
     title: "Marassi",
     titleTail: "— the flagship development",
-    desc: "Egypt's most celebrated coastal resort community. Four properties, direct Mediterranean frontage, and a marina that sets the tone.",
+    desc: `Egypt's most celebrated coastal resort community. ${numberWord(marassi.length)} properties, direct Mediterranean frontage, and a marina that sets the tone.`,
     hotels: marassi,
   },
   {
     id: "almaza",
     title: "Almaza Bay",
     titleTail: "— Egypt's clearest water",
-    desc: "Further east along the coast. Less developed, quieter, and widely regarded as home to the North Coast's most beautiful sea.",
+    desc: "About 130 km west of Marassi, near Marsa Matrouh. Less developed, quieter, and widely regarded as home to the North Coast's most beautiful sea.",
     hotels: almaza,
   },
   {
     id: "alamein",
     title: "El Alamein",
     titleTail: "— history meets the coast",
-    desc: "Where WWII history meets the Mediterranean. A quieter, more serious stretch of coast — ideal for those combining heritage visits with coastal rest.",
+    desc: "Just east of Marassi, where WWII history meets the Mediterranean. A quieter, more serious stretch of coast — ideal for those combining heritage visits with coastal rest.",
     hotels: alamein,
   },
 ];
@@ -312,6 +267,13 @@ export default function NorthCoastAccommodation() {
   const [active, setActive] = useState<FilterId>("all");
 
   const overlays = useHotelsBySlug();
+  const experienceOverlays = useExperiencesBySlug();
+  const fromAmount = useMemo(() => {
+    const amounts = NORTH_COAST.properties
+      .map((p) => adminPrice(overlays.get(p.slug)).amount)
+      .filter((a) => a > 0);
+    return amounts.length ? Math.min(...amounts) : 0;
+  }, [overlays]);
 
   const filteredGroups = useMemo(() => {
     const inlineSlugs = new Set(allHotels.map((h) => h.slug));
@@ -385,8 +347,8 @@ export default function NorthCoastAccommodation() {
   return (
     <>
       <SEO
-        title="North Coast Accommodation — 8 Curated Mediterranean Resorts | Soléi"
-        description="Eight curated North Coast properties across Marassi, Almaza Bay, and El Alamein. Personally visited, personally endorsed. Enquiry-based reservations confirmed within 24 hours."
+        title={`North Coast Accommodation — ${NC_COUNT} Curated Mediterranean Resorts | Soléi`}
+        description={`${numberWord(NC_COUNT)} curated North Coast properties across Marassi, Almaza Bay, and El Alamein. Personally visited, personally endorsed. Enquiry-based reservations confirmed within 24 hours.`}
         path="/north-coast/accommodation"
       />
       <Nav />
@@ -435,7 +397,7 @@ export default function NorthCoastAccommodation() {
                 North Coast{" "}
                 <em className="italic text-gold">accommodation.</em>
                 <br />
-                Eight properties. One shore.
+                {numberWord(NC_COUNT)} properties. One shore.
               </h1>
             </div>
 
@@ -451,9 +413,16 @@ export default function NorthCoastAccommodation() {
               </p>
               <div className="flex gap-10 border-t border-white/15 pt-5">
                 {[
-                  { num: "8", label: "Properties" },
+                  { num: String(NC_COUNT), label: "Properties" },
                   { num: "3", label: "Locations" },
-                  { num: "$175", label: "Starting from" },
+                  ...(fromAmount > 0
+                    ? [
+                        {
+                          num: `${CANONICAL_CURRENCY}${fromAmount.toLocaleString()}`,
+                          label: "Starting from",
+                        },
+                      ]
+                    : []),
                 ].map((s) => (
                   <div key={s.label}>
                     <div className="font-display text-[2rem] font-normal text-gold leading-none">
@@ -652,8 +621,8 @@ export default function NorthCoastAccommodation() {
                 {[
                   ["Booking method", "Enquiry → payment link"],
                   ["Response time", "Within 24 hours"],
-                  ["Properties", "8 curated partner hotels"],
-                  ["From Cairo", "~2.5 hours"],
+                  ["Properties", `${NC_COUNT} curated partner hotels`],
+                  ["From Cairo", "~3 hours to Marassi"],
                   ["Best season", "April–June, Sept–Nov"],
                 ].map(([k, v]) => (
                   <li
@@ -687,7 +656,7 @@ export default function NorthCoastAccommodation() {
                 {[
                   ["Booking method", "Direct — live availability"],
                   ["Confirmation", "Instant"],
-                  ["Properties", "8 incl. 2 Soléi-owned"],
+                  ["Properties", `${SIWA.ownedProperties.length} Soléi-owned`],
                   ["From Cairo", "~8 hours"],
                   ["Best season", "Oct–April"],
                 ].map(([k, v]) => (
@@ -724,9 +693,9 @@ export default function NorthCoastAccommodation() {
                 the <em className="italic text-coastal">coast.</em>
               </h2>
               <p className="text-[0.88rem] text-ink-soft leading-[1.95] mb-8">
-                The North Coast has more to offer than its resorts. Flamingos
-                behind the lagoons, WWII battlefields thirty minutes from
-                Marassi, open-water swims at dawn, private sunset sailing.
+                The North Coast has more to offer than a sunbed. A private
+                yacht off Marassi, a day at a beach club, a signature dinner,
+                a night out, an afternoon at the spa.
                 Once your accommodation is confirmed, we'll invite you to add
                 to your time here.
               </p>
@@ -747,10 +716,22 @@ export default function NorthCoastAccommodation() {
                 >
                   <div>
                     <div className="font-display text-[1rem] text-navy leading-tight">
-                      {m.title}
+                      {experienceOverlays.get(m.slug)?.title || m.title}
                     </div>
                     <div className="text-[0.68rem] text-ink-soft/50 mt-1">
-                      {m.detail}
+                      {(() => {
+                        const o = experienceOverlays.get(m.slug);
+                        const amount = parseAmount(o?.pricePerPerson);
+                        return [
+                          m.when,
+                          o?.duration,
+                          amount > 0
+                            ? `From ${CANONICAL_CURRENCY}${amount.toLocaleString()}pp`
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ");
+                      })()}
                     </div>
                   </div>
                   <span className="text-[0.58rem] tracking-[0.18em] uppercase text-gold/65 flex-shrink-0">
@@ -767,7 +748,7 @@ export default function NorthCoastAccommodation() {
                     View all North Coast experiences
                   </div>
                   <div className="text-[0.68rem] text-ink-soft/50 mt-1">
-                    6 curated experiences available
+                    {NORTH_COAST.experienceSlugs.length} curated experiences available
                   </div>
                 </div>
                 <span className="text-[0.58rem] tracking-[0.18em] uppercase text-gold/65 flex-shrink-0">

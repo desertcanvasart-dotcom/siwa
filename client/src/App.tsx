@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect, useRef, lazy, Suspense, Component, type ReactNode, type ComponentType } from "react";
 import {
   HOTELS,
+  EXPERIENCES,
   canonicalHotelSlug,
   destForHotelSlug,
   canonicalExperienceSlug,
@@ -137,7 +138,8 @@ function LegacyHotelRedirect() {
   const slug = params.slug ?? "";
   const dest = destForHotelSlug(slug);
   const canonical = canonicalHotelSlug(slug);
-  if (!dest) return <ReplaceRedirect to="/" />;
+  // Unknown slug → real 404, not a silent bounce to the home page.
+  if (!dest) return <NotFound />;
   return <ReplaceRedirect to={`/${dest}/accommodation/${canonical}`} />;
 }
 
@@ -147,7 +149,7 @@ function LegacyExperienceRedirect() {
   const slug = params.slug ?? "";
   const dest = destForExperienceSlug(slug);
   const canonical = canonicalExperienceSlug(slug);
-  if (!dest) return <ReplaceRedirect to="/" />;
+  if (!dest) return <NotFound />;
   return <ReplaceRedirect to={`/${dest}/experiences/${canonical}`} />;
 }
 
@@ -321,6 +323,16 @@ function Router() {
           />
 
           <Route path="/siwa-oasis/experiences" component={NewExperiencesArchive} />
+          {/* Legacy experience slugs (old Journal CTAs, bookmarks) →
+              the live product that replaced them. Everything else falls
+              through to TourDetail, which 404s unknown slugs. */}
+          {EXPERIENCES.flatMap((e) => (e.aliases ?? []).map((a) => [a, e.slug] as const)).map(
+            ([alias, canonical]) => (
+              <Route key={`legacy-exp-${alias}`} path={`/siwa-oasis/experiences/${alias}`}>
+                <ReplaceRedirect to={`/siwa-oasis/experiences/${canonical}`} />
+              </Route>
+            ),
+          )}
           <Route path="/siwa-oasis/experiences/:slug" component={TourDetail} />
 
           <Route path="/siwa-oasis/transportation" component={SiwaTransportation} />

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useRoute } from "wouter";
+import { useMemo, useState } from "react";
+import { Link, useRoute } from "wouter";
 import { SEO } from "@/components/seo";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
@@ -9,6 +9,8 @@ import {
   getExperience,
   type ExperienceDetail,
 } from "@/lib/experience-data";
+import NotFound from "@/pages/not-found";
+import { cleanList, cleanText } from "@/lib/display-text";
 
 /**
  * /siwa-oasis/experiences/:slug  +  /north-coast/experiences/:slug
@@ -21,7 +23,6 @@ import {
  */
 export default function ExperienceDetailPage() {
   useReveal();
-  const [, setLocation] = useLocation();
   const [siwaMatch, siwaParams] = useRoute("/siwa-oasis/experiences/:slug");
   const [ncMatch, ncParams] = useRoute("/north-coast/experiences/:slug");
   const slug =
@@ -30,17 +31,8 @@ export default function ExperienceDetailPage() {
     "";
   const exp = useMemo(() => getExperience(slug), [slug]);
 
-  // Redirect unknown slugs back to the right archive
-  useEffect(() => {
-    if (!exp && slug) {
-      const fallback = ncMatch
-        ? "/north-coast/experiences"
-        : "/siwa-oasis/experiences";
-      setLocation(fallback);
-    }
-  }, [exp, slug, setLocation, ncMatch]);
-
-  if (!exp) return null;
+  // Unknown slug → real 404, not a silent redirect to the archive.
+  if (!exp) return <NotFound />;
 
   const isNC = exp.destination === "north-coast";
   const destHub = isNC ? "/north-coast" : "/siwa-oasis";
@@ -160,7 +152,7 @@ export default function ExperienceDetailPage() {
                   : "text-navy bg-gold hover:bg-gold-light"
               }`}
             >
-              {isNC ? "Enquire to book" : "Book this experience"}
+              {isNC ? "Enquire to book" : "Request this experience"}
             </a>
           </div>
         </div>
@@ -211,7 +203,7 @@ export default function ExperienceDetailPage() {
               headlineItalic="need."
             >
               <div className="grid grid-cols-1 md:grid-cols-2">
-                {exp.includes.map((item, i, arr) => {
+                {cleanList(exp.includes).map((item, i, arr) => {
                   // match legacy behaviour: the last two items have no bottom border
                   const lastRow =
                     arr.length % 2 === 0
@@ -236,7 +228,7 @@ export default function ExperienceDetailPage() {
                   Not included
                 </p>
                 <p className="text-[0.8rem] text-ink-soft leading-[1.8]">
-                  {exp.notIncluded}
+                  {cleanText(exp.notIncluded)}
                 </p>
               </div>
             </BlockSection>
@@ -279,9 +271,10 @@ export default function ExperienceDetailPage() {
               eyebrow={isNC ? "Before you enquire" : "Before you book"}
               headline="Good to"
               headlineItalic="know."
+              last
             >
               <ul className="list-none">
-                {exp.notes.map((n, i, arr) => (
+                {cleanList(exp.notes).map((n, i, arr) => (
                   <li
                     key={i}
                     className={`flex gap-4 items-start py-3.5 text-[0.84rem] text-ink-soft leading-[1.75] ${
@@ -297,45 +290,7 @@ export default function ExperienceDetailPage() {
               </ul>
             </BlockSection>
 
-            {/* Reviews */}
-            <BlockSection
-              eyebrow="Guest reflections"
-              headline="What guests"
-              headlineItalic="remember."
-              last
-            >
-              <div className="flex flex-col">
-                {exp.reviews.map((r, i, arr) => (
-                  <div
-                    key={r.name}
-                    className={`py-7 ${
-                      i === arr.length - 1 ? "" : "border-b border-sand-light"
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <p className="font-display text-[0.95rem] text-navy leading-tight">
-                          {r.name}
-                        </p>
-                        <p className="text-[0.65rem] text-ink-soft/50 mt-0.5">
-                          {r.origin}
-                        </p>
-                      </div>
-                      <div className="flex gap-[3px]">
-                        {[0, 1, 2, 3, 4].map((n) => (
-                          <span key={n} className="text-gold/75">
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-[0.82rem] italic text-ink-soft leading-[1.85]">
-                      "{r.text}"
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </BlockSection>
+            {/* Guest reviews intentionally not rendered (owner decision). */}
           </div>
 
           {/* ── RIGHT COLUMN — BOOKING / ENQUIRY ── */}
@@ -437,7 +392,7 @@ export default function ExperienceDetailPage() {
                               : "text-gold"
                           }`}
                         >
-                          {r.destination === "north-coast" ? "Enquire →" : "Book →"}
+                          {r.destination === "north-coast" ? "Enquire →" : "Request →"}
                         </span>
                       </div>
                     </div>
@@ -566,7 +521,7 @@ function BookingPanel({ exp }: { exp: ExperienceDetail }) {
         <div className="absolute inset-0 textile-bg pointer-events-none" />
         <div className="relative z-[2]">
           <p className="text-[0.56rem] tracking-[0.28em] uppercase text-gold/75 mb-1">
-            Book this experience
+            Request this experience
           </p>
           <div className="flex items-baseline gap-2">
             <span className="text-[0.72rem] text-white/35">From</span>
@@ -668,10 +623,11 @@ function BookingPanel({ exp }: { exp: ExperienceDetail }) {
           href={bookHref}
           className="block w-full text-[0.65rem] tracking-[0.2em] uppercase text-navy bg-gold py-4 mt-4 text-center font-body font-medium hover:bg-gold-light transition-colors"
         >
-          Book now
+          Request this experience
         </a>
         <p className="text-[0.7rem] text-ink-soft/55 text-center mt-3 leading-[1.6]">
-          Free cancellation up to 48 hours before. Secure payment on site.
+          Cancellation terms are listed on this experience. Once we confirm,
+          we send a secure payment link.
         </p>
       </div>
     </div>

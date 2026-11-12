@@ -8,6 +8,11 @@ import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 import { useActiveSlugs } from "@/lib/useActiveSlugs";
 import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
 import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
+import { SIWA } from "@/lib/site-facts";
+import soleiOldTownImage from "@assets/solei-old-town-heritage.png";
+import soleiRoyalImage from "@assets/soliel-royal_1751757316304.png";
+import soleiDesertRetreatImage from "@assets/Solei Desart Retret_1763854758404.png";
+import soleiSaltCavesImage from "@assets/Solei Salt Caves_1763854758400.png";
 
 /**
  * /siwa-oasis — primary destination hub.
@@ -17,69 +22,47 @@ import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
  *   2. Intro — cream, sticky "01" + founder-voice copy
  *   3. Moments — white, 3-col
  *   4. The Lodge — navy, 2-col with detail list
- *   5. Accommodation — cream, 6 Siwa hotels in 3×2 grid
- *   6. Experiences — sand-light, 6 experiences in 3×2 grid
+ *   5. Accommodation — cream, Soléi-owned Siwa properties (SIWA.ownedProperties)
+ *   6. Experiences — sand-light, the Siwa experiences (SIWA.experienceSlugs)
  *   7. Transportation — white, 2-col with route list
  *   8. Practical info — cream, 6 items in 3×2 grid
  *   9. Closing — navy, Arch + 2 CTAs
  */
 
-const hotels = [
-  {
-    slug: "adrere-amellal",
-    name: "Adrere Amellal",
-    type: "Eco Lodge · No electricity",
-    desc: "Built from karsheef and palm wood. No electricity, no noise. Just the oasis as it has always been.",
-    price: "$320 / night",
-    image: "/attached_assets/adrerre-amelal_1751755031600.jpg",
-    gradient: "bg-[linear-gradient(160deg,#1a3a52_0%,#0F2436_100%)]",
-  },
-  {
-    slug: "taziry-ecolodge",
-    name: "Taziry Ecolodge",
-    type: "Boutique Lodge · Salt lake views",
-    desc: "Mud-brick villas overlooking the salt lake. Quiet mornings, warm evenings, the stars at night.",
-    price: "$180 / night",
-    image: "/attached_assets/taziry-room-_1751754795479.jpg",
-    gradient: "bg-[linear-gradient(160deg,#0F2436_0%,#0d3040_100%)]",
-  },
-  {
-    slug: "solei-old-town",
-    name: "Soléi Old Town",
-    type: "Heritage Stay · Old City",
+// Only Soléi-owned properties have pages (SIWA.ownedProperties).
+// Partner lodges are arranged on request and are never linked.
+const HOTEL_CARD_COPY: Record<string, { type: string; desc: string; image: string; gradient: string }> = {
+  "solei-old-town": {
+    type: "Heritage Stay · Old Town",
     desc: "Stone walls, cool interiors, a rooftop overlooking the shali fortress at dusk.",
-    price: "$145 / night",
-    image: "/attached_assets/Solei Ol town_1763854758397.png",
+    image: soleiOldTownImage,
     gradient: "bg-[linear-gradient(160deg,#162d3e_0%,#1a3a52_100%)]",
   },
-  {
-    slug: "siwa-shali-resort",
-    name: "Siwa Shali Resort",
-    type: "Resort · Garden & Pool",
-    desc: "A palm-shaded retreat with a pool and gardens, moments from the shali ruins.",
-    price: "$110 / night",
-    image: "/attached_assets/Siwa Shai resort_1763854758403.JPG",
+  "solei-royal": {
+    type: "Premium Stay · Desert Edge",
+    desc: "Our most private stay — a walled garden at the edge of the desert, entirely your own.",
+    image: soleiRoyalImage,
     gradient: "bg-[linear-gradient(160deg,#1a3a52_0%,#0F2436_100%)]",
   },
-  {
-    slug: "ghaliet-ecolodge-spa",
-    name: "Ghaliet Ecolodge & Spa",
-    type: "Ecolodge · Spa · Salt Pool",
-    desc: "Natural salt pool, traditional mud architecture, and a spa rooted in local healing traditions.",
-    price: "$160 / night",
-    image: "/attached_assets/Chalets_1753545430991.jpg",
-    gradient: "bg-[linear-gradient(160deg,#1a3a52_0%,#0F2436_100%)]",
-  },
-  {
-    slug: "talist-siwa",
-    name: "Talist Siwa",
-    type: "Boutique Hotel · Desert Edge",
-    desc: "At the edge of the oasis where the date palms give way to open desert. Private and unhurried.",
-    price: "$130 / night",
-    image: "/attached_assets/Talist Hotel_1763854758402.JPG",
+  "solei-desert-retreat": {
+    type: "Desert Lodge · Away from town",
+    desc: "Private rooms out past the salt flats, under a sky with no light pollution.",
+    image: soleiDesertRetreatImage,
     gradient: "bg-[linear-gradient(160deg,#0F2436_0%,#0d3040_100%)]",
   },
-];
+  "solei-salt-caves": {
+    type: "Wellness Retreat · Salt caves",
+    desc: "Cave rooms made for stillness, with a daily salt-cave session.",
+    image: soleiSaltCavesImage,
+    gradient: "bg-[linear-gradient(160deg,#1a3a52_0%,#0F2436_100%)]",
+  },
+};
+
+const hotels = SIWA.ownedProperties.map((p) => ({
+  slug: p.slug,
+  name: p.name,
+  ...HOTEL_CARD_COPY[p.slug],
+}));
 
 const experiences = [
   {
@@ -124,6 +107,13 @@ const experiences = [
     desc: "A traditional Siwan healing — buried in warm sand by a local healer, then tea, shade, and an optional private massage.",
     meta: ["2–3 hours", "Wellness"],
   },
+  {
+    slug: "desert-stargazing",
+    num: "07",
+    title: "Desert Stargazing",
+    desc: "No light pollution, no noise — a guide who knows the constellations, a telescope, blankets, and tea.",
+    meta: ["Night", "Stargazing"],
+  },
 ];
 
 const routes = [
@@ -157,12 +147,12 @@ const practical = [
   {
     n: "I",
     title: "Best time to visit",
-    desc: "October to April. The desert heat is manageable, the light is extraordinary, and the oasis is at its most alive. Summer is hot and quiet.",
+    desc: `${SIWA.season[0].toUpperCase()}${SIWA.season.slice(1)}. The desert heat is manageable, the light is extraordinary, and the oasis is at its most alive. Summer is hot and quiet.`,
   },
   {
     n: "II",
     title: "Getting there",
-    desc: "No direct flights. Cairo is the closest major airport (8 hrs by road). Marsa Matrouh has a domestic airport (3 hrs). We arrange all transfers.",
+    desc: `No direct flights. Cairo is the closest major airport (${SIWA.driveFromCairo} by road). Marsa Matrouh has a domestic airport (3 hrs). We arrange all transfers.`,
   },
   {
     n: "III",
@@ -177,7 +167,7 @@ const practical = [
   {
     n: "V",
     title: "Currency & payment",
-    desc: "Egyptian Pounds. Limited ATMs. We recommend bringing cash from Cairo. Card payment available at most Soléi properties.",
+    desc: "Egyptian Pounds. Limited ATMs — we recommend bringing cash from Cairo. Carry some cash; card acceptance varies.",
   },
   {
     n: "VI",
@@ -255,7 +245,7 @@ export default function SiwaOasis() {
   const lodgeP1 = pickContent(
     c,
     "siwa_hub.lodge.p1",
-    "We built our eco-lodges in Siwa from the ground up. Stone and palm, warm light through small windows, the smell of the desert just outside.",
+    "We built our eco-lodges in Siwa from the ground up. Karsheef and palm, warm light through small windows, the smell of the desert just outside.",
   );
   const lodgeP2 = pickContent(
     c,
@@ -549,7 +539,7 @@ export default function SiwaOasis() {
               {[
                 {
                   label: "Material",
-                  text: "Local karsheef salt rock, palm wood, earthen walls",
+                  text: "Local karsheef (salt-rock and mud), palm wood, earthen walls",
                 },
                 {
                   label: "Atmosphere",
@@ -561,7 +551,7 @@ export default function SiwaOasis() {
                 },
                 {
                   label: "Booking",
-                  text: "Direct booking via the site — live availability",
+                  text: "Direct booking on each property's page",
                 },
               ].map((item, i) => (
                 <div
@@ -650,6 +640,14 @@ export default function SiwaOasis() {
                 </Link>
               ))}
             </div>
+            <p className="reveal text-[0.8rem] text-ink-soft leading-[1.8] mt-6">
+              Partner lodges — {SIWA.partnerLodgesOnRequest.join(" and ")} — are
+              arranged on request through our{" "}
+              <Link href="/enquire" className="text-coastal border-b border-coastal/30 hover:border-coastal">
+                concierge
+              </Link>
+              .
+            </p>
           </div>
         </section>
 
@@ -699,7 +697,7 @@ export default function SiwaOasis() {
                     ))}
                   </div>
                   <span className="inline-flex items-center gap-2 group-hover:gap-3 text-[0.58rem] tracking-[0.2em] uppercase text-gold opacity-60 group-hover:opacity-100 transition-all duration-300">
-                    Book this →
+                    Request this →
                   </span>
                 </Link>
               ))}

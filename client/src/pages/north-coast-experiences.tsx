@@ -7,6 +7,9 @@ import { useReveal } from "@/components/home/useReveal";
 import { useExperiencesBySlug } from "@/lib/useExperiencesBySlug";
 import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
 import { Arch } from "@/components/ui/Arch";
+import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
+import { adminPrice, parseAmount, PRICE_ON_REQUEST, CANONICAL_CURRENCY } from "@/lib/price";
+import { NORTH_COAST, SIWA } from "@/lib/site-facts";
 import yachtSunsetImg from "@assets/Pristine Beaches_1764585387661.jpg";
 import beachClubImg from "@assets/water sports_1758262774773.jpg";
 import waterWorldImg from "@assets/Water Sports_1764585780831.jpg";
@@ -43,6 +46,9 @@ interface Experience {
   featured?: boolean;
 }
 
+const numberWord = (n: number) =>
+  ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"][n] ?? String(n);
+
 const SAIL_TEXTURE = "bg-[url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23FDFAF5' stroke-opacity='0.06' stroke-width='0.5'%3E%3Cpath d='M0 30 Q15 20 30 30 Q45 40 60 30'/%3E%3Cpath d='M0 45 Q15 35 30 45 Q45 55 60 45'/%3E%3C/g%3E%3C/svg%3E\")]";
 
 const EXPERIENCES: Experience[] = [
@@ -51,18 +57,18 @@ const EXPERIENCES: Experience[] = [
     enquirySlug: "yacht-sunset-nc",
     num: "01 · Hero experience",
     title: "Private Yacht",
-    titleItalic: "Sunset Ritual",
+    titleItalic: "Experience",
     desc: "An intimate escape into the Mediterranean at golden hour. The sea slows down, the light softens, and everything feels effortless — a private vessel, the coast in the distance, and a few hours where the day finally breathes out.",
-    timeTag: "Sunset · 3 hours",
+    timeTag: "1–8 hours · Private",
     catTag: "Water · Private",
     meta: [],
     highlights: [
       "Private yacht",
       "Captain & crew",
-      "Sunset timing",
+      "Sunset timing available",
       "Light refreshments",
     ],
-    price: 120,
+    price: 0, // live price comes from the CMS
     priceSuffix: "per person",
     cats: ["water"],
     gradient: "bg-[linear-gradient(155deg,#2F6F8F_0%,#1a4a6a_100%)]",
@@ -83,7 +89,7 @@ const EXPERIENCES: Experience[] = [
       "Beach club access",
       "Optional add-ons",
     ],
-    price: 75,
+    price: 0, // live price comes from the CMS
     priceSuffix: "per person",
     cats: ["leisure"],
     gradient: "bg-[linear-gradient(155deg,#1a4060_0%,#0F2436_60%,#2a5a6a_100%)]",
@@ -105,7 +111,7 @@ const EXPERIENCES: Experience[] = [
       "Poolside lounging areas",
       "Food & beverage available",
     ],
-    price: 90,
+    price: 0, // live price comes from the CMS
     priceSuffix: "per person",
     cats: ["leisure", "water"],
     gradient: "bg-[linear-gradient(155deg,#1a5a7a_0%,#2F6F8F_100%)]",
@@ -126,7 +132,7 @@ const EXPERIENCES: Experience[] = [
       "Curated menu",
       "Optional styling",
     ],
-    price: 140,
+    price: 0, // live price comes from the CMS
     priceSuffix: "per person",
     cats: ["dining"],
     gradient: "bg-[linear-gradient(155deg,#2a1a0a_0%,#0F2436_60%,#1a3a4a_100%)]",
@@ -146,7 +152,7 @@ const EXPERIENCES: Experience[] = [
       "Venue access",
       "Optional chauffeur service",
     ],
-    price: 110,
+    price: 0, // live price comes from the CMS
     priceSuffix: "per person",
     cats: ["nightlife"],
     gradient: "bg-[linear-gradient(155deg,#0a1828_0%,#1a3a52_60%,#0F2436_100%)]",
@@ -156,19 +162,17 @@ const EXPERIENCES: Experience[] = [
     slug: "coastal-wellness-ritual",
     enquirySlug: "wellness-nc",
     num: "06",
-    title: "Coastal",
-    titleItalic: "Wellness Ritual",
-    desc: "A slow morning by the sea — designed to relax the body and clear the mind. Breathwork into movement into massage, with refreshments and time to do nothing afterwards. The quietest way to start a day on the coast.",
-    timeTag: "Morning · Half day",
+    title: "Luxury Spa",
+    titleItalic: "Experience",
+    desc: "Time at one of the coast's best spas — designed to relax the body and clear the mind, with treatments, refreshments and time to do nothing afterwards. The quietest day on the coast.",
+    timeTag: "Spa",
     catTag: "Wellness",
-    meta: ["Half day", "Morning", "Spa or private setup"],
+    meta: ["Spa", "Day or evening"],
     highlights: [
-      "Breathwork & light movement",
-      "60-min private massage",
-      "Tea, juice & light refreshments",
-      "Spa or private setup",
+      "Spa treatments",
+      "Refreshments",
     ],
-    price: 130,
+    price: 0, // live price comes from the CMS
     priceSuffix: "per person",
     cats: ["wellness"],
     gradient: "bg-[linear-gradient(155deg,#3d8aad_0%,#1a4060_100%)]",
@@ -188,18 +192,18 @@ const FILTERS: { label: string; value: "all" | Category }[] = [
 const DIFFERENT = [
   {
     numeral: "I.",
-    title: "Off-resort by design",
-    desc: "Every experience listed here takes you outside the resort perimeter — not far, not dramatically, but far enough that the quality of what you see changes entirely.",
+    title: "Beyond your own resort",
+    desc: "Most of these experiences take you past your own resort — onto the water, into the coast's beach clubs, restaurants and venues — so you see more of the coast than one property can offer.",
   },
   {
     numeral: "II.",
     title: "Enquiry-based, personally arranged",
-    desc: "Unlike Siwa, where experiences book directly, all North Coast experiences go through our team. We confirm availability, match guides, and brief you personally before each one.",
+    desc: "Unlike Siwa, where experiences book directly, all North Coast experiences go through our team. We confirm availability with the operator or venue and brief you personally before each one.",
   },
   {
     numeral: "III.",
     title: "Shoulder season is the right season",
-    desc: "April–June and September–November. The sea is warm, the lagoons are full, the flamingos are present, and the coast is a fraction of its summer density.",
+    desc: `${NORTH_COAST.bestMonths}. The sea is warm, the boats and beach clubs are easy to book, and the coast is a fraction of its July–August density.`,
   },
 ];
 
@@ -211,8 +215,8 @@ const HOW_STEPS = [
   },
   {
     n: "2.",
-    strong: "We confirm with the guide",
-    rest: "Our team checks availability directly and selects the right guide for your group size and pace.",
+    strong: "We confirm with the operator",
+    rest: "Our team checks availability directly with the boat, venue or spa and makes sure it suits your group size and pace.",
   },
   {
     n: "3.",
@@ -226,24 +230,22 @@ const HOW_STEPS = [
   },
 ];
 
+/** Prices are read from the hotel data at render time (never hard-coded). */
 const UPSELL_PROPS = [
   {
     slug: "address-beach-resort-marassi",
     name: "Address Beach Resort Marassi",
     type: "Luxury Resort · Marassi · Beach front",
-    price: "From $290",
   },
   {
-    slug: "casa-cook-north-coast",
-    name: "Casa Cook North Coast",
-    type: "Boutique Resort · Design-led",
-    price: "From $195",
+    slug: "al-alamein-hotel",
+    name: "Al Alamein Hotel",
+    type: "Heritage Hotel · Marassi · Sea front",
   },
   {
     slug: "jaz-almaza-beach-resort",
     name: "Jaz Almaza Beach Resort",
     type: "Beach Resort · Almaza Bay",
-    price: "From $175",
   },
 ];
 
@@ -278,7 +280,7 @@ export default function NorthCoastExperiencesPage() {
           desc: o.summary || o.description || e.desc,
           timeTag: o.duration || e.timeTag,
           catTag: o.category || e.catTag,
-          price: o.pricePerPerson ? Number(o.pricePerPerson) : e.price,
+          price: parseAmount(o.pricePerPerson),
           image: o.imageUrl || e.image,
         };
       }),
@@ -310,7 +312,7 @@ export default function NorthCoastExperiencesPage() {
         timeTag: r.duration ?? "",
         catTag: r.category ?? "",
         meta: [],
-        price: Number(r.pricePerPerson) || 0,
+        price: parseAmount(r.pricePerPerson),
         cats: [],
         gradient: "bg-[linear-gradient(155deg,#2F6F8F_0%,#1a4a6a_100%)]",
         image: r.imageUrl || undefined,
@@ -323,13 +325,26 @@ export default function NorthCoastExperiencesPage() {
     [cat, withAdminTours],
   );
   const featured = visible.find((e) => e.featured);
+  const startingFrom = useMemo(() => {
+    const prices = withAdminTours.map((e) => e.price).filter((p) => p > 0);
+    return prices.length ? Math.min(...prices) : 0;
+  }, [withAdminTours]);
+  const hotelOverlays = useHotelsBySlug();
+  const hotelFromPrice = (slug: string) =>
+    adminPrice(hotelOverlays.get(slug)).amount;
+  const ncStayFrom = (() => {
+    const xs = NORTH_COAST.properties
+      .map((p) => hotelFromPrice(p.slug))
+      .filter((x) => x > 0);
+    return xs.length ? Math.min(...xs) : 0;
+  })();
   const rest = visible.filter((e) => !e.featured);
 
   return (
     <>
       <SEO
         title="North Coast Experiences — Soléi"
-        description="Six curated North Coast experiences — private sunset sailing, flamingo watching, El Alamein heritage, and more. Personally arranged by our team."
+        description={`${NORTH_COAST.experienceSlugs.length} curated North Coast experiences — a private yacht, beach clubs, Marassi Water World, signature dinners, nightlife and spa. Personally arranged by our team.`}
         path="/north-coast/experiences"
       />
       <Nav />
@@ -381,14 +396,22 @@ export default function NorthCoastExperiencesPage() {
             <div className="animate-fade-up animation-delay-800 pb-2">
               <p className="text-[0.9rem] text-white/40 leading-[1.95] mb-8">
                 The North Coast has more to offer than its pools and beaches.
-                Flamingos in the lagoons behind the resorts, WWII history
-                thirty minutes from Marassi, open-water swims at dawn. We know
-                what most guests miss — and we'll help you find it.
+                A private yacht off Marassi, a reserved day at a beach club,
+                a table worth dressing for, a night out, an afternoon at the
+                spa. We know what most guests miss — and we'll help you find
+                it.
               </p>
               <div className="flex gap-10 border-t border-white/10 pt-6">
                 {[
-                  { num: "6", label: "Experiences" },
-                  { num: "$30", label: "Starting from" },
+                  { num: String(withAdminTours.length), label: "Experiences" },
+                  ...(startingFrom > 0
+                    ? [
+                        {
+                          num: `${CANONICAL_CURRENCY}${startingFrom.toLocaleString()}`,
+                          label: "Starting from",
+                        },
+                      ]
+                    : []),
                   { num: "24h", label: "Response time" },
                 ].map((s) => (
                   <div key={s.label}>
@@ -463,20 +486,18 @@ export default function NorthCoastExperiencesPage() {
               className="reveal font-display italic font-normal leading-[1.45] text-navy"
               style={{ fontSize: "clamp(1.3rem, 2.5vw, 2rem)" }}
             >
-              "Most guests who come to the North Coast never leave the resort
-              perimeter. The ones who do are the ones who remember{" "}
+              "Most guests who come to the North Coast never leave their own
+              resort. The ones who do are the ones who remember{" "}
               <em className="not-italic text-coastal">the trip.</em>"
             </p>
             <div className="reveal reveal-d1">
               <div className="w-9 h-px bg-gold opacity-50 mb-5" />
               <p className="text-[0.88rem] text-ink-soft leading-[1.95]">
                 We don't offer the kind of experiences that appear on every
-                coastal tourism list. What we offer is access to the parts of
-                the North Coast that reward patience and a guide who knows
-                where to go. Flamingo lagoons that are a fifteen-minute drive
-                from your resort. A battlefield that most people fly home
-                without having visited. A fishing spot with no name on any
-                map.
+                coastal tourism list. What we offer is access to the best of
+                the North Coast, arranged by people who know it. A private
+                boat when the light is best. The beach club worth the drive.
+                The table and the venue you wouldn't get on your own.
               </p>
             </div>
           </div>
@@ -550,7 +571,7 @@ export default function NorthCoastExperiencesPage() {
               </h2>
               <p className="text-[0.88rem] text-ink-soft leading-[1.95]">
                 Unlike Siwa — where experiences book directly on site — all
-                North Coast experiences go through our team. Guides are
+                North Coast experiences go through our team. Operators are
                 local, logistics are confirmed manually, and we brief you
                 before each experience. It takes 24 hours, not 24 seconds.
                 That's the difference.
@@ -596,9 +617,9 @@ export default function NorthCoastExperiencesPage() {
                 <em className="italic text-gold">settled.</em>
               </h2>
               <p className="text-[0.88rem] text-white/40 leading-[1.95] mb-7">
-                A flamingo morning lands differently when you're not rushing
-                from an airport. A sunset sail is more peaceful when you've
-                had a day to find the coast's rhythm. If you haven't booked
+                A day at a beach club lands differently when you're not rushing
+                from an airport. An afternoon on the yacht is more peaceful
+                when you've had a day to find the coast's rhythm. If you haven't booked
                 accommodation yet — start there.
               </p>
               <Link
@@ -625,7 +646,9 @@ export default function NorthCoastExperiencesPage() {
                     </div>
                   </div>
                   <span className="font-display text-[0.9rem] text-gold flex-shrink-0 ml-4">
-                    {p.price}
+                    {hotelFromPrice(p.slug) > 0
+                      ? `From ${CANONICAL_CURRENCY}${hotelFromPrice(p.slug).toLocaleString()}`
+                      : PRICE_ON_REQUEST}
                   </span>
                 </Link>
               ))}
@@ -635,10 +658,13 @@ export default function NorthCoastExperiencesPage() {
               >
                 <div>
                   <div className="font-display text-[0.95rem] text-white leading-tight">
-                    View all 7 North Coast properties
+                    View all {NORTH_COAST.properties.length} North Coast properties
                   </div>
                   <div className="text-[0.65rem] text-white/30 mt-0.5">
-                    Marassi · Almaza Bay · El Alamein · From $175/night
+                    Marassi · Almaza Bay · El Alamein
+                    {ncStayFrom > 0
+                      ? ` · From ${CANONICAL_CURRENCY}${ncStayFrom.toLocaleString()}/night`
+                      : ""}
                   </div>
                 </div>
                 <span className="font-display text-[0.9rem] text-gold flex-shrink-0 ml-4">
@@ -664,8 +690,8 @@ export default function NorthCoastExperiencesPage() {
                 Siwa <em className="italic text-gold">experiences.</em>
               </h3>
               <p className="text-[0.84rem] text-white/40 leading-[1.85] mb-6">
-                Ten curated experiences in the oasis — salt lake floats,
-                desert stargazing, oracle temples. Most book directly on site.
+                {numberWord(SIWA.experienceSlugs.length)} curated experiences in
+                the oasis — salt lake floats, desert nights, stargazing.
               </p>
               <span className="flex items-center gap-2 text-[0.6rem] tracking-[0.2em] uppercase text-gold/70 group-hover:gap-3 transition-all">
                 View Siwa experiences →
@@ -739,7 +765,7 @@ export default function NorthCoastExperiencesPage() {
 }
 
 /* ──────────────────────────────────────────────────────────────
- *  Featured card (Private Sunset Sailing)
+ *  Featured card (Private Yacht Experience)
  * ────────────────────────────────────────────────────────────── */
 
 function FeaturedCard({ exp }: { exp: Experience }) {
@@ -805,12 +831,21 @@ function FeaturedCard({ exp }: { exp: Experience }) {
         </div>
         <div className="flex justify-between items-center pt-6 border-t border-sand">
           <div>
-            <div className="text-[0.62rem] text-ink-soft/45">From</div>
+            {exp.price > 0 && (
+              <div className="text-[0.62rem] text-ink-soft/45">From</div>
+            )}
             <div className="font-display text-[1.3rem] text-navy">
-              ${exp.price}{" "}
-              <span className="font-body text-[0.8rem] text-ink-soft font-light">
-                {exp.priceSuffix ?? "per person"}
-              </span>
+              {exp.price > 0 ? (
+                <>
+                  {CANONICAL_CURRENCY}
+                  {exp.price.toLocaleString()}{" "}
+                  <span className="font-body text-[0.8rem] text-ink-soft font-light">
+                    {exp.priceSuffix ?? "per person"}
+                  </span>
+                </>
+              ) : (
+                PRICE_ON_REQUEST
+              )}
             </div>
           </div>
           <span className="text-[0.62rem] tracking-[0.18em] uppercase text-white bg-coastal px-7 py-3 whitespace-nowrap group-hover:bg-[#266080] transition-colors">
@@ -892,9 +927,13 @@ function ExpCard({
         </div>
         <div className="flex justify-between items-center pt-4 border-t border-sand-light mt-auto">
           <div>
-            <div className="text-[0.62rem] text-ink-soft/45">From</div>
+            {exp.price > 0 && (
+              <div className="text-[0.62rem] text-ink-soft/45">From</div>
+            )}
             <div className="font-display text-[1.05rem] text-navy">
-              ${exp.price} pp
+              {exp.price > 0
+                ? `${CANONICAL_CURRENCY}${exp.price.toLocaleString()} pp`
+                : PRICE_ON_REQUEST}
             </div>
           </div>
           <span className="text-[0.58rem] tracking-[0.16em] uppercase text-white bg-coastal px-4 py-2 whitespace-nowrap group-hover:bg-[#266080] transition-colors">

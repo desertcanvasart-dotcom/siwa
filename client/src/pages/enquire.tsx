@@ -792,10 +792,13 @@ export default function EnquirePage() {
                   <p className="text-[0.82rem] text-ink-soft leading-[1.75] mb-8 pb-8 border-b border-sand-light">
                     Tell us which destinations and properties you're
                     interested in — one or several — your dates, and who's
-                    travelling. For Siwa, we'll
-                    confirm availability and send a secure booking link. For
-                    North Coast, we confirm with the hotel directly and
-                    send a secure payment link within 24 hours.
+                    travelling. Soléi's Siwa properties can also be booked
+                    directly on each property's page, with instant
+                    confirmation through our secure booking system
+                    (Tab.travel) — use this form if you'd like help choosing
+                    or combining stays. For North Coast, we confirm with the
+                    hotel directly and send a secure payment link within 24
+                    hours.
                   </p>
 
                   <ChoiceButtons
@@ -947,9 +950,9 @@ export default function EnquirePage() {
                   <p className="text-[0.82rem] text-ink-soft leading-[1.75] mb-8 pb-8 border-b border-sand-light">
                     Tell us which experiences you're interested in — one or
                     several, in one or both destinations — and your dates.
-                    Siwa experiences book directly. North
-                    Coast experiences are arranged by our team — we confirm
-                    availability and send a payment link within 24 hours.
+                    Experiences in both destinations are arranged by our
+                    team — we confirm availability and send a secure payment
+                    link within 24 hours.
                   </p>
 
                   <ChoiceButtons
@@ -1232,9 +1235,8 @@ export default function EnquirePage() {
                   24 hours
                 </div>
                 <p className="text-[0.78rem] text-white/40 leading-[1.7]">
-                  Usually same day. We don't operate an automated reply
-                  system — your enquiry goes directly to the team, and a
-                  person responds.
+                  Usually same day. Your enquiry goes directly to the team,
+                  and a person responds.
                 </p>
               </div>
             </div>
@@ -1356,8 +1358,8 @@ export default function EnquirePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[2px]">
               {[
                 {
-                  num: "8+",
-                  label: "Years in Siwa",
+                  num: "Siwa",
+                  label: "Born in Siwa",
                   desc: "We grew up here. The oasis is not a product for us — it is the place this brand was built around.",
                 },
                 {
@@ -1366,9 +1368,9 @@ export default function EnquirePage() {
                   desc: "Every enquiry gets a personal response within 24 hours. Usually same day. Always from a person.",
                 },
                 {
-                  num: "0",
-                  label: "Automated replies",
-                  desc: "Your enquiry goes directly to the team and a person replies — no auto-responders. (Ask Soléi, in the menu, is our AI planning assistant; this form is not.)",
+                  num: "2",
+                  label: "Destinations",
+                  desc: "Siwa Oasis and the North Coast — we plan either, or combine both in one trip.",
                 },
                 {
                   num: "100%",

@@ -14,6 +14,14 @@ import { useReveal } from "@/components/home/useReveal";
  * Grouped into North Coast / Siwa / Signature (combo) sections.
  */
 
+/**
+ * Journeys that cover BOTH destinations (or are fully flexible) but are
+ * tagged destination = "siwa" in the CMS. They belong in the combined
+ * group, not under "Siwa-only". Remove a slug once its CMS destination
+ * is cleared.
+ */
+const MULTI_DESTINATION_SLUGS = new Set(["solei-grand-escape", "solei-elite-journey"]);
+
 interface Journey {
   id: number;
   slug: string;
@@ -51,15 +59,16 @@ export default function JourneysPage() {
     [experiences],
   );
 
-  const ncJourneys = journeys.filter((j) => j.destination === "north-coast");
-  const siwaJourneys = journeys.filter((j) => j.destination === "siwa");
-  const signatureJourneys = journeys.filter((j) => j.destination === null);
+  const isMulti = (j: Journey) => j.destination === null || MULTI_DESTINATION_SLUGS.has(j.slug);
+  const ncJourneys = journeys.filter((j) => j.destination === "north-coast" && !isMulti(j));
+  const siwaJourneys = journeys.filter((j) => j.destination === "siwa" && !isMulti(j));
+  const signatureJourneys = journeys.filter(isMulti);
 
   return (
     <>
       <SEO
         title="Soléi Curated Journeys — From Sea to Sands"
-        description="Multi-night curated journeys across Siwa Oasis and Egypt's North Coast. Seven packages designed around accommodation, experiences, and the rhythm of each destination."
+        description="Multi-night curated journeys across Siwa Oasis and Egypt's North Coast. Fixed-length and fully flexible private journeys designed around accommodation, experiences, and the rhythm of each destination."
         path="/journeys"
       />
       <Nav darkHero />
@@ -88,7 +97,8 @@ export default function JourneysPage() {
               <em className="italic text-gold">sands.</em>
             </h1>
             <p className="text-[0.95rem] text-white/55 max-w-[58ch] leading-[1.9]">
-              Seven multi-night journeys designed end-to-end — accommodation,
+              Curated journeys designed end-to-end — from a few nights to a
+              fully flexible private itinerary — with accommodation,
               experiences, transfers, and the small details that turn a trip
               into something you remember properly.
             </p>
@@ -112,9 +122,9 @@ export default function JourneysPage() {
 
             {signatureJourneys.length > 0 && (
               <JourneyGroup
-                eyebrow="Signature · Coast + Siwa"
-                title="From the Sea to the Sands"
-                description="The combined arc — the most popular Soléi itineraries that take you across both destinations."
+                eyebrow="Coast + Siwa"
+                title="Across both destinations"
+                description="Journeys that take in the Mediterranean coast and the desert — including our fully flexible private journey."
                 items={signatureJourneys}
                 gradientKey="signature"
               />

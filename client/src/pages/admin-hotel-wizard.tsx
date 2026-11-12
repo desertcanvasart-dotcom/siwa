@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { formatAmenitiesInput, parseAmenitiesInput } from "@/lib/display-text";
 import { MediaField, MediaGalleryField } from "@/components/admin/MediaPicker";
 
 /**
@@ -152,7 +153,7 @@ export default function AdminHotelWizardPage() {
       imageUrl: existing.imageUrl ?? "",
       gallery: Array.isArray(d.gallery) ? d.gallery : [],
       pricePerNight: existing.pricePerNight ?? "",
-      amenities: Array.isArray(existing.amenities) ? existing.amenities.join(", ") : "",
+      amenities: Array.isArray(existing.amenities) ? formatAmenitiesInput(existing.amenities) : "",
       eco: !!existing.eco,
       luxury: !!existing.luxury,
       isActive: existing.isActive !== false,
@@ -190,10 +191,9 @@ export default function AdminHotelWizardPage() {
   }, [form.name]);
 
   const buildPayload = () => {
-    const amenities = form.amenities
-      .split(",")
-      .map((a) => a.trim())
-      .filter(Boolean);
+    // Comma-separated list, but a pasted paragraph stays whole (it used
+    // to be cut at every comma and rendered as a broken list).
+    const amenities = parseAmenitiesInput(form.amenities);
     const details = {
       tagLine: form.tagLine || undefined,
       heroTag: form.heroTag || undefined,
@@ -436,10 +436,11 @@ export default function AdminHotelWizardPage() {
                   placeholder="$320 / night"
                 />
               </Field>
-              <Field label="Amenities (comma-separated)">
-                <Input
+              <Field label="Amenities (comma-separated or one per line)">
+                <Textarea
                   value={form.amenities}
                   onChange={(e) => set({ amenities: e.target.value })}
+                  rows={3}
                   placeholder="Pool, Spa, Restaurant, Wifi"
                 />
               </Field>
@@ -675,7 +676,7 @@ export default function AdminHotelWizardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-display text-[1rem] text-navy">Guest reviews</h3>
-                  <p className="text-xs text-ink-soft/65">Optional testimonials shown near the bottom of the page.</p>
+                  <p className="text-xs text-ink-soft/65">Not shown on the public site — guest reviews are switched off. Clear any entries here.</p>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={addReview}>
                   <Plus className="w-3.5 h-3.5 mr-1.5" />

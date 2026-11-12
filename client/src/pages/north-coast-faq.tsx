@@ -5,6 +5,45 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { useSiteContent } from "@/lib/useSiteContent";
+import { NORTH_COAST, SIWA } from "@/lib/site-facts";
+
+const NC_PROPERTY_COUNT = NORTH_COAST.properties.length;
+const ncAreaCount = (area: string) =>
+  NORTH_COAST.properties.filter((p) => p.area === area).length;
+const MARASSI_COUNT = ncAreaCount("Marassi");
+const SIWA_OWNED_COUNT = SIWA.ownedProperties.length;
+
+/** Display copy for the live North Coast catalogue (prices live in the CMS). */
+const NC_EXPERIENCE_COPY: Record<
+  (typeof NORTH_COAST.experienceSlugs)[number],
+  { name: string; blurb: string }
+> = {
+  "private-yacht-sunset-ritual": {
+    name: "Private Yacht Experience",
+    blurb: "your own boat and crew on the open Mediterranean, from one hour to a full day",
+  },
+  "beach-club-experience": {
+    name: "Beach Club",
+    blurb: "a reserved day at one of the coast's beach clubs",
+  },
+  "marassi-water-world-experience": {
+    name: "Marassi Water World",
+    blurb: "a day at the Marassi water park, good for families",
+  },
+  "signature-dinner-experience": {
+    name: "Signature Dinner",
+    blurb: "a reserved evening at one of the coast's best tables",
+  },
+  "nightlife-experience": {
+    name: "Nightlife",
+    blurb: "an arranged night out at the coast's summer venues",
+  },
+  "coastal-wellness-ritual": {
+    name: "Luxury Spa",
+    blurb: "a spa session at one of the partner resorts",
+  },
+};
+const ncExperienceHref = (slug: string) => `/north-coast/experiences/${slug}`;
 
 /* ──────────────────────────────────────────────────────────────
  *  /north-coast-faq
@@ -124,16 +163,18 @@ const SECTIONS: FaqSection[] = [
               title="Key differences at a glance"
               items={[
                 <>
-                  <strong>Distance from Cairo:</strong> North Coast ~2.5 hrs
-                  · Siwa ~8 hrs
+                  <strong>Distance from Cairo:</strong> North Coast ~3 hrs
+                  to Marassi · Siwa ~8 hrs
                 </>,
                 <>
                   <strong>Environment:</strong> North Coast = Mediterranean
                   sea · Siwa = Desert oasis
                 </>,
                 <>
-                  <strong>Accommodation:</strong> North Coast = partner
-                  hotels · Siwa = partner + 3 Soléi-owned
+                  <strong>Accommodation:</strong> North Coast ={" "}
+                  {NC_PROPERTY_COUNT} partner hotels · Siwa ={" "}
+                  {SIWA_OWNED_COUNT} Soléi-owned properties, plus partner
+                  lodges on request
                 </>,
                 <>
                   <strong>Booking:</strong> North Coast = enquiry-based ·
@@ -157,11 +198,10 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Yes — the North Coast is the only Egyptian coastal
-              destination that's genuinely feasible as a day trip from
-              Cairo. Two and a half hours each way means you can leave
-              before 7am, have a full day on the coast, and return to Cairo
-              by evening.
+              It's possible, but it's a long day. Marassi is about three
+              hours from Cairo each way, so you'd leave before 7am, have
+              the middle of the day on the coast, and return to Cairo in
+              the evening.
             </p>
             <p>
               We offer a full-day{" "}
@@ -191,14 +231,14 @@ const SECTIONS: FaqSection[] = [
               large resort complexes (Rixos Premium Alamein, Address Beach
               Resort Marassi) have dedicated kids clubs, water parks, and
               multiple pools. The drive from Cairo is manageable for
-              children at 2.5 hours. The beach environment is familiar and
+              children at about three hours to Marassi. The beach environment is familiar and
               the activities are accessible.
             </p>
             <p>
-              For families, Marassi's properties are the most comprehensive
-              — specifically Rixos Premium Alamein for all-inclusive family
-              stays and Address Beach Resort Marassi for families who want
-              luxury without full all-inclusive. Jaz Almaza Beach Resort at
+              For families, our two strongest options are Rixos Premium
+              Alamein (in El Alamein, just east of Marassi) for
+              all-inclusive family stays and Address Beach Resort Marassi
+              for families who want luxury without full all-inclusive. Jaz Almaza Beach Resort at
               Almaza Bay is also an excellent family option with some of
               the clearest water on the coast.
             </p>
@@ -211,23 +251,28 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               <strong>Marassi</strong> is the most developed and the most
-              social. Four properties, a marina, multiple restaurant and
-              activity options, and the most comprehensive infrastructure
+              social. {MARASSI_COUNT} of our {NC_PROPERTY_COUNT} properties
+              are here — Address Marassi Golf, Address Beach, Vida Marina
+              and the older, more characterful Al Alamein Hotel — plus a
+              marina, multiple restaurant and activity options, and the most comprehensive infrastructure
               on the coast. Best for guests who want the full resort
               experience and don't mind being in the midst of it.
             </p>
             <p>
               <strong>Almaza Bay</strong> is quieter and has the clearest
-              water on the coast. Two properties — one larger resort, one
-              boutique. Best for guests who want excellent sea quality and
-              a slightly lower density than Marassi.
+              water on the coast. It sits{" "}
+              {NORTH_COAST.geography.almazaFromMarassi}, near Marsa
+              Matrouh. Our property there is Jaz Almaza Beach Resort. Best
+              for guests who want excellent sea quality and a lower
+              density than Marassi.
             </p>
             <p>
               <strong>El Alamein</strong> is the quietest and carries
-              significant historical weight. The WWII battlefield, museum,
-              and cemetery are thirty minutes away. Rixos Premium is
-              comprehensive and self-contained. Al Alamein Hotel is older
-              and more characterful. Best for guests who want coastal rest
+              significant historical weight — the WWII museum and
+              cemeteries are close by. It lies{" "}
+              {NORTH_COAST.geography.elAlameinFromMarassi}. Our property
+              there, Rixos Premium Alamein, is comprehensive and
+              self-contained. Best for guests who want coastal rest
               combined with something historically serious.
             </p>
             <p>
@@ -273,8 +318,8 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               Two reasons. First, we don't own any of the North Coast
-              properties — they are all partner hotels. Siwa has our three
-              Soléi-owned lodges and long-established direct booking
+              properties — they are all partner hotels. Siwa has our{" "}
+              {SIWA_OWNED_COUNT} Soléi-owned properties and long-established direct booking
               connections with partner properties. The North Coast
               relationships are newer and the live inventory connection is
               not yet built.
@@ -331,9 +376,9 @@ const SECTIONS: FaqSection[] = [
                   coast for guests who want genuine luxury.
                 </>,
                 <>
-                  <strong>Best for character:</strong> Casa Cook North Coast
-                  — the most distinctive design, the most considered
-                  atmosphere. Not a traditional resort.
+                  <strong>Best for character:</strong> Al Alamein Hotel —
+                  older and more characterful than the newer Marassi
+                  resorts around it. Not a modern mega-resort.
                 </>,
                 <>
                   <strong>Best for families:</strong> Rixos Premium Alamein
@@ -347,7 +392,7 @@ const SECTIONS: FaqSection[] = [
                 </>,
                 <>
                   <strong>Best for couples:</strong> Vida Marina Resort
-                  Marassi or Casa Cook — both suited to guests who want
+                  Marassi or Al Alamein Hotel — both suited to guests who want
                   quality without the family-resort energy.
                 </>,
                 <>
@@ -365,18 +410,18 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              About an hour's drive east along the coastal road separates
-              them, and the atmosphere shifts noticeably. Marassi is
-              bigger, more developed, and has more activity. Four
-              properties, a marina, multiple restaurants and shops. It is
+              Almaza Bay sits{" "}
+              {NORTH_COAST.geography.almazaFromMarassi}, along the coastal
+              road, and the atmosphere shifts noticeably. Marassi is
+              bigger, more developed, and has more activity —{" "}
+              {MARASSI_COUNT} of our properties, a marina, multiple restaurants and shops. It is
               the social centre of the North Coast.
             </p>
             <p>
               Almaza Bay is quieter, less developed, and has genuinely
               superior water quality — consistently described as the
-              clearest sea on the Egyptian Mediterranean. Two properties
-              (Jaz Almaza Beach and The G Hotel Seashell), both of which
-              suit guests who want excellent sea conditions with a lower
+              clearest sea on the Egyptian Mediterranean. Our property
+              there, Jaz Almaza Beach Resort, suits guests who want excellent sea conditions with a lower
               density of other guests around them.
             </p>
           </>
@@ -387,11 +432,11 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Cancellation policies vary by property and are stated clearly
-              in the booking confirmation. Most North Coast properties
-              allow free cancellation up to 7–14 days before arrival;
-              cancellations within that window are charged in full or at a
-              penalty rate depending on the property.
+              Cancellation terms are set by each property and differ from
+              one to the next, so we don't quote a blanket window here.
+              The exact terms are stated on the property's booking page
+              and again in your payment link — those are the terms that
+              apply to your booking.
             </p>
             <p>
               We will always tell you the exact cancellation terms before
@@ -418,13 +463,13 @@ const SECTIONS: FaqSection[] = [
               changes when there are fewer people, and the all-inclusive
               format tends to anchor you to the property in a way that
               closes off the experiences that make the North Coast worth
-              visiting — the flamingo lagoons, the sunset sailing, the El
-              Alamein heritage sites. Half-board or room-only gives more
+              visiting — an afternoon on a private yacht, a beach club
+              day, a signature dinner somewhere else. Half-board or room-only gives more
               flexibility.
             </p>
             <p>
-              Casa Cook operates on a non all-inclusive basis and is
-              specifically designed for guests who want quality without the
+              Address Beach Resort Marassi and Vida Marina Resort Marassi
+              suit guests who want quality without the
               managed-consumption model.
             </p>
           </>
@@ -436,7 +481,7 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               Standard check-in is from 3:00pm at most North Coast resorts.
-              Check-out is by 12:00pm noon. Given the 2.5-hour drive from
+              Check-out is by 12:00pm noon. Given the roughly three-hour drive from
               Cairo, an early morning departure gets you there by late
               morning — most properties will hold your luggage and let you
               access facilities (pool, beach) while your room is being
@@ -467,14 +512,15 @@ const SECTIONS: FaqSection[] = [
               All North Coast experiences are arranged by our team — they
               do not book directly on site the way Siwa experiences do.
               Enquire with your preferred experience, date, and guest count.
-              We confirm availability with the guide or operator, then send
+              We confirm availability with the operator or venue, then send
               a payment link within 24 hours. No payment until confirmed.
             </p>
             <p>
               This is the same enquiry-based model as North Coast
-              accommodation. The coast's experience providers are mostly
-              independent local operators with whom we have personal
-              relationships but no live booking integration.
+              accommodation. The coast's experience providers — yacht operators, beach
+              clubs, restaurants, venues and spas — are independent
+              partners with whom we have personal relationships but no
+              live booking integration.
             </p>
           </>
         ),
@@ -484,7 +530,11 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Private sunset sailing — without hesitation. It is the
+              The{" "}
+              <Link href={ncExperienceHref("private-yacht-sunset-ritual")}>
+                Private Yacht Experience
+              </Link>{" "}
+              — without hesitation. Time it for late afternoon. It is the
               experience that changes the North Coast from "a beach resort
               stay" into "a Mediterranean coastal experience." Seeing the
               coast from open water, at the hour the light is best, is the
@@ -492,11 +542,12 @@ const SECTIONS: FaqSection[] = [
               destination actually is.
             </p>
             <p>
-              If you have time for two: add the flamingo lagoon morning. It
-              costs $45 per person, takes half a day, and produces the kind
-              of reaction most guests describe as genuinely unexpected —
-              they had no idea flamingos existed fifteen minutes from their
-              resort.
+              If you have time for two: add the{" "}
+              <Link href={ncExperienceHref("signature-dinner-experience")}>
+                Signature Dinner
+              </Link>
+              . It turns one evening into the meal of the trip, and pairs
+              naturally with a day on the water.
             </p>
           </>
         ),
@@ -506,57 +557,42 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              More than most guests realise. Our six curated North Coast
-              experiences are all off-resort:
+              More than most guests realise. We arrange{" "}
+              {NORTH_COAST.experienceSlugs.length} North Coast experiences,
+              each bookable from its own page with current prices and
+              terms:
             </p>
             <InfoCard
               title="North Coast experiences"
-              items={[
+              items={NORTH_COAST.experienceSlugs.map((slug) => (
                 <>
-                  <strong>Private sunset sailing</strong> — open
-                  Mediterranean, 3 hours, from $85pp
-                </>,
-                <>
-                  <strong>Flamingo watching</strong> — the lagoons behind
-                  the resort strip, half day, from $45pp
-                </>,
-                <>
-                  <strong>Open water swimming</strong> — guided early
-                  morning swims in Almaza Bay, 2 hours, from $30pp
-                </>,
-                <>
-                  <strong>El Alamein heritage visit</strong> — WWII
-                  battlefield, museum, cemetery, half day, from $35pp
-                </>,
-                <>
-                  <strong>Private coastline drive</strong> — Cairo to
-                  Matrouh by sea, full day, from $120pp
-                </>,
-                <>
-                  <strong>Local seafood lunch</strong> — off the tourist
-                  strip, fishing spots, midday, from $40pp
-                </>,
-              ]}
+                  <strong>
+                    <Link href={ncExperienceHref(slug)}>
+                      {NC_EXPERIENCE_COPY[slug].name}
+                    </Link>
+                  </strong>{" "}
+                  — {NC_EXPERIENCE_COPY[slug].blurb}
+                </>
+              ))}
             />
           </>
         ),
       },
       {
-        q: "Is the sunset sailing suitable if I've never sailed before?",
+        q: "Is the Private Yacht Experience suitable if I've never sailed before?",
         a: (
           <>
             <p>
               Yes — no sailing experience is required or relevant. You are
               a passenger, not crew. The captain and crew manage the boat
               entirely. Your job is to sit on deck and watch the light
-              change. There is no minimum ability level and no age
-              restriction.
+              change. There is no minimum ability level.
             </p>
             <p>
               The experience is weather-dependent. In the event of strong
               wind or poor sea conditions, we reschedule at no charge. The
-              Mediterranean is generally calm April to November. October to
-              March can be choppier — guests prone to motion sickness in
+              Mediterranean is generally calm from April to October.
+              November to March can be choppier — guests prone to motion sickness in
               choppy conditions should check sea conditions with us before
               confirming a winter booking.
             </p>
@@ -571,9 +607,9 @@ const SECTIONS: FaqSection[] = [
               Yes. All North Coast experience enquiries can include a
               transport request — mention your property and we'll include a
               private vehicle from your resort to the experience meeting
-              point and back. This is standard for the flamingo lagoon, El
-              Alamein, the seafood lunch spot, and the marina for sunset
-              sailing.
+              point and back. This is standard for the marina for the Private Yacht
+              Experience, and for beach club, dinner and nightlife venues
+              outside your own resort.
             </p>
             <p>
               The transport cost is added to your experience booking and
@@ -588,15 +624,15 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               At least 48 hours before your preferred date — ideally more.
-              The sunset sailing in particular operates with a single
-              private boat booking per group and fills during summer
+              The Private Yacht Experience in particular operates with a
+              single private boat booking per group and fills during summer
               weekends. For July and August stays, book experiences at the
               same time as accommodation, not after arrival.
             </p>
             <p>
               Shoulder season (April–June, September–November) is more
               flexible, but 24–48 hours lead time is still the minimum for
-              our team to confirm with guides and arrange logistics
+              our team to confirm with operators and arrange logistics
               properly.
             </p>
           </>
@@ -616,8 +652,9 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              By private vehicle — approximately 2.5 hours on the Desert
-              Road or the Coastal Road. The Desert Road is faster and more
+              By private vehicle —{" "}
+              {NORTH_COAST.travelTimes.fromCairo}, on the Desert Road or
+              the Coastal Road. The Desert Road is faster and more
               consistent. The Coastal Road adds about 40 minutes but gives
               you the Mediterranean for the final stretch. We recommend the
               Coastal Road for arrivals, the Desert Road for departures.
@@ -625,9 +662,9 @@ const SECTIONS: FaqSection[] = [
             <p>
               We arrange all transport with private vehicles from $80 per
               vehicle Cairo–North Coast. Depart before 9am to avoid Cairo
-              traffic — Friday morning departures should be especially
-              early as Friday afternoon return traffic on the Coastal Road
-              is significant in summer.
+              traffic. In summer, weekend (Thursday–Saturday) traffic on
+              the coast roads is significant — leave especially early on
+              a Thursday.
             </p>
           </>
         ),
@@ -637,21 +674,24 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Borg El Arab Airport in Alexandria is the most practical —
-              roughly 45 minutes from the start of the North Coast resort
-              area. EgyptAir operates domestic connections from Cairo to
-              Borg El Arab. International connections are limited.
+              Yes — El Alamein International Airport is the closest to
+              Marassi and El Alamein, with mostly seasonal flights. Borg El
+              Arab Airport (Alexandria) is{" "}
+              {NORTH_COAST.travelTimes.fromBorgElArab}, and Marsa Matrouh
+              Airport is the closest to Almaza Bay. Schedules into all
+              three are limited, so check your routing before booking.
             </p>
             <p>
               Cairo International Airport is the main international gateway
-              — 2.5 hours by private vehicle to the North Coast. For most
+              — about three hours by private vehicle to Marassi. For most
               international guests arriving specifically for the North
               Coast, flying into Cairo and driving is the standard routing.
             </p>
             <p>
-              We arrange airport pickups from both airports — Borg El Arab
+              We arrange airport pickups from all of them — Borg El Arab
               from $45 per vehicle, Cairo International from $80 per
-              vehicle, with flight tracking included.
+              vehicle, El Alamein and Marsa Matrouh on request — with
+              flight tracking included.
             </p>
           </>
         ),
@@ -661,19 +701,20 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              By private vehicle — the three areas are spread over roughly
-              100km of coastline and there is no public transport between
+              By private vehicle — the three areas are spread over{" "}
+              {NORTH_COAST.geography.coastlineCovered} and there is no public transport between
               them. We arrange all within-coast transfers:
             </p>
             <InfoCard
               title="Within-coast transfer distances"
               items={[
                 <>
-                  <strong>Marassi ↔ Almaza Bay:</strong> ~1 hour · From $40
-                  per vehicle
+                  <strong>Marassi ↔ Almaza Bay:</strong> ~1.5–2 hours (about
+                  130 km west) · From $40 per vehicle
                 </>,
                 <>
-                  <strong>Marassi ↔ El Alamein:</strong> ~30 minutes · From
+                  <strong>Marassi ↔ El Alamein:</strong> ~20–30 minutes east
+                  · From
                   $25 per vehicle
                 </>,
                 <>
@@ -775,11 +816,11 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Egyptian Pounds (EGP) for anything within resort areas —
-              restaurants, shops, tips. ATMs are available within the
-              resort developments (Marassi has multiple). Major credit
-              cards (Visa, Mastercard) are accepted at all the larger
-              resort properties.
+              Inside the resorts, major credit cards (Visa, Mastercard) are
+              widely accepted — restaurants, bars, spas and shops. Carry
+              some Egyptian Pounds (EGP) in cash for tips and for anything
+              outside the resort areas. ATMs are available within the
+              resort developments (Marassi has multiple).
             </p>
             <p>
               All Soléi bookings — accommodation, experiences,
@@ -818,7 +859,8 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               WhatsApp — the number is in your booking confirmation. Unlike
-              Siwa, where we have our own on-site team at three properties,
+              Siwa, where we have our own on-site team at our{" "}
+              {SIWA_OWNED_COUNT} properties,
               the North Coast is entirely partner hotels and our contact is
               remote. If something isn't right with your accommodation,
               reach us on WhatsApp and we'll intervene with the property

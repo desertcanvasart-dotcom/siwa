@@ -98,8 +98,6 @@ export default function PremiumExperienceSingle() {
     duration: "90 minutes",
     price: 85,
     location: "Siwa Oasis Sacred Springs",
-    rating: 4.9,
-    reviews: 127,
     tags: [
       { name: "Wellness", icon: Sparkles, color: "bg-purple-100 text-purple-700" },
       { name: "Sacred", icon: Star, color: "bg-gold-100 text-gold-700" },
@@ -121,30 +119,6 @@ export default function PremiumExperienceSingle() {
     { step: "Water Preparation", duration: "10 min", description: "Natural oils and minerals blessing" },
     { step: "Sacred Soak", duration: "45 min", description: "Mindful immersion in healing waters" },
     { step: "Integration", duration: "10 min", description: "Herbal tea and reflection time" }
-  ];
-
-  const testimonials = [
-    {
-      quote: "The most transformative 90 minutes of my entire Egypt journey. I emerged feeling completely renewed.",
-      author: "Sarah Chen",
-      location: "Singapore",
-      rating: 5,
-      verified: true
-    },
-    {
-      quote: "Cleopatra herself couldn't have experienced anything more divine. Pure magic.",
-      author: "Marcus Rodriguez", 
-      location: "Barcelona",
-      rating: 5,
-      verified: true
-    },
-    {
-      quote: "The healing properties of these waters are real. My chronic stress just melted away.",
-      author: "Dr. Amelia Foster",
-      location: "London",
-      rating: 5,
-      verified: true
-    }
   ];
 
   const pairings = [
@@ -238,12 +212,6 @@ export default function PremiumExperienceSingle() {
                 {/* Experience Overview */}
                 <section>
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="flex items-center gap-2">
-                      <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{experience.rating}</span>
-                      <span className="text-gray-600">({experience.reviews} reviews)</span>
-                    </div>
-                    <Separator orientation="vertical" className="h-6" />
                     <div className="flex items-center gap-2 text-gray-600">
                       <MapPin className="w-4 h-4" />
                       <span>{experience.location}</span>
@@ -362,34 +330,7 @@ export default function PremiumExperienceSingle() {
                   </div>
                 </section>
 
-                {/* Guest Testimonials */}
-                <section>
-                  <h2 className="text-3xl font-light mb-8">Guest Stories</h2>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {testimonials.map((testimonial, index) => (
-                      <Card key={index} className="hover:shadow-lg transition-shadow">
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-1 mb-4">
-                            {[...Array(testimonial.rating)].map((_, i) => (
-                              <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            ))}
-                          </div>
-                          <blockquote className="text-gray-700 mb-4 italic">
-                            "{testimonial.quote}"
-                          </blockquote>
-                          <div className="text-sm">
-                            <div className="font-semibold">{testimonial.author}</div>
-                            <div className="text-gray-600">{testimonial.location}</div>
-                            {testimonial.verified && (
-                              <div className="text-green-600 text-xs mt-1">✓ Verified Guest</div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </section>
+                {/* Guest testimonials removed (owner decision: no reviews on the site). */}
 
                 {/* Suggested Pairings */}
                 <section>

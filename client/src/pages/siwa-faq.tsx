@@ -5,6 +5,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { useSiteContent } from "@/lib/useSiteContent";
+import { SIWA } from "@/lib/site-facts";
 
 /* ──────────────────────────────────────────────────────────────
  *  /siwa-faq
@@ -48,6 +49,9 @@ interface FaqSection {
   items: FaqItem[];
 }
 
+const ownedList = SIWA.ownedProperties.map((p) => p.name).join(", ");
+const partnerList = SIWA.partnerLodgesOnRequest.join(", ");
+
 const SECTIONS: FaqSection[] = [
   {
     id: "planning",
@@ -69,7 +73,7 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               May to September is possible but demanding. Midday temperatures
-              regularly exceed 40°C. Most Siwa experiences are scheduled
+              are {SIWA.summerHeat}. Most Siwa experiences are scheduled
               early morning or at sunset for this reason, and some activities
               pause entirely in July and August. If summer is your only
               option, plan around the cooler hours and accept that you'll
@@ -78,7 +82,7 @@ const SECTIONS: FaqSection[] = [
             <p>
               <strong>Best overall months:</strong> October, November, March,
               and April — warm days, cool evenings, and good light for
-              photography.
+              photography. The full season runs {SIWA.season}.
             </p>
           </>
         ),
@@ -134,14 +138,14 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               Yes. Siwa is calm, safe, and relatively easy to navigate with
-              children. The salt lake float has a minimum age of 8. The
-              desert drives and horseback rides are suitable for older
-              children and teenagers. The oracle temple visit and Cleopatra
+              children. Each experience page lists its own age and
+              suitability notes. The desert drives are best suited to older
+              children and teenagers. The oracle temple and Cleopatra
               Spring work at any age.
             </p>
             <p>
-              The main consideration is the journey — the 8-hour drive from
-              Cairo is long for young children. Breaking it with a stop in
+              The main consideration is the journey — the drive from Cairo
+              ({SIWA.driveFromCairo}) is long for young children. Breaking it with a stop in
               Marsa Matrouh is a reasonable option. From Marsa Matrouh it is
               only 3 hours.
             </p>
@@ -192,8 +196,9 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               All Soléi bookings — accommodation, experiences, transportation
-              — are settled in USD via our secure payment links. You
-              do not need local currency for anything we arrange directly.
+              — are settled in USD through our secure booking and payment
+              links. You do not need local currency for anything we arrange
+              directly. In town, carry some cash; card acceptance varies.
             </p>
           </>
         ),
@@ -237,17 +242,20 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              All Siwa accommodation books directly on our site — no waiting,
-              no back-and-forth with a team. Select your property, choose
-              your dates and room type, and pay securely via our Tab.travel
-              booking system. Confirmation is instant.
+              Siwa accommodation books on each property's page. Select your
+              property, choose your dates and room type, and pay securely via
+              our {SIWA.bookingEngine} booking system — where live booking is
+              shown, confirmation is instant. Otherwise, send a reservation
+              request and we'll confirm availability and send a secure
+              payment link.
             </p>
             <p>
-              For our three Soléi-owned properties (Soléi Old Town, Soléi
-              Royal, and Soléi Desert Retreat), you are booking directly with
-              us and our team manages your stay end to end. For partner
-              properties, we have live availability connected and your
-              reservation goes directly to the property.
+              For our {SIWA.ownedProperties.length} Soléi-owned properties
+              ({ownedList}), you are booking directly with us and our team
+              manages your stay end to end. Partner lodges ({partnerList})
+              are arranged on request through our concierge
+              — tell us your dates and we'll confirm availability with the
+              lodge.
             </p>
           </>
         ),
@@ -257,22 +265,22 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              <strong>Soléi-owned properties</strong> (Soléi Old Town, Soléi
-              Royal, Soléi Desert Retreat) are designed, operated, and
+              <strong>Soléi-owned properties</strong> ({ownedList}) are
+              designed, operated, and
               managed by our team directly. The service, the menus, the
               evening programming, the guide selection — all of it is ours.
               If something isn't right, you reach us and we fix it.
             </p>
             <p>
-              <strong>Partner properties</strong> (Adrere Amellal, Taziry,
-              Ghaliet, Talist, Siwa Shali Resort, Azad) are independently
-              operated lodges and hotels that we have personally visited and
-              chosen to include. We work closely with each one, but they are
+              <strong>Partner lodges</strong> ({partnerList}) are
+              independently operated lodges that we have personally visited
+              and arrange on request through our concierge. We work closely with each one, but they are
               not ours to run.
             </p>
             <p>
-              Both categories are booked through the same system. The
-              practical difference is the degree of end-to-end
+              Our own properties book on their pages; partner lodges are
+              arranged on request through our concierge. The practical
+              difference is the degree of end-to-end
               accountability: for our own properties, we are fully
               responsible for your stay. For partner properties, we are
               responsible for the booking and will advocate on your behalf
@@ -282,28 +290,28 @@ const SECTIONS: FaqSection[] = [
         ),
       },
       {
-        q: "What is Adrere Amellal and why does it have no electricity?",
+        q: "What is Adrère Amellal and why does it have no electricity?",
         a: (
           <>
             <p>
-              Adrere Amellal is an eco-lodge built entirely from karsheef —
-              the local salt rock — into the face of the White Mountain at
+              Adrère Amellal is an eco-lodge built entirely from karsheef
+              (salt-rock and mud) into the face of the White Mountain at
               the edge of the great salt lake. It has been operating since
               1997 and is widely regarded as one of Egypt's most distinctive
               lodges.
             </p>
             <p>
               The decision to have no electricity is not a compromise — it
-              is the design. Oil lamp lighting, organic farm produce for all
+              is the design. Candlelight after dark, organic farm produce for all
               meals, no internet, no noise. Full board is included in the
               rate. It is an experience of a fundamentally different quality
               of time rather than a set of amenities.
             </p>
             <p>
-              It is the highest-priced property in our Siwa portfolio at
-              $320/night (Garden Room) for precisely this reason. Guests who
-              choose it knowing what it is report some of the most
-              compelling stays we hear about.
+              It is a partner lodge, arranged on request through our
+              concierge rather than booked on our site. Guests who choose it
+              knowing what it is report some of the most compelling stays we
+              hear about.
             </p>
           </>
         ),
@@ -313,7 +321,7 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              At properties where full board is included (notably Adrere
+              At properties where full board is included (notably Adrère
               Amellal), this means breakfast, lunch, and dinner are all
               provided on site. At most other Siwa properties, breakfast is
               included and meals beyond that are available on site at
@@ -340,10 +348,10 @@ const SECTIONS: FaqSection[] = [
               booking notes and we'll do what we can.
             </p>
             <p>
-              For guests arriving from Cairo on the 8-hour drive, a
-              mid-afternoon arrival is typical and aligns naturally with the
-              2pm check-in. We recommend planning your departure from Cairo
-              no later than 7am to avoid arriving after dark.
+              For guests arriving from Cairo on the drive
+              ({SIWA.driveFromCairo}), a mid-afternoon arrival is typical and
+              aligns naturally with the 2pm check-in. Our advice:{" "}
+              {SIWA.cairoDepartureAdvice}, to avoid arriving after dark.
             </p>
           </>
         ),
@@ -355,7 +363,7 @@ const SECTIONS: FaqSection[] = [
             <p>
               It varies by property. Most Siwa lodges have limited or
               intermittent Wi-Fi — this is partly infrastructure and partly a
-              deliberate choice. Adrere Amellal has no internet at all. Most
+              deliberate choice. Adrère Amellal has no internet at all. Most
               other lodges have Wi-Fi in common areas with varying
               reliability.
             </p>
@@ -378,14 +386,15 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Free cancellation is available up to 7 days before arrival for
-              most Soléi-booked accommodation. Cancellations within 7 days
-              are charged in full. Cancellations more than 30 days out
-              receive a full refund within 5–10 business days.
+              Each property's booking page states its cancellation terms, and
+              those are the terms that apply to your booking. For most
+              Soléi-owned accommodation, cancellation is free up to 7 days
+              before arrival; cancellations within 7 days are charged in
+              full.
             </p>
             <p>
-              Partner properties may have slightly different policies which
-              will be clearly stated at the time of booking confirmation. If
+              Partner lodges have their own policies, which we confirm with
+              you before you pay. If
               you book and later need to change dates, contact us before the
               cancellation deadline — in most cases we can adjust without
               penalty.
@@ -398,14 +407,14 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Adrere Amellal has a minimum stay of 2 nights — a one-night
+              Adrère Amellal has a minimum stay of 2 nights — a one-night
               stay there is not something we would recommend in any case.
               Most other Siwa properties have no formal minimum, but we'd
               encourage any guest to book at least 2–3 nights given the
               journey involved in getting there.
             </p>
             <p>
-              A single-night stay in Siwa after an 8-hour drive is technically
+              A single-night stay in Siwa after an eight-hour drive is technically
               possible but means spending more time in transit than in the
               oasis. Three nights is the practical minimum for a stay that
               feels worthwhile.
@@ -427,9 +436,10 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              All Siwa experiences book directly on our site with instant
-              confirmation. Select your experience, choose a date, confirm
-              your group size, and pay. No waiting, no back-and-forth.
+              Select your experience, choose a date and your group size, and
+              send your booking request from the experience page. We confirm
+              the date with you and send a secure payment link — usually
+              within a few hours.
             </p>
             <p>
               If you've already booked accommodation with us, we automatically
@@ -446,8 +456,8 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               Before arrival — and ideally before you leave home. The salt
-              lake float at sunset and sleeping under the stars fill quickly
-              during peak season (October to March). Booking on the morning
+              lake float and sleeping under the stars fill quickly during
+              peak season ({SIWA.season}). Booking on the morning
               you want to do something is possible in the off-season but
               risky in busy months.
             </p>
@@ -461,27 +471,25 @@ const SECTIONS: FaqSection[] = [
         ),
       },
       {
-        q: "What is the salt lake float and why is it run only at sunset?",
+        q: "What is the salt lake float and when does it run?",
         a: (
           <>
             <p>
               The salt lake float is our signature Siwa experience —
-              floating effortlessly in Siwa's hyper-saline lakes as the sun
-              descends. The water is several times saltier than the ocean,
+              floating effortlessly in Siwa's hyper-saline lakes. The water is several times saltier than the ocean,
               which means you float without any effort. You lie back and the
               lake holds you completely.
             </p>
             <p>
-              It runs at sunset because the light is the experience. In the
-              last twenty minutes before the sun meets the horizon, the lake
-              and the sky become a single continuous reflective surface.
-              There is no edge between them. Running it at any other time of
-              day would be a different experience entirely and not one we'd
-              stake our reputation on.
+              {SIWA.saltLakeFloatTiming} In the last twenty minutes before
+              the sun meets the horizon, the lake and the sky become a single
+              continuous reflective surface. Each experience page shows its
+              own start time.
             </p>
             <p>
               It is the experience most guests name first when describing
-              their time in Siwa. From $45 per person.
+              their time in Siwa. Current prices are shown on each
+              experience page.
             </p>
           </>
         ),
@@ -492,10 +500,10 @@ const SECTIONS: FaqSection[] = [
           <>
             <p>
               Yes. All experiences listed for groups are available as
-              private bookings. The Full Siwa Day (experience 10) is private
-              by default. For all others, a private option is available —
-              contact us before booking and we'll give you the private
-              pricing based on your group size.
+              private bookings. Where an experience has a private option, its
+              page shows the private rate; for the rest, contact us before
+              booking and we'll give you private pricing based on your group
+              size.
             </p>
             <p>
               Private bookings have a flat rate rather than a per-person
@@ -510,9 +518,9 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Free cancellation up to 48 hours before the scheduled
-              experience. Cancellations within 48 hours are charged in full.
-              In the rare event of extreme weather, we reschedule at no
+              Cancellation terms vary by experience — see each experience's
+              page, which states the terms that apply to your booking. In the
+              rare event of extreme weather, we reschedule at no
               charge — Siwa's weather is generally predictable and this is
               uncommon.
             </p>
@@ -554,8 +562,9 @@ const SECTIONS: FaqSection[] = [
                 </>,
                 <>
                   <strong>Sand bath healing:</strong> Old clothes — you will
-                  be buried in sand. Avoid this if you have open wounds or
-                  skin conditions.
+                  be buried in hot sand for {SIWA.sandBath.duration}, never
+                  fully covered. {SIWA.sandBath.warning} Avoid it too if you
+                  have open wounds or skin conditions.
                 </>,
                 <>
                   <strong>Cleopatra Spring:</strong> Swimwear. The spring is
@@ -572,15 +581,16 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              The salt lake float at sunset — without hesitation. It is the
+              The salt lake float — without hesitation, ideally late in the
+              day. It is the
               experience that most consistently produces the reaction that
               brought guests to Siwa in the first place: the particular
               feeling of being somewhere completely unlike anywhere else.
             </p>
             <p>
-              If you have three nights, we'd add the Oracle Temple on your
-              first full morning and desert stargazing on your second
-              evening. That combination — heritage, salt lake, stars —
+              If you have three nights, we'd add a morning at the Oracle
+              Temple (our private Ancient Sites Drive covers it) and desert
+              stargazing on your second evening. That combination — heritage, salt lake, stars —
               covers the three essential registers of the oasis without
               over-programming the stay.
             </p>
@@ -630,8 +640,9 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               We arrange all Siwa transportation with private vehicles and
-              drivers we know personally. The Cairo–Siwa route runs from
-              $180 per vehicle. Depart before 7am to arrive by mid-afternoon.
+              drivers we know personally. Pricing per vehicle is confirmed
+              when you enquire. Our advice: {SIWA.cairoDepartureAdvice} to
+              arrive by mid-afternoon.
             </p>
           </>
         ),
@@ -650,7 +661,7 @@ const SECTIONS: FaqSection[] = [
             <p>
               Most guests fly into Cairo International and drive from there.
               If you're flying into Marsa Matrouh, we arrange the 3-hour
-              onward transfer from $95 per vehicle.
+              onward transfer by private vehicle.
             </p>
           </>
         ),
@@ -660,7 +671,7 @@ const SECTIONS: FaqSection[] = [
         a: (
           <>
             <p>
-              Before 6am if possible — ideally 5am or 5:30am. This gets you
+              Our one answer: {SIWA.cairoDepartureAdvice}. This gets you
               clear of Cairo before morning traffic builds, allows stops at
               a comfortable pace, and delivers you to Siwa by early to
               mid-afternoon. A mid-afternoon arrival means you can settle
@@ -687,7 +698,7 @@ const SECTIONS: FaqSection[] = [
             </p>
             <p>
               Once in the oasis, mobile signal varies by property. Most
-              properties have Wi-Fi in common areas. Adrere Amellal has no
+              properties have Wi-Fi in common areas. Adrère Amellal has no
               internet or reliable signal — this is part of the experience.
             </p>
           </>
@@ -796,7 +807,7 @@ const SECTIONS: FaqSection[] = [
               Siwa has a genuine food culture rooted in the oasis's
               agricultural products — dates, olives, olive oil, organic
               vegetables, and the particular flatbreads baked in the town. At
-              the better lodges, particularly Adrere Amellal and our own
+              the better lodges, particularly Adrère Amellal and our own
               Soléi properties, meals are genuinely excellent and use local
               produce extensively.
             </p>
@@ -829,9 +840,9 @@ const SECTIONS: FaqSection[] = [
             <p>
               Bring any prescription medications you need for the full
               duration of your stay — do not rely on being able to source
-              specific medications in Siwa. Travel insurance that covers
-              medical evacuation is recommended for guests with significant
-              health conditions.
+              specific medications in Siwa. Travel insurance with medical
+              cover is required for every booking — make sure yours includes
+              medical evacuation.
             </p>
           </>
         ),

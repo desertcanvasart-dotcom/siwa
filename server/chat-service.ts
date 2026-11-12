@@ -12,6 +12,37 @@ import OpenAI from "openai";
 import { db } from "./db";
 import { aiKnowledge, hotels, experiences, blogPosts } from "@shared/schema";
 import { eq } from "drizzle-orm";
+// Canonical facts shared with the public pages (relative import: the
+// file has no dependencies, so esbuild bundles it into the server).
+import { SIWA, NORTH_COAST, POLICIES } from "../client/src/lib/site-facts";
+
+/** Journal posts the concierge must not recommend. */
+const HIDDEN_POSTS = new Set(["the-curse-of-king-tuts-tomb"]);
+
+/** All Soléi prices are USD — normalise any stray € in free-text fields. */
+const usd = (v: string | null | undefined) => (v ?? "").replace(/€\s?/g, "$");
+
+/** The canonical facts block — the concierge must not contradict it. */
+function factsSection(): string {
+  const owned = SIWA.ownedProperties.map((p) => p.name).join(", ");
+  const nc = NORTH_COAST.properties.map((p) => `${p.name} (${p.area})`).join(", ");
+  return `# Facts you must stay consistent with
+- Siwa accommodation: ${SIWA.ownedProperties.length} Soléi-owned properties with pages — ${owned}. Partner lodges (${SIWA.partnerLodgesOnRequest.join(", ")}) can be arranged through our team on request only; they have no pages and are not instantly bookable. Don't name other Siwa hotels as bookable.
+- North Coast accommodation: ${NORTH_COAST.properties.length} properties — ${nc}. Casa Cook and The G Hotel Seashell are NOT offered.
+- North Coast experiences: only the ones in the live catalogue below (private yacht, beach club, Marassi Water World, signature dinner, nightlife, luxury spa). There is no sunset-sailing, flamingo-watching, open-water swim, El Alamein heritage tour, coastline drive or seafood-lunch product.
+- Siwa experiences: only the ones in the live catalogue below. There are no horseback rides and no standalone Oracle Temple tour.
+- North Coast geography (west to east): ${NORTH_COAST.geography.order}. Almaza Bay is ${NORTH_COAST.geography.almazaFromMarassi}; El Alamein is ${NORTH_COAST.geography.elAlameinFromMarassi}. The coast lies ${NORTH_COAST.geography.position}. Al Alamein Hotel is in the Marassi area; Rixos Premium Alamein is in El Alamein.
+- Travel to the North Coast: from Cairo ${NORTH_COAST.travelTimes.fromCairo}; from Alexandria ${NORTH_COAST.travelTimes.fromAlexandria}; from Borg El Arab airport ${NORTH_COAST.travelTimes.fromBorgElArab}. Airports: ${NORTH_COAST.airports.join("; ")}.
+- North Coast best months: ${NORTH_COAST.bestMonths}; peak: ${NORTH_COAST.peakSeason}.
+- Siwa: the drive from Cairo is ${SIWA.driveFromCairo}; advise guests to ${SIWA.cairoDepartureAdvice}. Best season ${SIWA.season}; summer is ${SIWA.summerHeat}.
+- Salt-lake float: ${SIWA.saltLakeFloatTiming}
+- Sand bath: ${SIWA.sandBath.duration}. ${SIWA.sandBath.warning} ${SIWA.sandBath.season}.
+- Soléi does not sell flights.
+- Prices are in ${POLICIES.currency}.
+- Cancellation: ${POLICIES.cancellationPrecedence} Point guests to the product page or /terms-of-service rather than quoting a rule.
+- Insurance: ${POLICIES.travelInsurance}
+- Guest reviews: don't quote or invent guest reviews or ratings.`;
+}
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
@@ -67,7 +98,7 @@ async function buildSystemPromptUncached(): Promise<string> {
 
     hotelLines = liveHotels.map((h) => {
       const dest = h.destination === "siwa" ? "Siwa Oasis" : "North Coast";
-      return `- ${h.name} (${dest}) — ${h.pricePerNight ?? "price on request"} — ${h.blurb ?? ""} (URL: /${h.destination === "siwa" ? "siwa-oasis" : "north-coast"}/accommodation/${h.slug})`;
+      return `- ${h.name} (${dest}) — ${usd(h.pricePerNight) || "price on request"} — ${h.blurb ?? ""} (URL: /${h.destination === "siwa" ? "siwa-oasis" : "north-coast"}/accommodation/${h.slug})`;
     });
 
     const tours = liveExp.filter((e) => e.category !== "Curated Journey");
@@ -80,14 +111,16 @@ async function buildSystemPromptUncached(): Promise<string> {
         : e.destination === "north-coast"
           ? `/north-coast/experiences/${e.slug}`
           : `/journeys/${e.slug}`;
-      return `- ${e.title} (${dest}) — ${e.duration} — €${e.pricePerPerson} pp — ${e.summary} (URL: ${url})`;
+      const price = Number(e.pricePerPerson) > 0 ? `$${Number(e.pricePerPerson).toFixed(0)} pp` : "price on request";
+      return `- ${e.title} (${dest}) — ${e.duration} — ${price} — ${e.summary} (URL: ${url})`;
     });
 
     journeyLines = journeys.map((j) => {
-      return `- ${j.title} — ${j.duration} — from €${j.pricePerPerson} pp — ${j.summary} (URL: /journeys/${j.slug})`;
+      const price = Number(j.pricePerPerson) > 0 ? `from $${Number(j.pricePerPerson).toFixed(0)} pp` : "price on request";
+      return `- ${j.title} — ${j.duration} — ${price} — ${j.summary} (URL: /journeys/${j.slug})`;
     });
 
-    blogLines = livePosts.slice(0, 20).map((p) => {
+    blogLines = livePosts.filter((p) => !HIDDEN_POSTS.has(p.slug)).slice(0, 20).map((p) => {
       return `- "${p.title}" (${p.category}) — ${p.excerpt} (URL: /journal/${p.slug})`;
     });
 
@@ -110,15 +143,17 @@ async function buildSystemPromptUncached(): Promise<string> {
 # What you can help with
 - Recommending hotels, experiences, and curated multi-night journeys based on the visitor's preferences (budget, dates, party size, vibe — wellness, romantic, family, adventure, cultural, etc.).
 - Explaining what a property or experience is like, including practical details (board basis, what's included, durations).
-- Walking visitors through how booking works: Siwa books direct, North Coast goes through enquiry with payment link within 24 hours.
+- Walking visitors through how booking works: Soléi's Siwa properties book directly online (${SIWA.bookingEngine}, instant confirmation); Siwa experiences, journeys and all North Coast bookings go through a request — we confirm availability and send a secure payment link within 24 hours.
 - Suggesting an itinerary if asked, drawing from real properties and experiences listed below.
 - Pointing them to the right page to enquire or read more. When you reference a specific item, include its URL in markdown link form: [name](url).
 
 # What you should NOT do
 - Don't invent properties, tours, or prices that aren't listed below.
 - Don't promise specific availability — say "subject to confirmation" and direct them to /enquire or /review.
-- Don't quote currencies other than what's in the catalogue (EUR / USD via Tab.travel).
+- Quote prices in USD only, exactly as listed in the catalogue.
 - If the visitor asks something outside travel scope (politics, unrelated topics), gently redirect: "I'm here to help plan your Soléi journey — happy to help with that side of things."
+
+${factsSection()}
 
 # Current live catalogue
 
@@ -137,8 +172,8 @@ ${blogLines.join("\n") || "(none)"}
 # Booking flow
 - Visitors can shape a trip on the home page booking bar (accommodation + experience + transport) → it sends them to /review for a summary → contact form sends the enquiry.
 - For direct enquiries: /enquire.
-- All North Coast bookings are confirmed within 24 hours with a Tab.travel payment link.
-- Siwa bookings can be confirmed instantly at the property.
+- North Coast bookings, Siwa experiences and journeys: confirmed by our team within 24 hours, then a secure payment link is sent.
+- Soléi's Siwa properties: book directly on the property page with instant confirmation (${SIWA.bookingEngine}).
 ${knowledgeSection}
 Use only what's listed above. If a visitor asks for something not in the catalogue, say "I don't have that as a current offering — would you like me to suggest something close?" rather than inventing.`;
 }
