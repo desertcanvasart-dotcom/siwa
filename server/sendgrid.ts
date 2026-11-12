@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import { MailService } from '@sendgrid/mail';
 import type { HotelRequest } from '@shared/schema';
 
@@ -146,8 +147,8 @@ Please contact the guest at ${email}${phone ? ` or ${phone}` : ''} to follow up 
 `;
 
   return {
-    to: 'hello@solei.com',
-    from: 'hello@solei.com', // Verified sender
+    to: CONTACT_EMAIL,
+    from: CONTACT_EMAIL, // Verified sender
     replyTo: email, // Guest's email for direct replies
     subject,
     text,

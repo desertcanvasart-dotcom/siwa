@@ -69,7 +69,9 @@ export function hotelCard(slug: string, hotelsMap: Map<string, HotelOverlay>): R
     key: `hotel:${slug}`,
     href: `/${dest === "siwa" ? "siwa-oasis" : "north-coast"}/accommodation/${slug}`,
     title: o.name || ts?.name || slug,
-    subtitle: ts?.tagLine || o.blurb || "",
+    // Live tag line first — the bundled TS copy is fallback only and had
+    // drifted (e.g. "Royal Villa · 5 Bedrooms" on a 2-bedroom villa).
+    subtitle: (o as any).details?.tagLine || ts?.tagLine || o.blurb || "",
     price: price.amount > 0 ? `From ${price.display}` : "",
     image: o.imageUrl || ts?.coverImage,
   };

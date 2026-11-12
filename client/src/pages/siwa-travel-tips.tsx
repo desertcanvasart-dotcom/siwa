@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import { useSiteContent, pickContent } from "@/lib/useSiteContent";
 import { Arch } from "@/components/ui/Arch";
+import { SIWA } from "@/lib/site-facts";
 
 /* ──────────────────────────────────────────────────────────────
  *  /siwa-travel-tips
@@ -27,9 +28,9 @@ const PAGE_NAV = [
 ];
 
 const QUICK_REF: { k: string; v: string }[] = [
-  { k: "From Cairo", v: "~8 hours by road" },
+  { k: "From Cairo", v: `${SIWA.driveFromCairo[0].toUpperCase()}${SIWA.driveFromCairo.slice(1)} by road` },
   { k: "From Marsa Matrouh", v: "~3 hours by road" },
-  { k: "Best season", v: "October – April" },
+  { k: "Best season", v: SIWA.season },
   { k: "Peak months", v: "Oct, Nov, Mar, Apr" },
   { k: "Ideal stay", v: "3 – 5 nights" },
   { k: "Currency", v: "Egyptian Pounds (EGP)" },
@@ -37,12 +38,12 @@ const QUICK_REF: { k: string; v: string }[] = [
   { k: "Dress in town", v: "Modest — shoulders & knees covered" },
   { k: "Mobile signal", v: "Intermittent — download offline" },
   { k: "Water", v: "Bottled only" },
-  { k: "Accommodation from", v: "$95 / night" },
-  { k: "Experiences from", v: "$35 / person" },
+  { k: "Soléi-owned properties", v: String(SIWA.ownedProperties.length) },
+  { k: "Siwa experiences", v: String(SIWA.experienceSlugs.length) },
 ];
 
 const MUST_SEE = [
-  "Salt lake at sunset — Birket Siwa",
+  "Salt lakes — Birket Siwa",
   "Oracle Temple of Amun — Aghurmi",
   "Cleopatra's Spring — Ein Guba",
   "Shali Fortress ruins — Old Town",
@@ -158,8 +159,8 @@ export default function SiwaTravelTipsPage() {
                   essential for desert drives within the oasis.
                 </p>
                 <p>
-                  Depart before 6am. Traffic out of Cairo is negligible at
-                  this hour and you arrive by mid-to-late afternoon — enough
+                  Our advice: {SIWA.cairoDepartureAdvice}. Traffic out of
+                  Cairo is negligible at this hour and you arrive by mid-to-late afternoon — enough
                   time to settle in before evening. Arriving after dark on a
                   first visit means missing the approach, which is part of
                   the experience.
@@ -230,7 +231,7 @@ export default function SiwaTravelTipsPage() {
 
               <SubBlock title="Summer: May to September — proceed with caution">
                 <p>
-                  Temperatures regularly exceed 40°C at midday. Most
+                  Midday temperatures are {SIWA.summerHeat}. Most
                   experiences are scheduled at sunrise or sunset. Desert
                   drives in the middle of the day are not recommended. The
                   oasis is quieter in summer and prices are lower, but
@@ -328,13 +329,15 @@ export default function SiwaTravelTipsPage() {
               <SubBlock title="Luxury lodges">
                 <p>
                   Siwa has a genuinely excellent luxury lodge category —
-                  properties that use traditional materials (karsheef salt
-                  rock, palm wood) and offer experiences that are deeply
-                  connected to the oasis. Adrere Amellal is the benchmark:
+                  properties that use traditional materials — karsheef
+                  (salt-rock and mud) and palm wood — and offer experiences
+                  that are deeply connected to the oasis. Adrère Amellal is the
+                  benchmark, arranged on request through our concierge:
                   no electricity, full board, salt lake front, and a
                   quality of stillness that guests describe as
-                  transformative. Our Soléi properties (Old Town, Royal,
-                  Desert Retreat) sit in the same category with the
+                  transformative. Our {SIWA.ownedProperties.length} Soléi
+                  properties ({SIWA.ownedProperties.map((p) => p.name).join(", ")})
+                  sit in the same category with the
                   additional accountability of being ours to run.
                 </p>
                 <Link
@@ -345,29 +348,27 @@ export default function SiwaTravelTipsPage() {
                 </Link>
               </SubBlock>
 
-              <SubBlock title="Boutique & heritage options">
+              <SubBlock title="Partner lodges on request">
                 <p>
-                  Taziry Ecolodge, Ghaliet Ecolodge & Spa, Talist Siwa, and
-                  Siwa Shali Resort represent the mid-range of our Siwa
-                  portfolio — all personally visited, all genuinely good,
-                  all offering something distinct. Taziry for eco-conscious
-                  guests. Ghaliet for its salt pool spa. Talist for its
-                  infinity pool and Shali fortress views.
+                  Beyond our own properties, our concierge can arrange stays
+                  at partner lodges we know personally —{" "}
+                  {SIWA.partnerLodgesOnRequest.join(" and ")}. These are not
+                  booked on our site; tell us your dates and we'll confirm
+                  availability with the lodge. Taziry suits eco-conscious
+                  guests.
                 </p>
               </SubBlock>
 
               <SubBlock title="Budget guesthouses">
                 <p>
-                  Azad Siwa Hotel is the most affordable property in our
-                  portfolio at from $95/night. Beyond our curated list,
-                  Siwa town has simple guesthouses at much lower price
-                  points for travellers on tight budgets. These are not
+                  Beyond our curated list, Siwa town has simple guesthouses
+                  at much lower price points for travellers on tight budgets. These are not
                   properties we vet or recommend, but they are viable for
                   guests who prioritise cost above environment.
                 </p>
                 <TipBox label="Our recommendation">
                   Booking in advance is essential for peak season
-                  (October–March). October and the Egyptian long weekends
+                  ({SIWA.season}). October and the Egyptian long weekends
                   (particularly Easter) sell out months ahead. Don't leave
                   it to arrival.
                 </TipBox>
@@ -376,14 +377,14 @@ export default function SiwaTravelTipsPage() {
 
             {/* 5. Experiences */}
             <TipSection num="05" id="experiences" title="Must-try " titleItalic="experiences.">
-              <SubBlock title="Start with the salt lake at sunset">
+              <SubBlock title="Start with the salt lake">
                 <p>
                   The float therapy at Siwa's hyper-saline lakes is the
                   single experience most guests name first when describing
                   what Siwa gave them. Not the views, not the desert drive,
-                  not the temple — the float. At sunset. In silence. It is
-                  from $45 per person and it books before almost everything
-                  else in peak season.
+                  not the temple — the float. In silence.{" "}
+                  {SIWA.saltLakeFloatTiming} It books before almost
+                  everything else in peak season.
                 </p>
               </SubBlock>
 
@@ -393,7 +394,8 @@ export default function SiwaTravelTipsPage() {
                   Cleopatra. Cool, clear water, a carved stone setting, and
                   the particular calm of a place visited continuously for
                   two thousand years. Best in the early morning before it
-                  gets busy. From $35 per person.
+                  gets busy. Our private Salt Lakes &amp; Springs Circuit
+                  includes it.
                 </p>
               </SubBlock>
 
@@ -404,7 +406,8 @@ export default function SiwaTravelTipsPage() {
                   sunset is one of the more purely joyful things available
                   in Siwa, combining the physicality of the desert with
                   light that makes the dunes look like they're glowing from
-                  inside. From $85 per group.
+                  inside. Our private Great Sand Sea Drive and our desert
+                  sunset experience both include it.
                 </p>
               </SubBlock>
 
@@ -415,22 +418,23 @@ export default function SiwaTravelTipsPage() {
                   looking for. Most visitors walk through in twenty minutes.
                   Half a day with a guide who explains the political and
                   spiritual context of the visit produces a fundamentally
-                  different experience. From $35 per person.
+                  different experience. Our private Ancient Sites Drive
+                  includes it.
                 </p>
               </SubBlock>
 
               <SubBlock title="Sleeping under the stars">
                 <p>
                   No light pollution. A sky that looks nothing like the sky
-                  in any city you have ever been in. A Bedouin camp, dinner
-                  in the open air, and the kind of sleep people describe
-                  for years afterward because of what surrounded it. From
-                  $120 per person including dinner.
+                  in any city you have ever been in. A Siwan desert camp,
+                  dinner in the open air, and the kind of sleep people
+                  describe for years afterward because of what surrounded
+                  it. Current prices are on the experience page.
                 </p>
                 <TipBox label="Booking note">
-                  All Siwa experiences book directly on our site — instant
-                  confirmation, no waiting. Book before arrival, not on the
-                  morning of the experience.
+                  Send your request from the experience page and we'll
+                  confirm your date and send a secure payment link. Book
+                  before arrival, not on the morning of the experience.
                 </TipBox>
               </SubBlock>
             </TipSection>
@@ -443,7 +447,7 @@ export default function SiwaTravelTipsPage() {
                   agricultural products — dates in extraordinary variety,
                   olives and olive oil from the oasis groves, organic
                   vegetables, the flatbreads baked daily in town. At
-                  properties like Adrere Amellal and our Soléi lodges,
+                  properties like Adrère Amellal and our Soléi lodges,
                   meals are composed entirely from local produce and
                   genuinely worth the full board rate.
                 </p>
@@ -467,7 +471,7 @@ export default function SiwaTravelTipsPage() {
                   the produce is excellent. Gluten-free is manageable but
                   requires flagging in advance. Halal is the default
                   everywhere. Alcohol is not available in Siwa town and is
-                  limited at most lodges — Adrere Amellal serves wine; our
+                  limited at most lodges — Adrère Amellal serves wine; our
                   Soléi properties do not.
                 </p>
               </SubBlock>
@@ -517,8 +521,8 @@ export default function SiwaTravelTipsPage() {
                   is Marsa Matrouh (3 hours). Bring any prescription
                   medications you need for the full duration of your stay —
                   do not rely on sourcing specific medications in Siwa.
-                  Travel insurance with medical evacuation coverage is
-                  recommended.
+                  Travel insurance with medical cover is required for every
+                  booking — make sure yours includes medical evacuation.
                 </p>
               </SubBlock>
 
@@ -547,9 +551,8 @@ export default function SiwaTravelTipsPage() {
                   ATMs exist in Siwa town but are unreliable — bring
                   sufficient Egyptian Pounds from Cairo or Alexandria. All
                   Soléi bookings are settled in USD via secure
-                  payment links. Credit cards are not widely accepted in
-                  small local businesses — cash is king for anything in the
-                  town market.
+                  payment links. In town, carry some cash; card acceptance
+                  varies, and the market is cash-only in practice.
                 </p>
               </SubBlock>
 
@@ -558,7 +561,7 @@ export default function SiwaTravelTipsPage() {
                   Mobile signal is intermittent throughout the oasis.
                   Vodafone Egypt provides the best coverage. Wi-Fi at most
                   lodges is limited to common areas and variable in
-                  quality. Adrere Amellal has no internet at all. Download
+                  quality. Adrère Amellal has no internet at all. Download
                   everything you'll need offline before the journey —
                   music, podcasts, navigation maps, any reading.
                 </p>
@@ -568,7 +571,7 @@ export default function SiwaTravelTipsPage() {
                 <InfoList
                   items={[
                     "Sunscreen SPF 50+ and a wide-brimmed hat",
-                    "Warm layer for evenings (essential October–March)",
+                    "Warm layer for evenings (essential December–February, useful all season)",
                     "Swimwear for the salt lake and Cleopatra Spring",
                     "Comfortable walking shoes for temple visits and town exploration",
                     "Cash in Egyptian Pounds for the town",
@@ -584,11 +587,11 @@ export default function SiwaTravelTipsPage() {
                   {[
                     {
                       title: "Accommodation",
-                      text: "$95–$320+ per night depending on property. Our Soléi properties from $145. Budget guesthouses from ~$20 (not curated).",
+                      text: "Varies by property, room and season — current nightly rates are shown on each property page. Budget guesthouses in town from ~$20 (not curated).",
                     },
                     {
                       title: "Experiences",
-                      text: "$35–$180 per person. Most half-day experiences fall between $35–$55. The Full Siwa Day at $180 covers the most ground.",
+                      text: `${SIWA.experienceSlugs.length} Siwa experiences, from half-day outings to a night in the desert. Current prices are shown on each experience page.`,
                     },
                     {
                       title: "Transportation",
@@ -719,14 +722,14 @@ export default function SiwaTravelTipsPage() {
               href="/siwa-oasis/accommodation"
               title="Siwa"
               titleItalic="accommodation"
-              desc="8 curated properties including 3 Soléi-owned lodges. Direct booking, instant confirmation."
+              desc={`${SIWA.ownedProperties.length} Soléi-owned properties, plus partner lodges arranged on request through our concierge.`}
               cta="View properties"
             />
             <SidebarLink
               href="/siwa-oasis/experiences"
               title="Siwa"
               titleItalic="experiences"
-              desc="10 curated experiences — salt lake float, desert stargazing, oracle temple and more."
+              desc={`${SIWA.experienceSlugs.length} curated experiences — salt lake float, desert stargazing, a night in the desert and more.`}
               cta="View experiences"
             />
             <SidebarLink

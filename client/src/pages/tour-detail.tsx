@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useRoute } from "wouter";
+import { useMemo, useState } from "react";
+import { Link, useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/seo";
 import { Nav } from "@/components/layout/Nav";
@@ -7,6 +7,8 @@ import { Footer } from "@/components/layout/Footer";
 import { useReveal } from "@/components/home/useReveal";
 import type { TourDetail } from "@shared/tour-detail";
 import { GalleryLightbox } from "@/components/ui/GalleryLightbox";
+import NotFound from "@/pages/not-found";
+import { cleanList, cleanText } from "@/lib/display-text";
 
 /**
  * /siwa-oasis/experiences/:slug + /north-coast/experiences/:slug
@@ -14,8 +16,8 @@ import { GalleryLightbox } from "@/components/ui/GalleryLightbox";
  * Tour detail page for the 13 curated bundled tours. Fetches the
  * record from /api/experiences/by-slug and renders a unified layout
  * built around the TourDetail shape (overview, includes, excludes,
- * itinerary, FAQs). When the API has no row for the slug we redirect
- * back to the relevant experiences index.
+ * itinerary, FAQs). When the API has no row for the slug the page
+ * renders the 404 page (no silent redirect to the index).
  */
 
 interface ApiTour {
@@ -35,7 +37,6 @@ interface ApiTour {
 
 export default function TourDetailPage() {
   useReveal();
-  const [, setLocation] = useLocation();
   const [siwaMatch, siwaParams] = useRoute("/siwa-oasis/experiences/:slug");
   const [ncMatch, ncParams] = useRoute("/north-coast/experiences/:slug");
   const [journeyMatch, journeyParams] = useRoute("/journeys/:slug");
@@ -60,19 +61,6 @@ export default function TourDetailPage() {
     staleTime: 60_000,
   });
 
-  // Only redirect on a confirmed 404, never while loading or on a
-  // transient network error.
-  useEffect(() => {
-    if (!isLoading && !isError && tour === null && slug) {
-      const fallback = journeyMatch
-        ? "/journeys"
-        : ncMatch
-        ? "/north-coast/experiences"
-        : "/siwa-oasis/experiences";
-      setLocation(fallback);
-    }
-  }, [isLoading, isError, tour, slug, ncMatch, journeyMatch, setLocation]);
-
   const isJourney = journeyMatch || tour?.category === "Curated Journey";
   const dest = tour?.destination ?? (ncMatch ? "north-coast" : "siwa");
   const isNC = dest === "north-coast";
@@ -85,8 +73,36 @@ export default function TourDetailPage() {
     ? `/journeys/${tour?.slug ?? ""}`
     : `${destHub}/experiences/${tour?.slug ?? ""}`;
 
-  const details = useMemo<TourDetail>(() => tour?.details ?? {}, [tour]);
-  const overview = details.overview ?? (tour?.description ? [tour.description] : []);
+  // CMS text is cleaned at render time: editors paste bullet lists, so
+  // items arrive as "- …", "* …", ".…" or "…..". Reviews are never
+  // shown (owner decision), whatever the record holds.
+  const details = useMemo<TourDetail>(() => {
+    const d: TourDetail = tour?.details ?? {};
+    return {
+      ...d,
+      overview: d.overview ? cleanList(d.overview) : undefined,
+      includes: cleanList(d.includes),
+      excludes: cleanList(d.excludes),
+      whatToBring: cleanList(d.whatToBring),
+      itinerary: (d.itinerary ?? []).map((st) => ({
+        time: cleanText(st.time),
+        title: cleanText(st.title),
+        body: cleanText(st.body),
+      })),
+      faqs: (d.faqs ?? [])
+        .map((f) => ({ q: cleanText(f.q), a: cleanText(f.a) }))
+        .filter((f) => f.q && f.a),
+      reviews: [],
+      meetingPoint: d.meetingPoint ? cleanText(d.meetingPoint) : undefined,
+      cancellationPolicy: d.cancellationPolicy ? cleanText(d.cancellationPolicy) : undefined,
+    };
+  }, [tour]);
+  const overview =
+    details.overview && details.overview.length > 0
+      ? details.overview
+      : tour?.description
+        ? [cleanText(tour.description)]
+        : [];
 
   // Gallery: the extra photos, plus the main photo first in the
   // full-screen viewer so it can be browsed too.
@@ -132,7 +148,7 @@ export default function TourDetailPage() {
       </>
     );
   }
-  if (!tour) return null;
+  if (!tour) return <NotFound />;
 
   // Journeys are multi-night, private by definition, and may span both
   // regions — so they enquire as a journey, and only pass a destination
@@ -144,13 +160,13 @@ export default function TourDetailPage() {
         ? `&destination=${tour.destination}`
         : "")
     : `/enquire?type=experience&destination=${dest === "siwa" ? "siwa" : "north-coast"}&exp=${tour.slug}`;
-  const pricePerPerson = Number(tour.pricePerPerson || "0");
+  const pricePerPerson = Number(tour.pricePerPerson || "0") || 0;
 
   return (
     <>
       <SEO
         title={`${tour.title} — ${destLabel} | Soléi`}
-        description={`${tour.duration}. ${tour.summary.slice(0, 160)}`}
+        description={`${tour.duration}. ${cleanText(tour.summary).slice(0, 160)}`}
         path={detailHref}
       />
       <Nav />
@@ -194,7 +210,7 @@ export default function TourDetailPage() {
               {tour.title}
             </h1>
             <p className="mt-6 text-[0.95rem] md:text-[1rem] text-white/65 leading-[1.85] max-w-2xl font-body">
-              {tour.summary}
+              {cleanText(tour.summary)}
             </p>
 
             <div className="mt-10 flex flex-wrap items-end gap-x-10 gap-y-4">
@@ -208,10 +224,14 @@ export default function TourDetailPage() {
               </div>
               <div>
                 <p className="text-[0.55rem] tracking-[0.22em] uppercase text-white/45 mb-1">From</p>
-                <p className="font-display text-[1.3rem] text-gold">
-                  ${pricePerPerson}
-                  <span className="text-white/45 text-[0.85rem] font-body ml-1">/ guest</span>
-                </p>
+                {pricePerPerson > 0 ? (
+                  <p className="font-display text-[1.3rem] text-gold">
+                    ${pricePerPerson}
+                    <span className="text-white/45 text-[0.85rem] font-body ml-1">/ guest</span>
+                  </p>
+                ) : (
+                  <p className="font-display text-[1rem] text-gold">Price on request</p>
+                )}
               </div>
               <Link
                 href={enquireHref}
@@ -343,34 +363,21 @@ export default function TourDetailPage() {
               </div>
             )}
 
-            {/* Reviews */}
-            {details.reviews && details.reviews.length > 0 && (
-              <div className="reveal mb-14">
-                <p className="text-[0.55rem] tracking-[0.3em] uppercase text-gold mb-3">Recent guests</p>
-                <div className="space-y-8">
-                  {details.reviews.map((r, i) => (
-                    <div key={i}>
-                      <p className="text-[0.92rem] text-ink-soft italic leading-[1.85] font-body mb-2">
-                        “{r.text}”
-                      </p>
-                      <p className="text-[0.6rem] tracking-[0.22em] uppercase text-ink-soft/55">
-                        {r.name} · {r.origin}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Guest reviews intentionally not rendered (owner decision). */}
           </div>
 
           {/* Sticky side card */}
           <aside className="lg:sticky lg:top-24 self-start">
             <div className="bg-white border border-sand p-7">
               <p className="text-[0.55rem] tracking-[0.3em] uppercase text-gold mb-1">From</p>
-              <p className="font-display text-[1.6rem] text-navy">
-                ${pricePerPerson}
-                <span className="text-ink-soft/55 text-[0.78rem] font-body ml-2">per guest</span>
-              </p>
+              {pricePerPerson > 0 ? (
+                <p className="font-display text-[1.6rem] text-navy">
+                  ${pricePerPerson}
+                  <span className="text-ink-soft/55 text-[0.78rem] font-body ml-2">per guest</span>
+                </p>
+              ) : (
+                <p className="font-display text-[1.2rem] text-navy">Price on request</p>
+              )}
 
               <dl className="mt-6 space-y-3 text-[0.84rem]">
                 <div className="flex justify-between gap-4 border-t border-sand-light pt-3">

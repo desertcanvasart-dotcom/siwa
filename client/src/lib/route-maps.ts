@@ -51,13 +51,15 @@ export const HOTELS: HotelSlug[] = [
 ];
 
 export const EXPERIENCES: ExperienceSlug[] = [
-  { slug: "salt-lake-float-therapy", dest: "siwa-oasis" },
+  // Live products that replaced legacy slugs still linked from old
+  // Journal posts / bookmarks — the aliases redirect to the real page.
+  { slug: "salt-and-spring-escape", dest: "siwa-oasis", aliases: ["salt-lake-float-therapy"] },
+  { slug: "desert-stargazing", dest: "siwa-oasis", aliases: ["desert-stargazing-experience"] },
   { slug: "sunset-sand-surfing", dest: "siwa-oasis" },
   { slug: "cleopatra-spring-soak", dest: "siwa-oasis" },
   { slug: "desert-breathwork-meditation", dest: "siwa-oasis" },
   { slug: "sleeping-under-stars", dest: "siwa-oasis" },
   { slug: "sunset-horseback-ride", dest: "siwa-oasis" },
-  { slug: "desert-stargazing-experience", dest: "siwa-oasis" },
   { slug: "oracle-temple-pilgrimage", dest: "siwa-oasis" },
   { slug: "traditional-sand-bath-healing", dest: "siwa-oasis" },
   { slug: "premium-siwa-full-day", dest: "siwa-oasis" },

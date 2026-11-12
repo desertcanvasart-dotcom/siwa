@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "./contact";
 import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -302,7 +303,7 @@ export const hotelRequestSchema = z.object({
   guests: z.string().default("2"),
   message: z.string().optional(),
   hotelName: z.string().min(1, "Hotel name is required"),
-  hotelEmail: z.string().email("Valid hotel email is required").default("hello@solei.com"),
+  hotelEmail: z.string().email("Valid hotel email is required").default(CONTACT_EMAIL),
 });
 
 // Types

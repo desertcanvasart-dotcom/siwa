@@ -185,23 +185,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Cancellations within 48 hours of the experience are charged in full. Earlier cancellations receive a full refund.",
       "In the rare event of extreme weather, we will reschedule at no charge. Siwa's weather is predictable — this is uncommon.",
     ],
-    reviews: [
-      {
-        name: "Laila & Thomas M.",
-        origin: "Germany · Stayed November 2024",
-        text: "We almost didn't book it because 'float therapy' sounded like a spa thing. It isn't. It's the most beautiful hour I've had in years. The silence, the light, the feeling of weightlessness — I keep trying to explain it to people at home and I can't. You just have to go.",
-      },
-      {
-        name: "Sara N.",
-        origin: "United Kingdom · Solo traveller · January 2025",
-        text: "I was travelling alone and slightly anxious about it. The guide made it feel completely easy — never hovering, never performing. Just present. The lake at sunset was genuinely one of those moments where you think: this is why I travel.",
-      },
-      {
-        name: "James & Priya K.",
-        origin: "USA · Stayed February 2025",
-        text: "We did this on our last evening in Siwa. Perfect timing. It felt like a proper goodbye to the oasis. The tea afterwards was warm, nobody rushed us, and we drove back to the lodge in complete silence — which felt exactly right.",
-      },
-    ],
+    reviews: [],
     price: 45,
     privatePrice: 220,
     maxGuests: 6,
@@ -277,18 +261,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Motion-sensitive guests should mention this in advance — we adjust pace accordingly.",
       "Cancellations within 48 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Marco V.",
-        origin: "Italy · Stayed December 2024",
-        text: "I was expecting a bit of sand and a tourist photo. What I got was an hour of genuine laughter on a dune with two new friends and a guide who felt like a local cousin. The sunset was a bonus.",
-      },
-      {
-        name: "Amira H.",
-        origin: "Egypt · Stayed March 2025",
-        text: "We booked it for the kids and all of us ended up doing it. The guide was patient, the dunes were perfect, and the sunset at the top was quietly one of the best moments of the trip.",
-      },
-    ],
+    reviews: [],
     price: 40,
     privatePrice: 180,
     maxGuests: 8,
@@ -363,18 +336,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "The steps into the pool can be slippery. Take care.",
       "Cancellations within 48 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Clara M.",
-        origin: "Spain · Stayed October 2024",
-        text: "I came in expecting a tourist photo op. I left having had the best swim of my holiday. The water is something else, and being in a place that has been used for centuries is quietly moving.",
-      },
-      {
-        name: "The Okoye family",
-        origin: "Nigeria · Stayed January 2025",
-        text: "Perfect for us with two kids. The water is safe, the setting is unusual, and our guide took the time to actually explain things rather than just shepherd us around.",
-      },
-    ],
+    reviews: [],
     price: 35,
     privatePrice: 150,
     maxGuests: 6,
@@ -450,18 +412,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Not suitable during pregnancy unless cleared by your practitioner beforehand.",
       "Cancellations within 48 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Ingrid B.",
-        origin: "Norway · Stayed February 2025",
-        text: "I have done breathwork in studios in Oslo for years. This is the first time the setting made the technique feel genuinely different. The silence is not the same silence you get anywhere else.",
-      },
-      {
-        name: "Rohan K.",
-        origin: "Australia · Stayed November 2024",
-        text: "Sceptical going in, completely converted coming out. The desert at sunrise is an environment that does something to your nervous system you can't quite explain afterwards.",
-      },
-    ],
+    reviews: [],
     price: 50,
     privatePrice: 240,
     maxGuests: 8,
@@ -545,18 +496,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Not suitable for very young children. 12+ is our minimum.",
       "Cancellations within 72 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Henrik J.",
-        origin: "Denmark · Stayed December 2024",
-        text: "We almost didn't book it because we thought we'd hate camping. We slept better than in any hotel I can remember. The silence alone is worth the trip.",
-      },
-      {
-        name: "Yasmine & Karim",
-        origin: "Lebanon · Stayed November 2024",
-        text: "We booked the private camp. Worth every additional euro. Dinner under a sky we had never seen like that before, then a night of genuinely deep sleep. We're planning to go back.",
-      },
-    ],
+    reviews: [],
     price: 120,
     privatePrice: 900,
     maxGuests: 6,
@@ -632,18 +572,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Back or joint issues — mention in advance so we can advise.",
       "Cancellations within 48 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Elena T.",
-        origin: "Argentina · Stayed January 2025",
-        text: "I ride at home, so I was a little nervous about the standard. No need — the horses are beautifully kept and the guide genuinely rode the whole route with us, not behind us.",
-      },
-      {
-        name: "The Al Futtaim family",
-        origin: "UAE · Stayed December 2024",
-        text: "Our daughter is eight and we thought she'd be too young. She wasn't — they matched her with a patient horse and she rode with a guide next to her the entire time. Her favourite part of Siwa.",
-      },
-    ],
+    reviews: [],
     price: 55,
     privatePrice: 240,
     maxGuests: 6,
@@ -719,18 +648,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Check your phone brightness before arrival and turn it off if possible.",
       "Cancellations within 48 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Michael O.",
-        origin: "Canada · Stayed October 2024",
-        text: "I grew up in rural Saskatchewan and thought I'd seen dark skies. I hadn't. This was another category entirely. The guide was genuinely knowledgeable — not scripted.",
-      },
-      {
-        name: "Alia S.",
-        origin: "Jordan · Stayed February 2025",
-        text: "Went expecting to be impressed. Came back unable to sleep for two hours thinking about what I'd just seen. Book it on a new-moon week if you can.",
-      },
-    ],
+    reviews: [],
     price: 55,
     privatePrice: 280,
     maxGuests: 8,
@@ -806,18 +724,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Modest dress is advised at the site.",
       "Cancellations within 48 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Jonas & Emma P.",
-        origin: "Sweden · Stayed November 2024",
-        text: "Our guide was exceptional. I've done guided tours in half a dozen countries and this one actually felt like a conversation, not a performance. The site is remarkable but the storytelling is what made it.",
-      },
-      {
-        name: "Priya R.",
-        origin: "India · Stayed January 2025",
-        text: "As a history student this was the experience I came for. The layered history — ancient Egyptian, Greek, Islamic — was delivered thoughtfully. We added the spring at the end and it was a perfect morning.",
-      },
-    ],
+    reviews: [],
     price: 35,
     privatePrice: 160,
     maxGuests: 8,
@@ -893,18 +800,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Loose cotton clothing or swimwear is fine — this is not a dressed affair.",
       "Cancellations within 72 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Farida M.",
-        origin: "Egypt · Stayed August 2024",
-        text: "My knees have never felt like this since. Whatever this practice is doing, it works. And the setting — with someone whose grandparents did the same thing — felt meaningful.",
-      },
-      {
-        name: "Rupert H.",
-        origin: "United Kingdom · Stayed September 2024",
-        text: "I came in thinking this was a gimmick. Left thinking it was the most unusual thing I did in Egypt. Not a spa experience. Something else.",
-      },
-    ],
+    reviews: [],
     price: 45,
     privatePrice: 200,
     maxGuests: 6,
@@ -994,18 +890,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Younger children are welcome but the pace is full. Discuss with us if you're considering it for under-10s.",
       "Cancellations within 72 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "The Wang family",
-        origin: "Singapore · Stayed December 2024",
-        text: "We had one day in Siwa and were worried we'd miss the best of it. We did not. Our guide ran the day like a friend showing us around — adjusted twice when we wanted to linger, and never once rushed us. The lunch was the memory our kids talk about most.",
-      },
-      {
-        name: "Robert & Diane H.",
-        origin: "USA · Stayed February 2025",
-        text: "Best single day of our three-week Egypt trip. The mix of ancient sites, a real local lunch, the desert, and the salt lake in one day was enormous — and yet it didn't feel rushed. Worth the premium entirely.",
-      },
-    ],
+    reviews: [],
     price: 180,
     maxGuests: 6,
     priceSuffix: "/ person",
@@ -1095,23 +980,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Cancellations within 48 hours of the experience are charged in full. Earlier cancellations receive a full refund.",
       "Transport from your property to the marina can be arranged as part of your booking — mention it in the enquiry form and we'll include it in your confirmation.",
     ],
-    reviews: [
-      {
-        name: "Claire & Antoine D.",
-        origin: "France · Stayed September 2024",
-        text: "We've sailed in Greece, Croatia, Turkey. This was quieter than all of them — partly because it was private, partly because the captain understood that we didn't want anything organised. He just put the boat in the right place and left us to it. The sunset was extraordinary.",
-      },
-      {
-        name: "Khalid & Nour F.",
-        origin: "Saudi Arabia · Stayed October 2024",
-        text: "We'd been at the resort for three days before this and hadn't really left. The sailing changed the whole trip — suddenly we understood where we were. The coast looks completely different from the water. We went back the next evening and asked for the same captain.",
-      },
-      {
-        name: "Sophie T.",
-        origin: "United Kingdom · Solo · August 2024",
-        text: "I was slightly nervous booking a private sailing trip alone — unnecessary, it turned out. The crew was entirely professional and the three hours was the most peaceful part of a busy summer trip. Book it. Do it on your first evening so it sets the tone for the rest of the stay.",
-      },
-    ],
+    reviews: [],
     price: 85,
     maxGuests: 6,
     priceSuffix: "/ person",
@@ -1188,18 +1057,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "No drones. Photography is welcome; disturbance is not.",
       "Cancellations within 48 hours of the experience are charged in full.",
     ],
-    reviews: [
-      {
-        name: "Emma & David R.",
-        origin: "United Kingdom · Stayed November 2024",
-        text: "Genuinely astonishing. We had no idea this existed behind the coast — our resort certainly didn't mention it. The guide was exceptional and we saw more than a thousand flamingos. A quiet morning that reframed our whole week.",
-      },
-      {
-        name: "The Ahmed family",
-        origin: "Egypt · Stayed December 2024",
-        text: "We brought our children, aged 10 and 12, and they were captivated. The guide was patient and knew how to keep them quiet. Better than any zoo visit.",
-      },
-    ],
+    reviews: [],
     price: 45,
     maxGuests: 8,
     priceSuffix: "/ person",
@@ -1276,18 +1134,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Cancellations within 48 hours of the experience are charged in full.",
       "Water temperature is ideal April–November. Earlier or later requires a wetsuit.",
     ],
-    reviews: [
-      {
-        name: "Helen B.",
-        origin: "Ireland · Stayed June 2024",
-        text: "I swim at home three times a week and was missing it on holiday. This was the perfect middle ground — guided but not patronised, social but not chatty. The bay at 6am is exceptional.",
-      },
-      {
-        name: "Tom & Lucia P.",
-        origin: "Italy · Stayed September 2024",
-        text: "We've done guided swims in Greece and Croatia. The water here is clearer than both. Small group, knowledgeable guide, and back to breakfast before our kids were awake.",
-      },
-    ],
+    reviews: [],
     price: 30,
     maxGuests: 6,
     priceSuffix: "/ person",
@@ -1372,18 +1219,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Cancellations within 72 hours of the experience are charged in full.",
       "If you'd like the day to focus on specific things (photography, food, architecture), mention it in the enquiry.",
     ],
-    reviews: [
-      {
-        name: "The Patel family",
-        origin: "United Kingdom · Stayed July 2024",
-        text: "We spent eight hours with our guide and wished we'd had twelve. The stops he picked were not on any tourist map, and the lunch was extraordinary. Our kids asked to do it again the next day.",
-      },
-      {
-        name: "Monika & Stefan W.",
-        origin: "Germany · Stayed October 2024",
-        text: "We speak German only. They arranged a German-speaking driver at no extra cost. Professional from start to finish. A genuine alternative to spending another day at the resort.",
-      },
-    ],
+    reviews: [],
     price: 120,
     maxGuests: 4,
     priceSuffix: "/ person",
@@ -1460,18 +1296,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Cancellations within 48 hours of the experience are charged in full.",
       "Guide available in English, Arabic, or German — specify on booking.",
     ],
-    reviews: [
-      {
-        name: "Richard H.",
-        origin: "United Kingdom · Stayed May 2024",
-        text: "My grandfather fought here. I had been meaning to visit for forty years. This was as respectful and thorough a morning as I could have asked for. The guide's knowledge was deep and his tone was right.",
-      },
-      {
-        name: "The Martinez family",
-        origin: "Spain · Stayed October 2024",
-        text: "We brought our teenager who didn't want to come. She was the most moved of all of us. Our guide made the history feel immediate, and the Commonwealth cemetery in particular is a place she talks about still.",
-      },
-    ],
+    reviews: [],
     price: 35,
     maxGuests: 8,
     priceSuffix: "/ person",
@@ -1548,18 +1373,7 @@ export const EXPERIENCE_DETAILS: ExperienceDetail[] = [
       "Cancellations within 48 hours of the experience are charged in full.",
       "Transport from your resort is always included — this is not an experience you drive to yourself.",
     ],
-    reviews: [
-      {
-        name: "James & Louise K.",
-        origin: "United Kingdom · Stayed June 2024",
-        text: "The best meal we had in Egypt, and we're not exaggerating. We've eaten at proper restaurants in Cairo and Alexandria. This small spot off the coast beat them all because the fish was an hour out of the sea.",
-      },
-      {
-        name: "Nadia F.",
-        origin: "Lebanon · Stayed September 2024",
-        text: "As a Lebanese we are particular about seafood. This was the real thing. The family running the place clearly knows what they're doing, and the setting is so unpretentious you relax immediately.",
-      },
-    ],
+    reviews: [],
     price: 40,
     maxGuests: 8,
     priceSuffix: "/ person",

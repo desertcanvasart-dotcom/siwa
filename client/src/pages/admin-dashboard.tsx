@@ -40,6 +40,7 @@ import { MediaField } from '@/components/admin/MediaPicker';
 import { NC_TRANSPORT, SIWA_TRANSPORT, transportAdminSections } from '@/lib/transport-content';
 import { RecommendationsField } from '@/components/admin/RecommendationsField';
 import type { RecSlot } from '@/lib/recommendations';
+import { formatAmenitiesInput, parseAmenitiesInput } from '@/lib/display-text';
 
 interface Experience {
   id: number;
@@ -2043,7 +2044,7 @@ function HotelForm({
     longitude: hotel?.longitude || '',
     category: hotel?.category || '',
     pricePerNight: hotel?.pricePerNight || '',
-    amenities: hotel?.amenities ? hotel.amenities.join(', ') : '',
+    amenities: hotel?.amenities ? formatAmenitiesInput(hotel.amenities) : '',
     destination: hotel?.destination || 'north-coast',
     eco: hotel?.eco || false,
     luxury: hotel?.luxury || false,
@@ -2084,10 +2085,8 @@ function HotelForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const amenitiesArray = formData.amenities
-      .split(',')
-      .map(item => item.trim())
-      .filter(item => item.length > 0);
+    // Comma-separated (or one per line); a pasted paragraph stays whole.
+    const amenitiesArray = parseAmenitiesInput(formData.amenities);
 
     const details: Record<string, any> = {
       ...(hotelDetails || {}),
@@ -2236,7 +2235,7 @@ function HotelForm({
       </div>
 
       <div>
-        <Label htmlFor="amenities">Amenities (comma-separated)</Label>
+        <Label htmlFor="amenities">Amenities (comma-separated or one per line)</Label>
         <Textarea
           id="amenities"
           value={formData.amenities}
@@ -3060,11 +3059,10 @@ function PagesEditor({ toast }: { toast: any }) {
         {
           id: 'owner',
           label: 'Owner contact',
-          description: 'Used as the fallback contact when the AI chat is unavailable. The WhatsApp number should include country code, digits only (e.g. 201234567890).',
+          description: 'Used as the fallback contact when the AI chat is unavailable. The WhatsApp number should include country code, digits only (e.g. 201234567890). The contact email is fixed to hello@darsolei.com site-wide and is not editable here.',
           fields: [
             { key: 'contact.whatsapp', label: 'WhatsApp number (with country code, digits only)', placeholder: '201234567890' },
             { key: 'contact.whatsapp_label', label: 'WhatsApp display label', placeholder: '+20 1234 567890' },
-            { key: 'contact.email', label: 'Contact email', placeholder: 'hello@solei.travel' },
             { key: 'contact.fallback_message', label: 'Chat fallback message', multiline: true, placeholder: "Sorry, I'm not available right now. Please try again later or reach the Soléi team directly on WhatsApp." },
           ],
         },
@@ -3327,18 +3325,18 @@ function PagesEditor({ toast }: { toast: any }) {
             { key: 'home.journal.all_href', label: '"Read all" link URL', placeholder: '/journal' },
             { key: 'home.journal.articles.0.href', label: 'Lead (large) card — article URL', placeholder: '/journal/healing-waters-of-siwa-salt-lake-therapy' },
             { key: 'home.journal.articles.0.tag', label: 'Lead (large) card — label', placeholder: 'Siwa Oasis' },
-            { key: 'home.journal.articles.0.title', label: 'Lead (large) card — title', multiline: true, placeholder: 'Why Siwa\'s salt lakes feel like the end of the world…' },
+            { key: 'home.journal.articles.0.title', label: 'Lead (large) card — title', multiline: true, placeholder: 'Leave empty to use the article\'s own title' },
             { key: 'home.journal.articles.0.excerpt', label: 'Lead (large) card — excerpt', multiline: true },
             { key: 'home.journal.articles.0.meta', label: 'Lead (large) card — read time', placeholder: '8 min read · Experiences' },
             { key: 'home.journal.articles.0.image', label: 'Lead (large) card — image', type: 'media-image' },
             { key: 'home.journal.articles.1.href', label: 'Card 2 — article URL', placeholder: '/journal/ultimate-guide-to-egypts-north-coast' },
             { key: 'home.journal.articles.1.tag', label: 'Card 2 — label', placeholder: 'North Coast' },
-            { key: 'home.journal.articles.1.title', label: 'Card 2 — title', multiline: true, placeholder: 'The quiet side of Egypt\'s North Coast…' },
+            { key: 'home.journal.articles.1.title', label: 'Card 2 — title', multiline: true, placeholder: 'Leave empty to use the article\'s own title' },
             { key: 'home.journal.articles.1.meta', label: 'Card 2 — read time', placeholder: '5 min read' },
             { key: 'home.journal.articles.1.image', label: 'Card 2 — image', type: 'media-image' },
             { key: 'home.journal.articles.2.href', label: 'Card 3 — article URL', placeholder: '/journal/stargazing-in-siwa-guide-to-desert-night-sky' },
             { key: 'home.journal.articles.2.tag', label: 'Card 3 — label', placeholder: 'Siwa · Experiences' },
-            { key: 'home.journal.articles.2.title', label: 'Card 3 — title', multiline: true, placeholder: 'What an unscheduled evening in the desert…' },
+            { key: 'home.journal.articles.2.title', label: 'Card 3 — title', multiline: true, placeholder: 'Leave empty to use the article\'s own title' },
             { key: 'home.journal.articles.2.meta', label: 'Card 3 — read time', placeholder: '6 min read' },
             { key: 'home.journal.articles.2.image', label: 'Card 3 — image', type: 'media-image' },
           ],

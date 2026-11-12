@@ -27,7 +27,12 @@ export default function OurStory() {
   );
   const heroItalic = pickContent(content, "our_story.hero.italic", "feel it.");
   // Origin
-  const originLabel = pickContent(content, "our_story.origin.label", "Where this began");
+  // The stored label picked up a stray trailing "0" ("Where this
+  // began0") — a digit glued to the end of a word is never intended in
+  // a label, so drop it at render time too.
+  const originLabel = String(
+    pickContent(content, "our_story.origin.label", "Where this began"),
+  ).replace(/(?<=[A-Za-z])\d+$/, "");
   const originIntro = pickContent(
     content,
     "our_story.origin.intro",
@@ -299,7 +304,7 @@ export default function OurStory() {
               {[
                 {
                   label: "Material",
-                  text: "Local stone, palm wood, earthen walls that keep the desert heat outside",
+                  text: "Karsheef (salt rock and clay), palm wood and local stone — earthen walls that keep the desert heat outside",
                 },
                 {
                   label: "Atmosphere",
@@ -311,7 +316,7 @@ export default function OurStory() {
                 },
                 {
                   label: "Location",
-                  text: "Siwa Oasis, Egypt — within walking distance of the salt lakes",
+                  text: "Siwa Oasis, Egypt — within easy reach of the salt lakes",
                 },
               ].map((item, i) => (
                 <div

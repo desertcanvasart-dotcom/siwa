@@ -10,7 +10,8 @@ import { useHotelsBySlug } from "@/lib/useHotelsBySlug";
 import { adminPrice, PRICE_ON_REQUEST } from "@/lib/price";
 import vidaMarinaImage from "@assets/Vida Marina Resort Marassi _1758142322079.jpg";
 import addressBeachImage from "@assets/Address beach Resort _1758144493080.jpg";
-import casaCookImage from "@assets/Casa Cook North Coast _001_1758143858816.png";
+import alAlameinImage from "@assets/Al Alamein Hotel__1758143858816.png";
+import { NORTH_COAST } from "@/lib/site-facts";
 import rixosImage from "@assets/Rixos Premium Alamein_1758143858817.png";
 import jazAlmazaImage from "@assets/JAZ Almaza Beach-Resort_1758143858816.jpg";
 import addressGolfImage from "@assets/Address Golf Resort_1758143858790.jpg";
@@ -52,13 +53,13 @@ const hotels = [
     image: addressBeachImage,
   },
   {
-    slug: "casa-cook-north-coast",
-    name: "Casa Cook North Coast",
-    type: "Boutique Resort · North Coast",
-    desc: "Bohemian in spirit, considered in execution. Designed for people who travel slowly and notice things.",
-    price: "$195 / night",
+    slug: "al-alamein-hotel",
+    name: "Al Alamein Hotel",
+    type: "Heritage Hotel · Marassi · Sea front",
+    desc: "Older, quieter, and more characterful than the newer resorts around it. A seafront address inside Marassi.",
+    price: "",
     gradient: "bg-[linear-gradient(160deg,#235570_0%,#2F6F8F_100%)]",
-    image: casaCookImage,
+    image: alAlameinImage,
   },
   {
     slug: "rixos-premium-alamein",
@@ -93,9 +94,9 @@ const experiences = [
   {
     slug: "private-yacht-sunset-ritual",
     num: "01",
-    title: "Private yacht sunset ritual",
-    desc: "An intimate escape into the Mediterranean at golden hour. The sea slows down, the light softens, and everything feels effortless.",
-    meta: ["3 hours", "Sunset"],
+    title: "Private yacht experience",
+    desc: "Your own boat and crew on the Mediterranean — time it for golden hour, when the sea slows down and the light softens.",
+    meta: ["1–8 hours", "Private"],
   },
   {
     slug: "beach-club-experience",
@@ -107,7 +108,7 @@ const experiences = [
   {
     slug: "marassi-water-world-experience",
     num: "03",
-    title: "Marassi water world",
+    title: "Marassi Water World",
     desc: "A vibrant day of energy and movement — slides, pools, and open-air moments balanced with comfort, space, and ease.",
     meta: ["Full day", "All ages"],
   },
@@ -116,7 +117,7 @@ const experiences = [
     num: "04",
     title: "Signature dinner experience",
     desc: "An intimate dining moment by the sea — curated in location, mood, and detail.",
-    meta: ["3 hours", "Evening"],
+    meta: ["Evening"],
   },
   {
     slug: "nightlife-experience",
@@ -128,9 +129,9 @@ const experiences = [
   {
     slug: "coastal-wellness-ritual",
     num: "06",
-    title: "Coastal wellness ritual",
-    desc: "A slow morning by the sea — breathwork, light movement, and a private massage to start the day.",
-    meta: ["Half day", "Morning"],
+    title: "Luxury spa experience",
+    desc: "Time at one of the coast's best spas — treatments, refreshments, and nothing to do afterwards.",
+    meta: ["Spa"],
   },
 ];
 
@@ -147,8 +148,8 @@ const contrasts = [
   },
   {
     n: "III.",
-    title: "September to June",
-    desc: "The best version of the North Coast isn't summer. It's the shoulder seasons — warm water, cool evenings, and half the people.",
+    title: "Spring and autumn",
+    desc: `The best version of the North Coast isn't July and August. It's ${NORTH_COAST.bestMonths} — warm water, cool evenings, and half the people.`,
   },
 ];
 
@@ -179,19 +180,19 @@ const routes = [
   {
     slug: "cairo-north-coast",
     name: "Cairo → North Coast",
-    detail: "~2.5 hours · Private vehicle · Desert Road or Coastal Road",
+    detail: "~3 hours to Marassi · Private vehicle · Desert Road or Coastal Road",
     type: "Private",
   },
   {
     slug: "alex-north-coast",
     name: "Alexandria → North Coast",
-    detail: "~45 min – 1 hour · Private vehicle",
+    detail: "~1.5–2 hours to Marassi · Private vehicle",
     type: "Private",
   },
   {
     slug: "cairo-alex-coast",
     name: "Cairo → Alexandria → Coast",
-    detail: "~3.5 hours · Private vehicle · Full coastal approach",
+    detail: "Full day · Private vehicle · Full coastal approach",
     type: "Private",
   },
   {
@@ -206,12 +207,12 @@ const practical = [
   {
     n: "I",
     title: "Best time to visit",
-    desc: "April to June and September to November. Warm sea, manageable temperatures, and a fraction of the summer crowd. July and August are hot and heavily booked.",
+    desc: `${NORTH_COAST.bestMonths}. Warm sea, manageable temperatures, and a fraction of the summer crowd. July and August are hot and heavily booked.`,
   },
   {
     n: "II",
     title: "Getting there",
-    desc: "No direct flights to the coast itself. Cairo International (2.5 hrs) and Borg El Arab Airport in Alexandria (45 min) are the main entry points. We arrange all transfers.",
+    desc: "El Alamein International is closest to Marassi (mostly seasonal flights) and Marsa Matrouh to Almaza Bay. Year-round, most guests arrive via Cairo International (about 3 hours) or Borg El Arab in Alexandria (about 1–1.5 hours). We arrange all transfers.",
   },
   {
     n: "III",
@@ -226,12 +227,12 @@ const practical = [
   {
     n: "V",
     title: "Currency & payment",
-    desc: "Egyptian Pounds. All major resorts accept international cards. Payment for Soléi bookings is via secure link in USD.",
+    desc: "International cards are widely accepted inside the resorts; carry some Egyptian Pounds in cash for tips and anything outside them. Payment for Soléi bookings is via secure link in USD.",
   },
   {
     n: "VI",
     title: "Combining with Siwa",
-    desc: "Cairo sits between both destinations. Many guests do North Coast first, return to Cairo, then travel to Siwa. We design the full journey if you'd like.",
+    desc: "The Cairo–Siwa road runs west along the North Coast to Marsa Matrouh before turning south, so the two destinations combine naturally in one trip. We design the full journey if you'd like.",
   },
 ];
 
@@ -320,12 +321,12 @@ export default function NorthCoastHub() {
   const expItalic = pickContent(c, "nc_hub.experiences.italic", "experiences");
   // Transport
   const trEyebrow = pickContent(c, "nc_hub.transport.eyebrow", "Getting here");
-  const trTitle = pickContent(c, "nc_hub.transport.title", "Two hours from");
-  const trItalic = pickContent(c, "nc_hub.transport.italic", "Cairo or Alexandria.");
+  const trTitle = pickContent(c, "nc_hub.transport.title", "About three hours");
+  const trItalic = pickContent(c, "nc_hub.transport.italic", "from Cairo.");
   const trBody = pickContent(
     c,
     "nc_hub.transport.body",
-    "The North Coast is Egypt's most accessible second destination. Cairo is two and a half hours by private vehicle. Alexandria is less than one. We arrange private transfers — nothing shared, nothing generic.",
+    "The North Coast is Egypt's most accessible second destination. Marassi is about three hours from Cairo by private vehicle, and about 1.5–2 hours from Alexandria. We arrange private transfers — nothing shared, nothing generic.",
   );
   const trCta = pickContent(c, "nc_hub.transport.cta", "View all routes");
   // Practical

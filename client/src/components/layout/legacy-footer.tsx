@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@shared/contact";
 import { Link } from "wouter";
 import { Instagram, Mail, Phone, MessageCircle } from "lucide-react";
 
@@ -27,8 +28,8 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-3">
                 <Mail size={14} className="text-travel-teal flex-shrink-0" />
-                <a href="mailto:hello@lasolei.com" className="text-gray-300 hover:text-travel-teal transition-colors text-sm">
-                  hello@lasolei.com
+                <a href={`mailto:${CONTACT_EMAIL}`} className="text-gray-300 hover:text-travel-teal transition-colors text-sm">
+                  {CONTACT_EMAIL}
                 </a>
               </div>
             </div>

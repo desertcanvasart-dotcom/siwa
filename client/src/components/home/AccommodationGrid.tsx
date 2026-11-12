@@ -7,7 +7,7 @@ import taziryImage from "@assets/taziry-room-.jpg";
 import soleiOldTownImage from "@assets/solei-old-town-heritage.png";
 import vidaMarinaImage from "@assets/Vida Marina Resort Marassi _1758142322079.jpg";
 import addressBeachImage from "@assets/Address beach Resort _1758144493080.jpg";
-import casaCookImage from "@assets/Casa Cook North Coast _001_1758143858816.png";
+import addressGolfImage from "@assets/Address Golf Resort_1758143858790.jpg";
 
 type Hotel = {
   slug: string;
@@ -24,35 +24,35 @@ type Hotel = {
 
 const hotels: Hotel[] = [
   {
-    slug: "adrere-amellal",
-    name: "Adrere Amellal",
-    location: "Siwa Oasis · Eco Lodge",
-    desc: "Built from karsheef salt rock and palm wood. No electricity. No noise. Just the oasis as it has always been.",
-    price: "$320 / night",
+    slug: "solei-royal",
+    name: "Soléi Royal",
+    location: "Siwa Oasis · Private Villa",
+    desc: "A fully private Soléi-owned villa with natural pools and open desert views.",
+    price: "",
     dest: "Siwa Oasis",
     image: adrereAmellalImage,
     gradientClass:
       "bg-[linear-gradient(160deg,#1a3a52_0%,#0F2436_100%)]",
-    href: "/siwa-oasis/accommodation/adrere-amellal",
+    href: "/siwa-oasis/accommodation/solei-royal",
   },
   {
-    slug: "taziry-ecolodge",
-    name: "Taziry Ecolodge",
-    location: "Siwa Oasis · Boutique Lodge",
-    desc: "Mud-brick villas overlooking the salt lake. Quiet mornings, warm evenings, the stars at night.",
-    price: "$180 / night",
+    slug: "solei-desert-retreat",
+    name: "Soléi Desert Retreat",
+    location: "Siwa Oasis · Desert Lodge",
+    desc: "A secluded retreat at the edge of the Great Sand Sea, with dune and mountain views.",
+    price: "",
     dest: "Siwa Oasis",
     image: taziryImage,
     gradientClass:
       "bg-[linear-gradient(160deg,#0F2436_0%,#0d3040_100%)]",
-    href: "/siwa-oasis/accommodation/taziry-ecolodge",
+    href: "/siwa-oasis/accommodation/solei-desert-retreat",
   },
   {
     slug: "solei-old-town",
     name: "Soléi Old Town",
     location: "Siwa Oasis · Heritage Stay",
     desc: "Stone walls, cool interiors, a rooftop that overlooks the shali fortress at dusk.",
-    price: "$145 / night",
+    price: "",
     dest: "Siwa Oasis",
     image: soleiOldTownImage,
     gradientClass:
@@ -60,11 +60,11 @@ const hotels: Hotel[] = [
     href: "/siwa-oasis/accommodation/solei-old-town",
   },
   {
-    slug: "vida-marina",
+    slug: "vida-marina-resort-marassi",
     name: "Vida Marina Resort Marassi",
     location: "North Coast · Resort",
     desc: "Mediterranean-facing. Clean lines, open sea, and enough space to feel genuinely alone.",
-    price: "$210 / night",
+    price: "",
     dest: "North Coast",
     image: vidaMarinaImage,
     gradientClass:
@@ -76,7 +76,7 @@ const hotels: Hotel[] = [
     name: "Address Beach Resort",
     location: "North Coast · Luxury Resort",
     desc: "Refined, unhurried, positioned directly on the water. The coast at its most quiet.",
-    price: "$290 / night",
+    price: "",
     dest: "North Coast",
     image: addressBeachImage,
     gradientClass:
@@ -84,16 +84,16 @@ const hotels: Hotel[] = [
     href: "/north-coast/accommodation/address-beach-resort-marassi",
   },
   {
-    slug: "casa-cook-north-coast",
-    name: "Casa Cook North Coast",
-    location: "North Coast · Boutique Resort",
-    desc: "Bohemian, warm, designed for people who travel slowly. Every corner feels considered.",
-    price: "$195 / night",
+    slug: "address-marassi-golf-resort",
+    name: "Address Marassi Golf Resort",
+    location: "North Coast · Golf Resort",
+    desc: "Fairway views, calm pools and the Marassi marina a short drive away.",
+    price: "",
     dest: "North Coast",
-    image: casaCookImage,
+    image: addressGolfImage,
     gradientClass:
       "bg-[linear-gradient(160deg,#235570_0%,#2F6F8F_100%)]",
-    href: "/north-coast/accommodation/casa-cook-north-coast",
+    href: "/north-coast/accommodation/address-marassi-golf-resort",
   },
 ];
 

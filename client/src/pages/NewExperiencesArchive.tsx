@@ -7,6 +7,8 @@ import { useReveal } from "@/components/home/useReveal";
 import { useExperiencesBySlug } from "@/lib/useExperiencesBySlug";
 import { useExperiencesRaw } from "@/lib/useExperiencesRaw";
 import { Arch } from "@/components/ui/Arch";
+import { SIWA } from "@/lib/site-facts";
+import { PRICE_ON_REQUEST } from "@/lib/price";
 import saltLakeFloatImg from "@assets/floating-in-spring_1753576589836.jpeg";
 import sandSurfingImg from "@assets/sand-boarding_1753576015281.png";
 import cleopatraSpringImg from "@assets/Cleopatra Spring Soak_1764123896008.JPG";
@@ -21,7 +23,7 @@ import fullSiwaDayImg from "@assets/hero-image_1753576015270.png";
 /* ──────────────────────────────────────────────────────────────
  *  /siwa-oasis/experiences
  *
- *  Siwa Oasis experience archive. 10 curated experiences, featured
+ *  Siwa Oasis experience archive. SIWA.experienceSlugs curated experiences, featured
  *  card + 3-col grid, sticky category filter, philosophy strip,
  *  accommodation upsell, practical info, and closing CTA.
  * ────────────────────────────────────────────────────────────── */
@@ -239,17 +241,17 @@ const HOW_STEPS = [
   {
     n: "1.",
     strong: "Choose your experience & date",
-    rest: "Live availability shown for each experience. Select the date that works for your stay.",
+    rest: "Select the date that works for your stay from the experience page.",
   },
   {
     n: "2.",
     strong: "Confirm group size",
-    rest: "Most experiences run for groups of 2–8. Private options available on request for most listings.",
+    rest: "Group sizes vary by experience — each experience page shows its maximum. Private options available on request for most listings.",
   },
   {
     n: "3.",
-    strong: "Pay securely on site",
-    rest: "Payment processed instantly. Confirmation sent to your email with full meeting point and timing details.",
+    strong: "Send your request",
+    rest: "We confirm your date and send a secure payment link. Confirmation follows with full meeting point and timing details.",
   },
   {
     n: "4.",
@@ -258,32 +260,26 @@ const HOW_STEPS = [
   },
 ];
 
-const UPSELL_PROPS = [
-  {
-    slug: "adrere-amellal",
-    name: "Adrere Amellal",
-    type: "Eco Lodge · No electricity · Salt lake front",
-    price: "From $320",
-  },
-  {
-    slug: "taziry-ecolodge",
-    name: "Taziry Ecolodge",
-    type: "Boutique Eco Lodge · Salt lake views",
-    price: "From $180",
-  },
-  {
-    slug: "solei-old-town",
-    name: "Soléi Old Town",
-    type: "Heritage Stay · Soléi owned",
-    price: "From $145",
-  },
-];
+const UPSELL_TYPES: Record<string, string> = {
+  "solei-old-town": "Heritage Stay · Soléi owned",
+  "solei-royal": "Private villa · Soléi owned",
+  "solei-desert-retreat": "Desert Lodge · Soléi owned",
+  "solei-salt-caves": "Wellness Retreat · Soléi owned",
+};
+
+// Only properties with live pages are linked; partner lodges are
+// arranged on request through the concierge (no page, no link).
+const UPSELL_PROPS = SIWA.ownedProperties.map((p) => ({
+  slug: p.slug,
+  name: p.name,
+  type: UPSELL_TYPES[p.slug] ?? "Soléi owned",
+}));
 
 const PRACTICAL = [
   {
     numeral: "I",
     title: "When to book",
-    desc: "Book experiences before arrival — not the morning of. The salt lake float at sunset and sleeping under the stars fill quickly, especially October to March.",
+    desc: `Book experiences before arrival — not the morning of. The salt lake float and sleeping under the stars fill quickly, especially in peak season (${SIWA.season}).`,
   },
   {
     numeral: "II",
@@ -298,12 +294,12 @@ const PRACTICAL = [
   {
     numeral: "IV",
     title: "Cancellation",
-    desc: "Free cancellation up to 48 hours before the scheduled experience. Cancellations within 48 hours are charged in full.",
+    desc: "Cancellation terms vary by experience — see each experience's page, which states the terms that apply to your booking.",
   },
   {
     numeral: "V",
     title: "Group sizes",
-    desc: "Most experiences run with a minimum of 2 and maximum of 8 guests. The premium full-day experience is private by default.",
+    desc: "Group sizes vary by experience — each experience page shows its maximum. The Soléi Signature Siwa Journey is private by default.",
   },
   {
     numeral: "VI",
@@ -323,7 +319,8 @@ export default function NewExperiencesArchive() {
       // Drop drafted experiences (absent from the active-only API map).
       EXPERIENCES.filter((e) => overlays.size === 0 || overlays.has(e.slug)).map((e) => {
         const o = overlays.get(e.slug);
-        if (!o) return e;
+        // No CMS record: never show the bundled sample price.
+        if (!o) return { ...e, price: 0 };
         return {
           ...e,
           title: o.title ? o.title.split(" ")[0] : e.title,
@@ -334,7 +331,7 @@ export default function NewExperiencesArchive() {
           desc: o.summary || o.description || e.desc,
           timeTag: o.duration || e.timeTag,
           categoryTag: o.category || e.categoryTag,
-          price: o.pricePerPerson ? Number(o.pricePerPerson) : e.price,
+          price: Number(o.pricePerPerson) || 0,
           image: o.imageUrl || e.image,
         };
       }),
@@ -384,7 +381,7 @@ export default function NewExperiencesArchive() {
     <>
       <SEO
         title="Siwa Oasis Experiences — Soléi"
-        description="Ten curated Siwa experiences — salt lake floats, desert stargazing, Cleopatra Spring, oracle temple, and more. Bookable directly."
+        description={`${SIWA.experienceSlugs.length} curated Siwa experiences — salt lake floats, Cleopatra Spring, sand bathing, desert stargazing, and nights in the desert. Request online and we confirm personally.`}
         path="/siwa-oasis/experiences"
       />
       <Nav />
@@ -439,8 +436,8 @@ export default function NewExperiencesArchive() {
               </p>
               <div className="flex gap-10 border-t border-gold/15 pt-6">
                 {[
-                  { num: "10", label: "Experiences" },
-                  { num: "$35", label: "Starting from" },
+                  { num: String(SIWA.experienceSlugs.length), label: "Experiences" },
+                  { num: "Oct–Apr", label: "Season" },
                   { num: "½–2", label: "Days duration" },
                 ].map((s) => (
                   <div key={s.label}>
@@ -583,14 +580,15 @@ export default function NewExperiencesArchive() {
                 style={{ fontSize: "clamp(1.4rem, 3vw, 2.2rem)" }}
               >
                 Experiences book{" "}
-                <em className="italic text-coastal">directly</em> — no waiting.
+                <em className="italic text-coastal">directly</em> — confirmed by a person.
               </h2>
               <p className="text-[0.88rem] text-ink-soft leading-[1.95]">
-                All Siwa experiences are bookable directly on site. Select your
-                experience, choose your date, confirm your group size, and pay.
-                Instant confirmation. If you've already booked accommodation
-                with us, we'll coordinate timing automatically — no need to
-                cross-reference separately.
+                Request any Siwa experience directly on its page. Select your
+                experience, choose your date and group size, and send your
+                request — we confirm the date and send a secure payment link.
+                If you've already booked accommodation with us, we'll
+                coordinate timing automatically — no need to cross-reference
+                separately.
               </p>
             </div>
             <ul className="reveal reveal-d1 border-t border-sand list-none">
@@ -662,20 +660,28 @@ export default function NewExperiencesArchive() {
                     </div>
                   </div>
                   <span className="font-display text-[0.9rem] text-gold flex-shrink-0 ml-4">
-                    {p.price}
+                    →
                   </span>
                 </Link>
               ))}
+              <div className="border border-gold/10 px-6 py-5">
+                <div className="font-display text-[0.95rem] text-white leading-tight">
+                  {SIWA.partnerLodgesOnRequest.join(" · ")}
+                </div>
+                <div className="text-[0.65rem] text-white/30 mt-0.5">
+                  Partner lodges · arranged on request through our concierge
+                </div>
+              </div>
               <Link
                 href="/siwa-oasis/accommodation"
                 className="border border-gold/10 px-6 py-5 flex items-center justify-between hover:bg-coastal/10 hover:border-gold/30 transition-colors"
               >
                 <div>
                   <div className="font-display text-[0.95rem] text-white leading-tight">
-                    View all 8 Siwa properties
+                    View all Siwa accommodation
                   </div>
                   <div className="text-[0.65rem] text-white/30 mt-0.5">
-                    Including 3 Soléi-owned · From $95/night
+                    {SIWA.ownedProperties.length} Soléi-owned properties · partner lodges on request
                   </div>
                 </div>
                 <span className="font-display text-[0.9rem] text-gold flex-shrink-0 ml-4">
@@ -829,17 +835,21 @@ function FeaturedCard({ exp }: { exp: Experience }) {
           )}
         </div>
         <div className="flex justify-between items-center pt-6 border-t border-sand">
-          <div>
-            <div className="text-[0.62rem] text-ink-soft/45">From</div>
-            <div className="font-display text-[1.3rem] text-navy">
-              ${exp.price}{" "}
-              <span className="font-body text-[0.8rem] text-ink-soft font-light">
-                per person
-              </span>
+          {exp.price > 0 ? (
+            <div>
+              <div className="text-[0.62rem] text-ink-soft/45">From</div>
+              <div className="font-display text-[1.3rem] text-navy">
+                ${exp.price}{" "}
+                <span className="font-body text-[0.8rem] text-ink-soft font-light">
+                  per person
+                </span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="font-display text-[1.05rem] text-navy">{PRICE_ON_REQUEST}</div>
+          )}
           <span className="text-[0.62rem] tracking-[0.18em] uppercase text-navy bg-gold px-7 py-3 whitespace-nowrap group-hover:bg-gold-light transition-colors">
-            Book this experience
+            Request this experience
           </span>
         </div>
       </div>
@@ -904,14 +914,18 @@ function ExpCard({ exp, delayClass }: { exp: Experience; delayClass: string }) {
           ))}
         </div>
         <div className="flex justify-between items-center pt-4 border-t border-sand-light mt-auto">
-          <div>
-            <div className="text-[0.62rem] text-ink-soft/45">From</div>
-            <div className="font-display text-[1.05rem] text-navy">
-              ${exp.price} pp
+          {exp.price > 0 ? (
+            <div>
+              <div className="text-[0.62rem] text-ink-soft/45">From</div>
+              <div className="font-display text-[1.05rem] text-navy">
+                ${exp.price} pp
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="font-display text-[0.95rem] text-navy">{PRICE_ON_REQUEST}</div>
+          )}
           <span className="text-[0.58rem] tracking-[0.16em] uppercase text-navy bg-gold px-4 py-2 whitespace-nowrap group-hover:bg-gold-light transition-colors">
-            Book →
+            Request →
           </span>
         </div>
       </div>

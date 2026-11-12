@@ -269,11 +269,12 @@ export default function PlanPage() {
     trVehicle, selectedExps, pax,
   ]);
 
-  /* If they somehow reach /plan with no property, send them to the
-     Siwa hub to pick one. */
+  /* /plan is the guided flow behind a hotel page's booking button and
+     needs a property. Reached without one (bare /plan link), send them
+     to the general enquiry form rather than a destination's listing. */
   useEffect(() => {
     if (!propertySlug) {
-      const t = setTimeout(() => setLocation("/siwa-oasis/accommodation"), 50);
+      const t = setTimeout(() => setLocation("/enquire", { replace: true }), 50);
       return () => clearTimeout(t);
     }
   }, [propertySlug, setLocation]);

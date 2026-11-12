@@ -1,5 +1,3 @@
-import type { ExperienceSlug } from "./experience-data";
-
 export type BlogDestination = "siwa" | "north-coast";
 export type BlogArticleType = "guide" | "experience";
 
@@ -28,10 +26,17 @@ export interface BlogPost {
    */
   articleType?: BlogArticleType;
   /**
-   * Optional linked experience slug. When set, the article renders an
-   * inline CTA block that deep-links to `/:destination/experiences/<slug>`.
+   * Optional linked experience slug — a LIVE /api/experiences slug.
+   * When it resolves to a published experience, the article renders an
+   * inline CTA to `/:destination/experiences/<slug>` (no price is
+   * hard-coded; the experience page shows the live one).
    */
-  linkedExperience?: ExperienceSlug;
+  linkedExperience?: string;
+  /**
+   * Optional pull quote. Rendered only when set — the article page never
+   * promotes a body paragraph to a quote on its own.
+   */
+  pullQuote?: string;
 }
 
 export const blogPosts: BlogPost[] = [
@@ -42,11 +47,11 @@ export const blogPosts: BlogPost[] = [
       "Tucked away in Egypt's Western Desert, Siwa Oasis is a world apart — a place where ancient traditions, healing springs, and endless starlit skies create the ultimate digital detox.",
     content: [
       "There are places you visit, and then there are places that quietly rearrange something inside you. Siwa Oasis is the latter. Tucked away in Egypt's Western Desert, some 750 kilometres from Cairo, this ancient settlement feels like it belongs to another era entirely — one where time moves with the sun and silence is something you can actually hear.",
-      "Siwa has been inhabited for thousands of years. Alexander the Great made the gruelling desert crossing to consult the Oracle of Amun here in 331 BC, and the ruins of the temple still stand on a rocky outcrop overlooking the town. The crumbling medieval fortress of Shali, built from kershef — a local mixture of salt rock and clay — dominates the skyline, its honey-coloured walls glowing gold at sunset.",
+      "Siwa has been inhabited for thousands of years. Alexander the Great made the gruelling desert crossing to consult the Oracle of Amun here in 331 BC, and the ruins of the temple still stand on a rocky outcrop overlooking the town. The crumbling medieval fortress of Shali, built from karsheef — a local mixture of salt rock and clay — dominates the skyline, its honey-coloured walls glowing gold at sunset.",
       "But Siwa is far more than its history. The oasis is home to over 200 freshwater springs and vast salt lakes whose mineral-rich waters are said to have therapeutic properties. Floating in one of these lakes at golden hour, weightless and warm, with nothing but dunes on the horizon, is the kind of experience that stays with you long after you leave.",
-      "Accommodation in Siwa ranges from simple guesthouses to extraordinary eco-lodges built from local materials. Adrère Amellal, constructed entirely from salt blocks and lit only by candlelight, is regularly cited as one of the most unique hotels in the world. Newer properties like Taziry Eco-Lodge run entirely on solar power, while heritage stays like Soléi Old Town offer handcrafted clay rooms in the historic centre.",
-      "Getting to Siwa takes effort — there are no commercial flights, and the drive from Cairo is a solid nine hours. But that remoteness is precisely the point. In a world of constant connectivity, Siwa offers something increasingly rare: genuine stillness. Your phone signal fades somewhere past Marsa Matrouh, and with it goes the noise.",
-      "The best time to visit is between October and April, when daytime temperatures hover around a pleasant 25°C. Summer months can push past 45°C, making outdoor exploration uncomfortable. If you time your visit right, you might catch the annual Siwan festival of reconciliation, a tradition that has brought the community together for centuries.",
+      "Accommodation in Siwa ranges from simple guesthouses to extraordinary eco-lodges built from local materials. Adrère Amellal, constructed entirely from salt blocks and lit only by candles and oil lamps, is regularly cited as one of the most unique hotels in the world. Taziry Ecolodge follows the same low-impact, local-stone approach, while heritage stays like Soléi Old Town offer handcrafted clay rooms inside the Old Town.",
+      "Getting to Siwa takes effort — there are no commercial flights, and the drive from Cairo takes about eight hours. But that remoteness is precisely the point. In a world of constant connectivity, Siwa offers something increasingly rare: genuine stillness. Your phone signal fades somewhere past Marsa Matrouh, and with it goes the noise.",
+      "The best time to visit is between October and April, when daytime temperatures hover around a pleasant 25°C. Summer temperatures are regularly above 40°C, making outdoor exploration uncomfortable. If you time your visit right, you might catch the annual Siwan festival of reconciliation, a tradition that has brought the community together for centuries.",
       "Whether you come for the history, the healing waters, the star-filled skies, or simply to disconnect, Siwa has a way of giving you exactly what you need — even if you didn't know you needed it.",
     ],
     category: "Siwa",
@@ -67,10 +72,10 @@ export const blogPosts: BlogPost[] = [
     content: [
       "Egypt's North Coast stretches along the Mediterranean from Alexandria westward to the Libyan border, and over the past decade it has transformed from a quiet summer retreat for Cairene families into one of the region's most exciting luxury destinations.",
       "The stretch between Al Alamein and Ras El Hekma — roughly 200 kilometres of coastline — is where the action is. Here, master-planned resort communities like Marassi, Hacienda Bay, and Almaza Bay have created self-contained worlds of private beaches, championship golf courses, marinas, and world-class dining.",
-      "The water is the first thing that strikes you. The Mediterranean here is an almost Caribbean shade of turquoise, with white-sand beaches that rival anything in Southern Europe. The season runs from May through October, with peak months in July and August when temperatures sit comfortably in the low 30s and the sea is warm enough for long evening swims.",
-      "For accommodation, the North Coast now offers genuine five-star options. The Address Beach Resort Marassi brings Dubai-level luxury to the Egyptian coast. Rixos Premium Alamein operates on an all-inclusive model with multiple restaurants and a private beach club. Casa Cook offers minimalist, design-led rooms for travellers who prefer style over spectacle.",
+      "The water is the first thing that strikes you. The Mediterranean here is an almost Caribbean shade of turquoise, with white-sand beaches that rival anything in Southern Europe. The best months are April to June and September to November, when the sea is warm and the resorts are calm; July and August are peak season — the busiest and hottest weeks of the year.",
+      "For accommodation, the North Coast now offers genuine five-star options. The Address Beach Resort Marassi brings Dubai-level luxury to the Egyptian coast. Rixos Premium Alamein operates on an all-inclusive model with multiple restaurants and a private beach club. Further west, Jaz Almaza Beach Resort on Almaza Bay is the quieter, family-friendly choice.",
       "Beyond the resorts, the area carries real historical weight. Al Alamein was the site of one of World War II's most decisive battles, and the excellent war museum tells the story with sensitivity and detail. Further west, the small fishing town of Marsa Matrouh offers a glimpse of North Coast life before the developers arrived.",
-      "Getting there is straightforward — the new Al Alamein International Airport receives domestic flights from Cairo, and the coastal highway from Alexandria is a smooth two-hour drive. Most resorts offer shuttle services from both entry points.",
+      "Getting there is straightforward — El Alamein International Airport is the closest airport to Marassi, Alexandria is about 1.5–2 hours away by road and Cairo about 3 hours. We arrange private transfers from each.",
       "The North Coast is no longer Egypt's best-kept secret, but with hundreds of kilometres of coastline still being developed, there's plenty of room to find your own stretch of paradise.",
     ],
     category: "North Coast",
@@ -87,14 +92,14 @@ export const blogPosts: BlogPost[] = [
     slug: "healing-waters-of-siwa-salt-lake-therapy",
     title: "The Healing Waters of Siwa: A Guide to Salt Lake Therapy",
     excerpt:
-      "For centuries, Siwans have known what science is now confirming — the mineral-rich salt lakes of this remote oasis offer genuine therapeutic benefits for body and mind.",
+      "For centuries, Siwans have come to the mineral-rich salt lakes of this remote oasis to rest and recover — and floating in them is one of the most restful things you can do in Egypt.",
     content: [
-      "The salt lakes of Siwa Oasis are not ordinary bodies of water. With salinity levels that rival the Dead Sea, these striking turquoise pools allow you to float effortlessly on the surface, weightless and still, while minerals absorb through your skin.",
+      "The salt lakes of Siwa Oasis are not ordinary bodies of water. With salinity levels that rival the Dead Sea, these striking turquoise pools allow you to float effortlessly on the surface, weightless and still.",
       "The largest and most accessible is Birket Siwa, a vast lake that shimmers white and blue against the desert. Smaller therapeutic pools, some heated naturally by underground springs, are scattered across the oasis and often attached to eco-lodges. Adrère Amellal's private salt lake is perhaps the most beautiful — a mirror-still pool surrounded by nothing but dunes and sky.",
-      "The therapeutic claims are not just folklore. The lakes contain high concentrations of sodium chloride, magnesium, potassium, and trace minerals. Studies have shown that salt water immersion can reduce inflammation, improve skin conditions like psoriasis and eczema, ease joint pain, and promote deep relaxation through magnesium absorption.",
+      "The lakes contain high concentrations of sodium chloride, magnesium, potassium, and trace minerals, and Siwans have long used them for tired muscles and dry skin. We describe a float as deeply relaxing rather than as a medical treatment — if you have a health condition, check with your doctor before you go.",
       "A typical float therapy session lasts around 90 minutes. You enter the water slowly — the salt concentration makes it denser than your body, so you rise to the surface naturally. Most people float on their backs, arms outstretched, eyes closed. The sensation is strange at first, almost disconcerting, but within minutes the body surrenders to it. Your muscles release tension you didn't know you were holding.",
       "The best time for a float is late afternoon, when the desert light turns golden and the water takes on an almost supernatural glow. Some lodges offer guided sessions with breathwork or meditation, though many travellers prefer to float in silence, letting the landscape do the work.",
-      "A few practical notes: don't shave for at least 24 hours before floating (the salt will sting), bring sunglasses for the glare, and rinse off in fresh water afterwards. The salt dries to a fine white crust on your skin that feels oddly satisfying — proof that the minerals have done their work.",
+      "A few practical notes: don't shave for at least 24 hours before floating (the salt will sting), bring sunglasses for the glare, and rinse off in fresh water afterwards. The salt dries to a fine white crust on your skin that feels oddly satisfying.",
       "Whether you approach it as wellness, therapy, or simply one of the most unusual experiences available in Egypt, floating in Siwa's salt lakes is something that stays with you. The combination of silence, weightlessness, and vast open sky creates a meditative state that no spa treatment can replicate.",
     ],
     category: "Wellness",
@@ -105,7 +110,7 @@ export const blogPosts: BlogPost[] = [
     tags: ["Wellness", "Salt Lakes", "Siwa", "Therapy"],
     destination: "siwa",
     articleType: "experience",
-    linkedExperience: "salt-lake-float-therapy",
+    linkedExperience: "salt-and-spring-escape",
   },
   {
     slug: "siwan-culture-traditions-you-should-know",
@@ -142,7 +147,7 @@ export const blogPosts: BlogPost[] = [
       "Footwear depends on your planned activities. Comfortable sandals work for the town and eco-lodges, but if you're doing any desert excursions — dune surfing, stargazing trips, temple visits — bring closed-toe shoes that can handle sand. Hiking sandals with ankle straps are a good compromise.",
       "Electronics require thought. Phone signal is limited in Siwa, and some lodges (notably Adrère Amellal) have no electricity at all. Bring a portable power bank, a headlamp or small torch for candlelit lodges, and consider downloading maps and entertainment offline before you arrive. A camera with good low-light capability is worth its weight in gold for stargazing nights.",
       "Health essentials: bring any prescription medications you need, as pharmacies in Siwa are basic. A small first-aid kit with plasters, antiseptic, and anti-diarrheal medication is sensible. Insect repellent is useful in spring and autumn when mosquitoes are active near the springs. If you're prone to dry skin, bring a good moisturiser — the desert air will dehydrate your skin quickly.",
-      "Finally, bring cash. ATMs exist in Siwa but are unreliable, and many eco-lodges, restaurants, and experience operators deal in cash only. Egyptian pounds are essential; USD or EUR can sometimes be exchanged but not relied upon. Bring more than you think you'll need — running out of cash in the desert is not a situation you want to experience.",
+      "Finally, bring cash. Your Soléi accommodation and experiences are paid online when you book, but ATMs in Siwa are unreliable and most cafés, markets, and small shops outside the hotels deal in cash only. Egyptian pounds are essential; USD or EUR can sometimes be exchanged but not relied upon. Bring more than you think you'll need — running out of cash in the desert is not a situation you want to experience.",
     ],
     category: "Travel Tips",
     coverImage: "/attached_assets/Great_Sand_Sea_Adventures_1764706599725.PNG",
@@ -161,7 +166,7 @@ export const blogPosts: BlogPost[] = [
     content: [
       "There is a moment, about an hour after sunset in the desert outside Siwa, when the sky does something extraordinary. The last traces of twilight fade, and what replaces them is not simply darkness — it is a dome of stars so dense, so vivid, that it fundamentally changes your understanding of the night sky.",
       "Siwa's position in the Western Desert, far from any major city, gives it a Bortle scale rating of 1-2, making it one of the darkest places in North Africa. The Milky Way is not a faint smudge here — it is a blazing river of light that stretches from horizon to horizon, its structure clearly visible to the naked eye.",
-      "The best stargazing months are October through March, when the air is cool and dry, reducing atmospheric distortion. The period around the new moon is ideal, though even a crescent moon in Siwa's clear air produces enough light to cast shadows on the dunes.",
+      "The best stargazing months are October through April, when the air is cool and dry, reducing atmospheric distortion. The period around the new moon is ideal, though even a crescent moon in Siwa's clear air produces enough light to cast shadows on the dunes.",
       "Several eco-lodges and experience operators offer guided stargazing sessions. These typically involve a short drive into the desert, away from even Siwa's minimal lights, where telescopes are set up on the sand. A good guide will walk you through the major constellations, point out planets, and share the mythology — both Greek and Siwan — behind the patterns overhead.",
       "For astrophotography, bring a camera with manual exposure control and a sturdy tripod. Wide-angle lenses (14-24mm) work best for capturing the full sweep of the Milky Way. Exposure settings of 15-25 seconds at high ISO (3200-6400) with a wide aperture (f/2.8 or lower) will reveal detail invisible to the naked eye. A remote shutter release prevents camera shake.",
       "Even without a telescope or camera, simply lying on a blanket in the desert and watching the sky is one of Siwa's most profound experiences. Shooting stars are common — the Perseids in August and the Geminids in December put on particularly good shows. Satellites trace their silent paths, and on very clear nights, you might catch the faint glow of the zodiacal light on the horizon.",
@@ -175,7 +180,7 @@ export const blogPosts: BlogPost[] = [
     tags: ["Stargazing", "Siwa", "Desert", "Astronomy"],
     destination: "siwa",
     articleType: "experience",
-    linkedExperience: "desert-stargazing-experience",
+    linkedExperience: "desert-stargazing",
   },
 ];
 

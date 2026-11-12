@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useRoute, useLocation } from "wouter";
+import { useMemo, useState } from "react";
+import { Link, useRoute } from "wouter";
 import { SEO } from "@/components/seo";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
@@ -9,6 +9,37 @@ import { useHotelOverlay, useHotelOverlayQuery } from "@/lib/useHotelOverlay";
 import { resolvePrice, PRICE_ON_REQUEST } from "@/lib/price";
 import { GalleryLightbox } from "@/components/ui/GalleryLightbox";
 import { HotelRecommendations } from "@/components/hotel/HotelRecommendations";
+import NotFound from "@/pages/not-found";
+import { SIWA, NORTH_COAST } from "@/lib/site-facts";
+import {
+  amenitiesAsProse,
+  cleanPriceLabel,
+  cleanText,
+  fixKnownTypos,
+  fixSingulars,
+} from "@/lib/display-text";
+
+/** Guest options offered in the booking panels, with their head count. */
+const GUEST_OPTIONS: Array<{ label: string; count: number }> = [
+  { label: "1 adult", count: 1 },
+  { label: "2 adults", count: 2 },
+  { label: "2 adults, 1 child", count: 3 },
+  { label: "2 adults, 2 children", count: 4 },
+];
+
+/** Max guests stated in a room's occupancy text ("Up to 4 guests",
+ *  "1 guest"), or Infinity when it doesn't say. */
+function occupancyMax(occupancy: string | undefined): number {
+  const m = (occupancy ?? "").match(/\d+/);
+  return m ? Number(m[0]) : Infinity;
+}
+
+/** Guest options that fit the room (always at least "1 adult"). */
+function guestOptionsFor(occupancy: string | undefined) {
+  const max = occupancyMax(occupancy);
+  const fit = GUEST_OPTIONS.filter((o) => o.count <= max);
+  return fit.length > 0 ? fit : GUEST_OPTIONS.slice(0, 1);
+}
 
 const siwaStubGradient =
   "bg-[linear-gradient(155deg,#1a3a52_0%,#0F2436_50%,#0a1e2e_100%)]";
@@ -29,7 +60,6 @@ const coastalStubGradient =
  */
 export default function HotelDetailPage() {
   useReveal();
-  const [, setLocation] = useLocation();
   const [siwaMatch, siwaParams] = useRoute("/siwa-oasis/accommodation/:slug");
   const [ncMatch, ncParams] = useRoute("/north-coast/accommodation/:slug");
 
@@ -99,7 +129,10 @@ export default function HotelDetailPage() {
     // no admin rooms the sample rooms still describe the property, but
     // without their sample rates.
     const adminRooms = nonEmpty(d.rooms);
-    const rooms = adminRooms ?? baseHotel.rooms.map((r) => ({ ...r, price: 0 }));
+    const rooms = (adminRooms ?? baseHotel.rooms.map((r) => ({ ...r, price: 0 }))).map((r) => ({
+      ...r,
+      occupancy: fixSingulars(r.occupancy),
+    }));
     const resolved = resolvePrice({
       pricePerNight: overlay.pricePerNight,
       rooms: adminRooms,
@@ -129,18 +162,29 @@ export default function HotelDetailPage() {
       headline: d.headline || baseHotel.headline,
       headlineItalic: d.headlineItalic || baseHotel.headlineItalic,
       intro: nonEmpty(d.intro) ?? baseHotel.intro,
-      facts: nonEmpty(d.facts) ?? baseHotel.facts,
+      facts: (nonEmpty(d.facts) ?? baseHotel.facts).map((f) => ({
+        label: f.label,
+        value: fixKnownTypos(fixSingulars(f.value)),
+      })),
       rooms,
-      location: nonEmpty(d.location) ?? baseHotel.location,
-      reviews: nonEmpty(d.reviews) ?? baseHotel.reviews,
-      amenities:
-        overlay.amenities && overlay.amenities.length > 0
-          ? overlay.amenities
-          : baseHotel.amenities,
+      location: (nonEmpty(d.location) ?? baseHotel.location).map((l) => ({
+        label: l.label,
+        value: cleanText(l.value),
+      })),
+      // Guest reviews are not shown anywhere on the site (owner
+      // decision) — CMS review rows are ignored.
+      reviews: [],
+      amenities: (overlay.amenities && overlay.amenities.length > 0
+        ? overlay.amenities
+        : baseHotel.amenities
+      ).map(fixKnownTypos),
       // resolved.label is the admin's trailing qualifier with the amount
       // and any leading "From" stripped, so rendering "<amount> <label>"
       // can't produce "$199 $145 / night" or a doubled "From".
-      priceLabel: d.priceLabel || resolved.label,
+      // d.priceLabel is free text and sometimes repeats the amount
+      // ("$650/ night · private villa") — strip it so the amount isn't
+      // shown twice.
+      priceLabel: cleanPriceLabel(d.priceLabel) || resolved.label,
       coverImage: overlay.imageUrl || baseHotel.coverImage,
       gallery: nonEmpty(d.gallery) ?? baseHotel.gallery,
     };
@@ -170,24 +214,18 @@ export default function HotelDetailPage() {
   }, [hotel]);
 
 
-  // Redirect to the hub when the API returns no record (drafted or
-  // missing). The API is the source of truth — if it 404s, the hotel
-  // should disappear from the public site even when the inline TS
-  // file still has it. Wait for the query to finish first so we don't
-  // bounce mid-load.
-  useEffect(() => {
-    if (!slug) return;
-    if (overlayLoading || !overlayFetched) return;
-    if (overlay) return;
-    const hub = ncMatch ? "/north-coast/accommodation" : "/siwa-oasis/accommodation";
-    setLocation(hub);
-  }, [slug, overlay, overlayLoading, overlayFetched, ncMatch, setLocation]);
+  // The API is the source of truth — when it has no record (drafted
+  // or unknown slug) the page is a real 404, even when the inline TS
+  // file still has the slug. Wait for the query to finish first.
+  const amenityProse = useMemo(
+    () => (hotel ? amenitiesAsProse(hotel.amenities) : null),
+    [hotel],
+  );
 
   // Don't render anything while loading (avoid a flash of the inline
-  // TS content for a drafted hotel before the redirect fires).
+  // TS content for a drafted hotel).
   if (overlayLoading || !overlayFetched) return null;
-  if (!overlay) return null;
-  if (!hotel) return null;
+  if (!overlay || !hotel) return <NotFound />;
 
   const isSiwa = hotel.destination === "siwa-oasis";
 
@@ -195,7 +233,7 @@ export default function HotelDetailPage() {
     <>
       <SEO
         title={`${hotel.name} — ${isSiwa ? "Siwa Oasis" : "North Coast"} | Soléi`}
-        description={`${hotel.tagLine}. ${hotel.intro[0].slice(0, 160)}`}
+        description={`${hotel.tagLine}. ${(hotel.intro[0] ?? "").slice(0, 160)}`}
         path={`/${hotel.destination}/accommodation/${hotel.slug}`}
       />
       <Nav />
@@ -373,6 +411,18 @@ export default function HotelDetailPage() {
               headline="Amenities &"
               headlineItalic="inclusions."
             >
+              {amenityProse ? (
+                // A paragraph typed into the amenities field — render it
+                // as prose rather than a list split at every comma.
+                amenityProse.map((p, i) => (
+                  <p
+                    key={i}
+                    className="text-[0.86rem] text-ink-soft leading-[1.9] mb-4 last:mb-0"
+                  >
+                    {p}
+                  </p>
+                ))
+              ) : (
               <div className="grid grid-cols-1 md:grid-cols-2">
                 {hotel.amenities.map((a, i, arr) => {
                   const isLastRow = i >= arr.length - (arr.length % 2 || 2);
@@ -389,6 +439,7 @@ export default function HotelDetailPage() {
                   );
                 })}
               </div>
+              )}
             </BlockSection>
 
             {/* Rooms */}
@@ -443,7 +494,7 @@ export default function HotelDetailPage() {
                           {room.desc}
                         </p>
                         <div className="flex gap-4 flex-wrap mb-4">
-                          {[room.occupancy, room.beds, room.sqm].map((d) => (
+                          {[room.occupancy, room.beds, room.sqm].filter((d) => d && d.trim()).map((d) => (
                             <span
                               key={d}
                               className="text-[0.62rem] text-ink-soft/55 tracking-wide"
@@ -490,6 +541,7 @@ export default function HotelDetailPage() {
               eyebrow="Getting here"
               headline="Location &"
               headlineItalic="access."
+              last
             >
               {overlay?.latitude && overlay?.longitude ? (
                 <div className="mb-6">
@@ -544,45 +596,8 @@ export default function HotelDetailPage() {
               </Link>
             </BlockSection>
 
-            {/* Reviews */}
-            <BlockSection
-              eyebrow="Guest reflections"
-              headline="What guests"
-              headlineItalic="remember."
-              last
-            >
-              <div className="flex flex-col">
-                {hotel.reviews.map((r, i, arr) => (
-                  <div
-                    key={r.name}
-                    className={`py-7 ${
-                      i === arr.length - 1 ? "" : "border-b border-sand-light"
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <p className="font-display text-[0.95rem] text-navy leading-tight">
-                          {r.name}
-                        </p>
-                        <p className="text-[0.65rem] text-ink-soft/50 mt-0.5">
-                          {r.origin}
-                        </p>
-                      </div>
-                      <div className="flex gap-[3px]">
-                        {[0, 1, 2, 3, 4].map((n) => (
-                          <span key={n} className="text-gold/70">
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-[0.82rem] italic text-ink-soft leading-[1.85]">
-                      "{r.text}"
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </BlockSection>
+            {/* Guest reviews intentionally not rendered (owner decision:
+                no reviews on the site, whatever the CMS holds). */}
           </div>
 
           {/* ── RIGHT COLUMN — BOOKING PANEL ── */}
@@ -599,8 +614,8 @@ export default function HotelDetailPage() {
               titleItalic="experiences."
               desc={
                 isSiwa
-                  ? "Salt lake float, desert stargazing, oracle temple — added after booking, never required."
-                  : "Sunset sailing, flamingo watching, El Alamein heritage — added after booking, never required."
+                  ? "Salt lake float, desert stargazing, sunset in the dunes — added after booking, never required."
+                  : "Private yacht days, beach clubs, spa time and signature dinners — added after booking, never required."
               }
               href={`/${hotel.destination}/experiences`}
               linkLabel={
@@ -621,7 +636,11 @@ export default function HotelDetailPage() {
             <SidebarCard
               title="Not sure this is"
               titleItalic="right for you?"
-              desc={`Tell us what you're looking for and we'll recommend the best fit across all ${isSiwa ? "eight Siwa" : "eight North Coast"} properties.`}
+              desc={
+                isSiwa
+                  ? `Tell us what you're looking for and we'll recommend the best fit across our ${SIWA.ownedProperties.length} Siwa properties — or arrange a partner lodge on request.`
+                  : `Tell us what you're looking for and we'll recommend the best fit across our ${NORTH_COAST.properties.length} North Coast properties.`
+              }
               href="/enquire"
               linkLabel="Ask our team"
             />
@@ -733,6 +752,11 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
   const [checkin, setCheckin] = useState("");
   const [checkout, setCheckout] = useState("");
   const [guests, setGuests] = useState("2 adults");
+  // Only offer guest counts the selected room can hold.
+  const guestOptions = guestOptionsFor(hotel.rooms[roomIdx]?.occupancy);
+  const guestValue = guestOptions.some((o) => o.label === guests)
+    ? guests
+    : guestOptions[guestOptions.length - 1].label;
 
   // A room without its own rate falls back to the property's price;
   // 0 means no price was entered anywhere → "Price on request".
@@ -757,10 +781,10 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
     });
     if (checkin) params.set("checkin", checkin);
     if (checkout) params.set("checkout", checkout);
-    if (guests) params.set("guests", guests);
+    if (guestValue) params.set("guests", guestValue);
     if (hotel.rooms[roomIdx]) params.set("room", hotel.rooms[roomIdx].name);
     return `/plan?${params.toString()}`;
-  }, [hotel.slug, hotel.rooms, roomIdx, checkin, checkout, guests]);
+  }, [hotel.slug, hotel.rooms, roomIdx, checkin, checkout, guestValue]);
 
   return (
     <div className="bg-white border border-sand">
@@ -824,14 +848,13 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
         </div>
         <Field label="Guests">
           <select
-            value={guests}
+            value={guestValue}
             onChange={(e) => setGuests(e.target.value)}
             className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
           >
-            <option>1 adult</option>
-            <option>2 adults</option>
-            <option>2 adults, 1 child</option>
-            <option>2 adults, 2 children</option>
+            {guestOptions.map((o) => (
+              <option key={o.label}>{o.label}</option>
+            ))}
           </select>
         </Field>
 
@@ -866,7 +889,7 @@ function SiwaBookingPanel({ hotel, currency }: { hotel: HotelDetail; currency: s
             data-tabtravel-property={hotel.slug}
             data-tabtravel-checkin={checkin || undefined}
             data-tabtravel-checkout={checkout || undefined}
-            data-tabtravel-guests={guests}
+            data-tabtravel-guests={guestValue}
           />
         ) : (
           <a
@@ -891,6 +914,10 @@ function NorthCoastBookingPanel({ hotel, currency }: { hotel: HotelDetail; curre
   const [checkout, setCheckout] = useState("");
   const [roomName, setRoomName] = useState(hotel.rooms[0]?.name ?? "");
   const [guests, setGuests] = useState("2 adults");
+  const guestOptions = guestOptionsFor(hotel.rooms.find((r) => r.name === roomName)?.occupancy);
+  const guestValue = guestOptions.some((o) => o.label === guests)
+    ? guests
+    : guestOptions[guestOptions.length - 1].label;
 
   const enquiryHref = useMemo(() => {
     const params = new URLSearchParams({
@@ -901,9 +928,9 @@ function NorthCoastBookingPanel({ hotel, currency }: { hotel: HotelDetail; curre
     if (checkin) params.set("checkin", checkin);
     if (checkout) params.set("checkout", checkout);
     if (roomName) params.set("room", roomName);
-    if (guests) params.set("guests", guests);
+    if (guestValue) params.set("guests", guestValue);
     return `/plan?${params.toString()}`;
-  }, [hotel.slug, checkin, checkout, roomName, guests]);
+  }, [hotel.slug, checkin, checkout, roomName, guestValue]);
 
   return (
     <div className="bg-white border border-sand">
@@ -999,14 +1026,13 @@ function NorthCoastBookingPanel({ hotel, currency }: { hotel: HotelDetail; curre
 
         <Field label="Guests">
           <select
-            value={guests}
+            value={guestValue}
             onChange={(e) => setGuests(e.target.value)}
             className="w-full px-3 py-3 bg-cream border border-sand text-[0.84rem] text-navy font-body focus:border-gold outline-none appearance-none cursor-pointer"
           >
-            <option>1 adult</option>
-            <option>2 adults</option>
-            <option>2 adults, 1 child</option>
-            <option>2 adults, 2 children</option>
+            {guestOptions.map((o) => (
+              <option key={o.label}>{o.label}</option>
+            ))}
           </select>
         </Field>
 
